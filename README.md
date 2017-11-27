@@ -4,6 +4,6 @@ Learning site
   设计模式 http://designpatternsphp.readthedocs.io/en/latest/
   
 ## MySQL
-  数据库内核月报 http://mysql.taobao.org/monthly/
+  数据库内核月报 http://mysql.taobao.org/monthly/
   
   DBA的罗浮宫 http://mdba.cn/
