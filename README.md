@@ -5,6 +5,10 @@ Learning site
 
 深入理解PHP内核 http://www.php-internals.com/
 
+JpGraph http://jpgraph.net/
+
+PHP Redis Client https://github.com/phpredis/phpredis
+
 ## MySQL
   数据库内核月报 http://mysql.taobao.org/monthly/
   
@@ -18,4 +22,3 @@ Learning site
 
   Redis https://redis.io
   
-  PHP Redis Client https://github.com/phpredis/phpredis
