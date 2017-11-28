@@ -18,4 +18,4 @@ Learning site
 
   Redis https://redis.io
   
-  phpredis https://github.com/phpredis/phpredis
+  PHP redis client https://github.com/phpredis/phpredis
