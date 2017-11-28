@@ -17,3 +17,5 @@ Learning site
 ## Redis
 
   Redis https://redis.io
+  
+  phpredis https://github.com/phpredis/phpredis
