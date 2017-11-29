@@ -28,3 +28,7 @@ PHP Redis Client https://github.com/phpredis/phpredis
   Redis https://redis.io
   
   Retwis (A Twitter-toy clone) https://github.com/antirez/retwis
+  
+## ElasticSearch
+
+Elasticsearch权威指南中文版 https://github.com/elasticsearch-cn/elasticsearch-definitive-guide
