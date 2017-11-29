@@ -24,6 +24,4 @@ PHP Redis Client https://github.com/phpredis/phpredis
 
   Redis https://redis.io
   
-  Redis 3.0 中文版 http://wiki.jikexueyuan.com/project/redis-guide/
-  
   Retwis (A Twitter-toy clone) https://github.com/antirez/retwis
