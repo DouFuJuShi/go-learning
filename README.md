@@ -14,6 +14,9 @@ PHPExcel https://github.com/PHPOffice/PHPExcel
 PHP Redis Client https://github.com/phpredis/phpredis
 
 ## MySQL
+
+  MySQL 5.7 Reference Manual https://dev.mysql.com/doc/refman/5.7/en/
+  
   数据库内核月报 http://mysql.taobao.org/monthly/
   
   何登成的技术博客 http://hedengcheng.com/
