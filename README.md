@@ -1,5 +1,5 @@
-# learning_site
-常用网站收集
+# learning_sites
+sites
 
 ## PHP
 设计模式 http://designpatternsphp.readthedocs.io/en/latest/
