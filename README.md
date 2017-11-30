@@ -2,7 +2,7 @@
 sites
 
 ## Linux
-I/O模型 https://www.ibm.com/developerworks/cn/linux/l-async/
+异步I/O模型 https://www.ibm.com/developerworks/cn/linux/l-async/
 
 ## PHP
 设计模式 http://designpatternsphp.readthedocs.io/en/latest/
