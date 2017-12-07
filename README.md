@@ -7,11 +7,11 @@ sites
 高性能IO模型浅析 https://www.cnblogs.com/fanzhidongyzby/p/4098546.html
 
 ## PHP
+The Right Way http://www.phptherightway.com/
+
 设计模式 http://designpatternsphp.readthedocs.io/en/latest/
 
 深入理解PHP内核 http://www.php-internals.com/
-
-The Right Way http://www.phptherightway.com/
 
 ### PHP Library
   JpGraph http://jpgraph.net/
