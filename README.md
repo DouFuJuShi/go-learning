@@ -41,3 +41,10 @@ The Right Way http://www.phptherightway.com/
 ## ElasticSearch
 
 Elasticsearch权威指南中文版 https://github.com/elasticsearch-cn/elasticsearch-definitive-guide
+
+## Message Queue
+RabbitMQ https://www.rabbitmq.com/
+Beanstalkd http://kr.github.io/beanstalkd/
+Disque https://github.com/antirez/disque
+
+
