@@ -30,8 +30,6 @@ The Right Way http://www.phptherightway.com/
   
   MySQL Optimal Configuration File https://github.com/jdaaaaaavid/mysql_best_configuration
   
-  关系代数的基本运算 https://keelii.github.io/2017/02/19/basic-operations-of-relation-algebra/
-  
 ## Redis
 
   Redis https://redis.io
