@@ -1,11 +1,6 @@
 # learning_sites
 sites
 
-## Linux
-异步I/O模型 https://www.ibm.com/developerworks/cn/linux/l-async/
-
-高性能IO模型浅析 https://www.cnblogs.com/fanzhidongyzby/p/4098546.html
-
 ## PHP
 The Right Way http://www.phptherightway.com/
 
@@ -47,4 +42,9 @@ Beanstalkd http://kr.github.io/beanstalkd/
 
 Disque https://github.com/antirez/disque
 
+## Linux
+异步I/O模型 https://www.ibm.com/developerworks/cn/linux/l-async/
 
+高性能IO模型浅析 https://www.cnblogs.com/fanzhidongyzby/p/4098546.html
+
+两种高性能 I/O 设计模式 Reactor 和 Proactor https://www.cnblogs.com/daoluanxiaozi/p/3274925.html
