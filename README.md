@@ -1,6 +1,18 @@
 # learning_sites
 sites
+## Linux
+### 0. 基础学习
+  鸟哥的 Linux 私房菜 -- 基础学习篇 http://cn.linux.vbird.org/linux_basic/linux_basic.php
+  
+  鸟哥的 Linux 私房菜 -- 服务器架设篇 http://cn.linux.vbird.org/linux_server/
+  
+### 1. I/O 模型
+  异步I/O模型 https://www.ibm.com/developerworks/cn/linux/l-async/
 
+  高性能IO模型浅析 https://www.cnblogs.com/fanzhidongyzby/p/4098546.html
+
+  两种高性能 I/O 设计模式 Reactor 和 Proactor https://www.cnblogs.com/daoluanxiaozi/p/3274925.html
+  
 ## PHP
 The Right Way http://www.phptherightway.com/
 
@@ -32,33 +44,21 @@ The Right Way http://www.phptherightway.com/
   数据库内核月报 http://mysql.taobao.org/monthly/
   
   何登成的技术博客 http://hedengcheng.com/
-    
-## Redis
+
+## 其他
+### Redis
 
   Redis https://redis.io
   
   Retwis (A Twitter-toy clone) https://github.com/antirez/retwis
   
-## ElasticSearch
+### ElasticSearch
 
 Elasticsearch权威指南中文版 https://github.com/elasticsearch-cn/elasticsearch-definitive-guide
 
-## Message Queue
+### Message Queue
 RabbitMQ https://www.rabbitmq.com/
 
 Beanstalkd http://kr.github.io/beanstalkd/
 
 Disque https://github.com/antirez/disque
-
-## Linux
-### 0. 基础学习
-  鸟哥的 Linux 私房菜 -- 基础学习篇 http://cn.linux.vbird.org/linux_basic/linux_basic.php
-  
-  鸟哥的 Linux 私房菜 -- 服务器架设篇 http://cn.linux.vbird.org/linux_server/
-  
-### 1. I/O 模型
-  异步I/O模型 https://www.ibm.com/developerworks/cn/linux/l-async/
-
-  高性能IO模型浅析 https://www.cnblogs.com/fanzhidongyzby/p/4098546.html
-
-  两种高性能 I/O 设计模式 Reactor 和 Proactor https://www.cnblogs.com/daoluanxiaozi/p/3274925.html
