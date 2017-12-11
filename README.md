@@ -19,14 +19,18 @@ The Right Way http://www.phptherightway.com/
 
   MySQL 5.7 Reference Manual https://dev.mysql.com/doc/refman/5.7/en/
   
-  数据库内核月报 http://mysql.taobao.org/monthly/
-  
-  何登成的技术博客 http://hedengcheng.com/
-  
   MySQL Optimal Configuration File https://github.com/jdaaaaaavid/mysql_best_configuration
   
   MHA (MySQL高可用) https://github.com/yoshinorim/mha4mysql-manager/wiki
   
+  Percona Toolkit https://www.percona.com/software/database-tools/percona-toolkit
+  
+  PMM https://www.percona.com/software/database-tools/percona-monitoring-and-management
+  
+  数据库内核月报 http://mysql.taobao.org/monthly/
+  
+  何登成的技术博客 http://hedengcheng.com/
+    
 ## Redis
 
   Redis https://redis.io
