@@ -25,6 +25,8 @@ The Right Way http://www.phptherightway.com/
   
   Percona Toolkit https://www.percona.com/software/database-tools/percona-toolkit
   
+  Percona XtraBackup https://www.percona.com/software/mysql-database/percona-xtrabackup
+  
   PMM https://www.percona.com/software/database-tools/percona-monitoring-and-management
   
   数据库内核月报 http://mysql.taobao.org/monthly/
