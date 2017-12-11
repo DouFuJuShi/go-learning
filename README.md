@@ -21,7 +21,7 @@ The Right Way http://www.phptherightway.com/
   
   MySQL Optimal Configuration File https://github.com/jdaaaaaavid/mysql_best_configuration
   
-  MHA (MySQL高可用) https://github.com/yoshinorim/mha4mysql-manager/wiki
+  MHA https://github.com/yoshinorim/mha4mysql-manager/wiki
   
   Percona Toolkit https://www.percona.com/software/database-tools/percona-toolkit
   
