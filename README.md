@@ -67,3 +67,7 @@ Disque https://github.com/antirez/disque
 缓存更新的套路 https://coolshell.cn/articles/17416.html
 
 Memcache mutex设计模式 https://timyang.net/programming/memcache-mutex/
+
+### 分布式事务
+
+  分布式系统的事务处理 https://coolshell.cn/articles/10910.html
