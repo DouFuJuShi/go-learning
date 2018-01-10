@@ -20,6 +20,8 @@ The Right Way http://www.phptherightway.com/
 
 深入理解PHP内核 http://www.php-internals.com/
 
+信海龙的博客 http://www.bo56.com/php7%E6%89%A9%E5%B1%95/
+
 ### PHP Library
   JpGraph http://jpgraph.net/
 
