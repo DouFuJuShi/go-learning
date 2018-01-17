@@ -46,6 +46,8 @@ The Right Way http://www.phptherightway.com/
   数据库内核月报 http://mysql.taobao.org/monthly/
   
   何登成的技术博客 http://hedengcheng.com/
+  
+  一个故事@MySQL DBA http://www.orczhou.com/
 
 ## 其他
 ### Redis
