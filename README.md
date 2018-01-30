@@ -30,6 +30,8 @@ php-fig(PHP代码规范) https://github.com/php-fig/fig-standards/tree/master/ac
   PHPExcel https://github.com/PHPOffice/PHPExcel
 
   PHP Redis Client https://github.com/phpredis/phpredis
+  
+  Guzzle(PHP HTTP client) http://docs.guzzlephp.org/en/stable/
 
 ## MySQL
 
