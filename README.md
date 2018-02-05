@@ -25,6 +25,9 @@ The Right Way http://www.phptherightway.com/
 php-fig(PHP代码规范) https://github.com/php-fig/fig-standards/tree/master/accepted
 
 ### PHP Library
+
+  Json Web Token https://github.com/firebase/php-jwt
+  
   JpGraph http://jpgraph.net/
   
   PHP Image Manipulation https://github.com/Intervention/image
