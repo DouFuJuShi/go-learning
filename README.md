@@ -12,6 +12,9 @@ sites
   高性能IO模型浅析 https://www.cnblogs.com/fanzhidongyzby/p/4098546.html
 
   两种高性能 I/O 设计模式 Reactor 和 Proactor https://www.cnblogs.com/daoluanxiaozi/p/3274925.html
+
+### 2. 调优
+  Linux Performance http://www.brendangregg.com/linuxperf.html
   
 ## PHP
 The Right Way http://www.phptherightway.com/
