@@ -72,6 +72,8 @@ php-fig(PHP代码规范) https://github.com/php-fig/fig-standards/tree/master/ac
 
 Elasticsearch权威指南中文版 https://github.com/elasticsearch-cn/elasticsearch-definitive-guide
 
+JDBC importer for Elasticsearch https://github.com/jprante/elasticsearch-jdbc
+
 ### Message Queue
 RabbitMQ https://www.rabbitmq.com/
 
