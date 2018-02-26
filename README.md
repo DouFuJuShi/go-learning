@@ -1,5 +1,3 @@
-# learning_sites
-sites
 ## Linux
 ### 0. 基础学习
   鸟哥的 Linux 私房菜 -- 基础学习篇 http://cn.linux.vbird.org/linux_basic/linux_basic.php
