@@ -15,6 +15,7 @@ sites
 
 ### 2. 调优
   Linux Performance http://www.brendangregg.com/linuxperf.html
+                    https://github.com/brendangregg/perf-tools
   
 ## PHP
 The Right Way http://www.phptherightway.com/
