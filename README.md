@@ -29,6 +29,7 @@ php-fig(PHP代码规范) https://github.com/php-fig/fig-standards/tree/master/ac
 ### PHP Library
 
   Oauth2.0 https://github.com/thephpleague/oauth2-server
+  
   Json Web Token https://github.com/lcobucci/jwt
   
   JpGraph http://jpgraph.net/
