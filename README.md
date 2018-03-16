@@ -100,4 +100,10 @@ https://golang.google.cn/dl/
 https://github.com/qyuhen/book
 
 ### Oauth2.0
-  https://oauth.net/code/
+  
+https://oauth.net/code/
+
+### 阿里java开发手册
+
+https://github.com/alibaba/p3c
+
