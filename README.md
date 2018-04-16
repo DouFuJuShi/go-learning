@@ -48,6 +48,8 @@ php-fig(PHP代码规范) https://github.com/php-fig/fig-standards/tree/master/ac
 
   MySQL 5.7 Reference Manual https://dev.mysql.com/doc/refman/5.7/en/
   
+  innodb_diagrams https://github.com/jeremycole/innodb_diagrams
+  
   MySQL Optimal Configuration File https://github.com/jdaaaaaavid/mysql_best_configuration
   
   MHA https://github.com/yoshinorim/mha4mysql-manager/wiki
