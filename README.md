@@ -3,9 +3,7 @@
   鸟哥的 Linux 私房菜 -- 基础学习篇 http://cn.linux.vbird.org/linux_basic/linux_basic.php
   
   鸟哥的 Linux 私房菜 -- 服务器架设篇 http://cn.linux.vbird.org/linux_server/
-  
-  CSS http://css.doyoe.com/       https://caniuse.com/
-  
+    
 ### 1. I/O 模型
 
   五种IO模型分析 https://mp.weixin.qq.com/s?__biz=MzIyNjE4NDcyMA==&mid=2247484730&idx=1&sn=d082cda4af30321660cd8cc741fff865&chksm=e8751e45df0297532ae7a4e36f9383e49b99c11d1654b7238ee2279167f671bc3d0026e24dbd&mpshare=1&scene=1&srcid=0416tCrjB9LxUsVvfWUyv4kn#rd
@@ -124,4 +122,10 @@ https://oauth.net/code/
 ### 阿里java开发手册
 
 https://github.com/alibaba/p3c
+
+### CSS 速查
+
+http://css.doyoe.com/
+
+https://caniuse.com/
 
