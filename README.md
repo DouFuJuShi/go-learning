@@ -1,5 +1,5 @@
 ## Linux
-### 0. 基础学习
+### 0. 基础
   鸟哥的 Linux 私房菜 -- 基础学习篇 http://cn.linux.vbird.org/linux_basic/linux_basic.php
   
   鸟哥的 Linux 私房菜 -- 服务器架设篇 http://cn.linux.vbird.org/linux_server/
