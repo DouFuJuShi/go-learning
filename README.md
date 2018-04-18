@@ -75,6 +75,12 @@ php-fig(PHP代码规范) https://github.com/php-fig/fig-standards/tree/master/ac
   
   Redis 源码日志 http://wiki.jikexueyuan.com/project/redis/author.html
   
+  Codis https://github.com/CodisLabs/codis
+  
+  twemproxy https://github.com/twitter/twemproxy
+  
+  分布式锁实现 https://redis.io/topics/distlock
+  
 ### ElasticSearch
 
 Elasticsearch权威指南中文版 https://github.com/elasticsearch-cn/elasticsearch-definitive-guide
