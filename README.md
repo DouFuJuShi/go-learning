@@ -79,7 +79,7 @@ php-fig(PHP代码规范) https://github.com/php-fig/fig-standards/tree/master/ac
   
   twemproxy https://github.com/twitter/twemproxy
   
-  分布式锁实现 https://redis.io/topics/distlock
+  分布式锁实现 https://redis.io/topics/distlock
   
 ### ElasticSearch
 
