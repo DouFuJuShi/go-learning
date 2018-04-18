@@ -79,6 +79,8 @@ php-fig(PHP代码规范) https://github.com/php-fig/fig-standards/tree/master/ac
   
   twemproxy https://github.com/twitter/twemproxy
   
+  Redis集群教程 http://www.redis.cn/topics/cluster-tutorial.html
+  
   分布式锁实现 https://redis.io/topics/distlock
   
 ### ElasticSearch
