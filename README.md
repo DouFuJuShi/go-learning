@@ -86,7 +86,11 @@ php-fig(PHP代码规范) https://github.com/php-fig/fig-standards/tree/master/ac
   Redis集群规范 http://www.redis.cn/topics/cluster-spec.html
   
   分布式锁实现 https://redis.io/topics/distlock
-  
+
+### Memcached
+
+memagent https://code.google.com/archive/p/memagent/
+
 ### ElasticSearch
 
 Elasticsearch权威指南中文版 https://github.com/elasticsearch-cn/elasticsearch-definitive-guide
