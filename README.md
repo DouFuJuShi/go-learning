@@ -86,6 +86,8 @@ php-fig(PHP代码规范) https://github.com/php-fig/fig-standards/tree/master/ac
   Redis集群规范 http://www.redis.cn/topics/cluster-spec.html
   
   分布式锁实现 https://redis.io/topics/distlock
+  
+  Redis 设计与实现 http://redisbook.com/
 
 ### Memcached
 
