@@ -68,7 +68,14 @@ php-fig(PHP代码规范) https://github.com/php-fig/fig-standards/tree/master/ac
   
   一个故事@MySQL DBA http://www.orczhou.com/
 
-## 其他
+### OpenResty
+
+  https://github.com/openresty/lua-nginx-module
+  
+  https://github.com/openresty/stream-lua-nginx-module
+  
+  https://moonbingbing.gitbooks.io/openresty-best-practices/
+
 ### Redis
 
   Redis https://redis.io
