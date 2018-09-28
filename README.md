@@ -30,6 +30,8 @@ The Right Way http://www.phptherightway.com/
 
 php-fig(PHP代码规范) https://github.com/php-fig/fig-standards/tree/master/accepted
 
+phptrace https://github.com/Qihoo360/phptrace
+
 ### PHP Library
 
   Oauth2.0 https://github.com/thephpleague/oauth2-server
