@@ -110,6 +110,8 @@ phptrace https://github.com/Qihoo360/phptrace
   分布式锁实现 https://redis.io/topics/distlock
   
   Redis设计与实现 http://redisbook.com/
+  
+  Redisson https://github.com/redisson/redisson
 
 ### Memcached
 
@@ -154,10 +156,3 @@ https://oauth.net/code/
 ### 阿里java开发手册
 
 https://github.com/alibaba/p3c
-
-### CSS 速查
-
-http://css.doyoe.com/
-
-https://caniuse.com/
-
