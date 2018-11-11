@@ -158,3 +158,6 @@ https://oauth.net/code/
 ### 阿里java开发手册
 
 https://github.com/alibaba/p3c
+
+### zsh
+https://ohmyz.sh/
