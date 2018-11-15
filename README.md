@@ -78,6 +78,12 @@ phptrace https://github.com/Qihoo360/phptrace
   一个故事@MySQL DBA http://www.orczhou.com/
   
   Raft https://raft.github.io/raft.pdf
+  
+### 分布式事务
+
+  分布式系统的事务处理 https://coolshell.cn/articles/10910.html
+  
+  微服务架构下分布式事务解决方案 http://www.cnblogs.com/jiangyu666/p/8522547.html
 
 ### OpenResty
 
@@ -138,12 +144,6 @@ Disque https://github.com/antirez/disque
 缓存更新的套路 https://coolshell.cn/articles/17416.html
 
 Memcache mutex设计模式 https://timyang.net/programming/memcache-mutex/
-
-### 分布式事务
-
-  分布式系统的事务处理 https://coolshell.cn/articles/10910.html
-  
-  微服务架构下分布式事务解决方案 http://www.cnblogs.com/jiangyu666/p/8522547.html
 
 ### Golang
 
