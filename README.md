@@ -76,6 +76,8 @@ phptrace https://github.com/Qihoo360/phptrace
   何登成的技术博客 http://hedengcheng.com/
   
   一个故事@MySQL DBA http://www.orczhou.com/
+  
+  Raft https://raft.github.io/raft.pdf
 
 ### OpenResty
 
