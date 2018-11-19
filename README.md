@@ -163,3 +163,5 @@ https://github.com/alibaba/p3c
 
 ### zsh
 https://ohmyz.sh/
+
+https://github.com/robbyrussell/oh-my-zsh
