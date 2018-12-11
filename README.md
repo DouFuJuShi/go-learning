@@ -122,6 +122,8 @@ phptrace https://github.com/Qihoo360/phptrace
   Redis设计与实现 http://redisbook.com/
   
   Redisson https://github.com/redisson/redisson
+  
+  Redis Cluster Specification https://redis.io/topics/cluster-spec
 
 ### Memcached
 
