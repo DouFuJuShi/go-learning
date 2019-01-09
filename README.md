@@ -59,8 +59,6 @@ phptrace https://github.com/Qihoo360/phptrace
 
 ## MySQL
 
-  MySQL 5.7 Reference Manual https://dev.mysql.com/doc/refman/5.7/en/
-  
   MySQL sys https://github.com/mysql/mysql-sys
   
   innodb_diagrams https://github.com/jeremycole/innodb_diagrams
@@ -77,15 +75,13 @@ phptrace https://github.com/Qihoo360/phptrace
   
   数据库内核月报 http://mysql.taobao.org/monthly/
   
-  何登成的技术博客 http://hedengcheng.com/
-  
-  一个故事@MySQL DBA http://www.orczhou.com/
-  
   Raft https://raft.github.io/raft.pdf
   
   ProxySQL https://proxysql.com/
   
   gh-ost https://github.com/github/gh-ost
+  
+  sysbench https://github.com/akopytov/sysbench
   
 ### 分布式事务
 
