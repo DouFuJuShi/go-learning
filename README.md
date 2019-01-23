@@ -73,8 +73,6 @@ phptrace https://github.com/Qihoo360/phptrace
   
   PMM https://www.percona.com/software/database-tools/percona-monitoring-and-management
   
-  数据库内核月报 http://mysql.taobao.org/monthly/
-  
   Raft https://raft.github.io/raft.pdf
   
   ProxySQL https://proxysql.com/
@@ -83,6 +81,13 @@ phptrace https://github.com/Qihoo360/phptrace
   
   sysbench https://github.com/akopytov/sysbench
   
+### MySQL博客
+
+数据库内核月报 http://mysql.taobao.org/monthly/
+
+https://dinglin.iteye.com/category/130817
+
+
 ### 分布式事务
 
   分布式系统的事务处理 https://coolshell.cn/articles/10910.html
