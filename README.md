@@ -80,6 +80,8 @@ phptrace https://github.com/Qihoo360/phptrace
   gh-ost https://github.com/github/gh-ost
   
   sysbench https://github.com/akopytov/sysbench
+
+  optimizr_trace https://dev.mysql.com/doc/internals/en/tracing-example.html
   
 ### MySQL博客
 
