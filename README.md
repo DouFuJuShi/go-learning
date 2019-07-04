@@ -83,6 +83,8 @@ phptrace https://github.com/Qihoo360/phptrace
 
   optimizr_trace https://dev.mysql.com/doc/internals/en/tracing-example.html
   
+  MySQL source https://github.com/mysql/mysql-server
+  
 ### MySQL博客
 
 数据库内核月报 http://mysql.taobao.org/monthly/
