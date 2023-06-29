@@ -2,4 +2,4 @@
 
 ## Distributed Transactions
 dtm https://github.com/dtm-labs/dtm   
-seata-gohttps://github.com/seata/seata-go
+seata-go https://github.com/seata/seata-go
