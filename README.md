@@ -93,13 +93,6 @@ https://dinglin.iteye.com/category/130817
 
 https://github.com/hedengcheng/tech
 
-
-### 分布式事务
-
-  分布式系统的事务处理 https://coolshell.cn/articles/10910.html
-  
-  微服务架构下分布式事务解决方案 http://www.cnblogs.com/jiangyu666/p/8522547.html
-
 ### OpenResty
 
   https://github.com/openresty/lua-nginx-module
@@ -161,14 +154,6 @@ Disque https://github.com/antirez/disque
 缓存更新的套路 https://coolshell.cn/articles/17416.html
 
 Memcache mutex设计模式 https://timyang.net/programming/memcache-mutex/
-
-### Golang
-
-https://www.processon.com/view/link/5a9ba4c8e4b0a9d22eb3bdf0
-
-https://golang.google.cn/dl/
-
-https://github.com/qyuhen/book
 
 ### Oauth2.0
   
