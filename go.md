@@ -1,4 +1,4 @@
-# GO项目
+# Golang
 
 ## Distributed Transactions
 dtm https://github.com/dtm-labs/dtm   
