@@ -69,7 +69,7 @@ wire https://github.com/google/wire
 
 dig https://github.com/uber-go/dig
 
-## http & tcp copy
+## HTTP request & TCP copy
 
 goreplay https://github.com/buger/goreplay    
 
