@@ -12,6 +12,8 @@ Standard Go Project Layout https://github.com/golang-standards/project-layout/bl
 ## Go profiler
 go-profiler-notes https://github.com/DataDog/go-profiler-notes    
 
+google pprof https://github.com/google/pprof
+
 Holmes https://github.com/mosn/holmes
 
 ## Redis 
