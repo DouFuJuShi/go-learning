@@ -40,7 +40,7 @@ gRPCurl https://github.com/fullstorydev/grpcurl
 
 grpc-gateway https://github.com/grpc-ecosystem/grpc-gateway
 
-## HTTTP
+## HTTP
 
 fasthttp https://github.com/valyala/fasthttp
 
