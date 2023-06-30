@@ -44,7 +44,7 @@ fasthttp https://github.com/valyala/fasthttp
 
 go-resty/resty https://github.com/go-resty/resty
 
-## linter
+## Linter
 
 golangci-lint https://github.com/golangci/golangci-lint
 
