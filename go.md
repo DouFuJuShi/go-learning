@@ -17,8 +17,18 @@ Holmes https://github.com/mosn/holmes
 ## Redis 
 go-redis https://github.com/redis/go-redis
 
+disque https://github.com/antirez/disque
+
 ## Kafka
 sarama  https://github.com/Shopify/sarama
+
+## Database
+
+go-mysql-elasticsearch https://github.com/go-mysql-org/go-mysql-elasticsearch
+
+go-mysql https://github.com/go-mysql-org/go-mysql
+
+Cetus https://github.com/session-replay-tools/cetus
 
 ## GRPC
 
@@ -48,18 +58,17 @@ tollbooth https://github.com/didip/tollbooth
 
 uber-go/ratelimit https://github.com/uber-go/ratelimit
 
-## Database
-
-go-mysql-elasticsearch https://github.com/go-mysql-org/go-mysql-elasticsearch
-
-go-mysql https://github.com/go-mysql-org/go-mysql
-
-
 ## Dependency Injection 
 
 wire https://github.com/google/wire
 
 dig https://github.com/uber-go/dig
+
+## http & tcp copy
+
+goreplay https://github.com/buger/goreplay    
+
+tcpcopy https://github.com/session-replay-tools/tcpcopy
  
 ## other
 Pay https://github.com/go-pay/gopay   
