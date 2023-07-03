@@ -83,6 +83,8 @@ gocron https://github.com/go-co-op/gocron
 
 go-quartz https://github.com/reugn/go-quartz
 
+temporal https://github.com/temporalio/temporal
+
 ## Rate limit
 tollbooth https://github.com/didip/tollbooth    
 
