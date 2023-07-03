@@ -78,6 +78,10 @@ go.uuid https://github.com/satori/go.uuid
 
 glang-jwt https://github.com/golang-jwt/jwt   
 
+## CRON 
+gocron https://github.com/go-co-op/gocron     
+
+go-quartz https://github.com/reugn/go-quartz
 
 ## Rate limit
 tollbooth https://github.com/didip/tollbooth    
