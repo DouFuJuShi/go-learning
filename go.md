@@ -2,16 +2,11 @@
 ## Doc
 Go101 https://gfw.go101.org/article/packages-and-imports.html
 
-## Distributed Transactions
-dtm https://github.com/dtm-labs/dtm     
-
-seata-go https://github.com/seata/seata-go
-
-
 ## Go style guide
 Uber Style Guide https://github.com/uber-go/guide    
 
 Standard Go Project Layout https://github.com/golang-standards/project-layout/blob/master/README_zh.md
+
 
 ## Go profiler
 go-profiler-notes https://github.com/DataDog/go-profiler-notes    
@@ -20,16 +15,19 @@ google pprof https://github.com/google/pprof
 
 Holmes https://github.com/mosn/holmes
 
-## Redis 
-go-redis https://github.com/redis/go-redis
+## Dependency Injection 
 
-disque https://github.com/antirez/disque
+wire https://github.com/google/wire
 
-## Distribute Lock
-redsync https://github.com/go-redsync/redsync
+dig https://github.com/uber-go/dig
 
-## Kafka
-sarama  https://github.com/Shopify/sarama
+## GRPC
+
+grpc-go https://github.com/grpc/grpc-go    
+
+gRPCurl https://github.com/fullstorydev/grpcurl
+
+grpc-gateway https://github.com/grpc-ecosystem/grpc-gateway
 
 ## Database Tools
 
@@ -41,14 +39,22 @@ go-mysql https://github.com/go-mysql-org/go-mysql
 
 Cetus https://github.com/session-replay-tools/cetus
 
+## Distributed Transactions
+dtm https://github.com/dtm-labs/dtm     
 
-## GRPC
+seata-go https://github.com/seata/seata-go
 
-grpc-go https://github.com/grpc/grpc-go    
+## Distribute Lock
+redsync https://github.com/go-redsync/redsync
 
-gRPCurl https://github.com/fullstorydev/grpcurl
+## Redis 
+go-redis https://github.com/redis/go-redis
 
-grpc-gateway https://github.com/grpc-ecosystem/grpc-gateway
+disque https://github.com/antirez/disque
+
+## Kafka
+sarama  https://github.com/Shopify/sarama
+
 
 ## HTTP
 
@@ -77,12 +83,6 @@ glang-jwt https://github.com/golang-jwt/jwt
 tollbooth https://github.com/didip/tollbooth    
 
 uber-go/ratelimit https://github.com/uber-go/ratelimit
-
-## Dependency Injection 
-
-wire https://github.com/google/wire
-
-dig https://github.com/uber-go/dig
 
 ## HTTP request & TCP copy
 
