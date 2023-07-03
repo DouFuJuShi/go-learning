@@ -33,11 +33,14 @@ sarama  https://github.com/Shopify/sarama
 
 ## Database Tools
 
+GORM https://github.com/go-gorm/gorm    
+
 go-mysql-elasticsearch https://github.com/go-mysql-org/go-mysql-elasticsearch
 
 go-mysql https://github.com/go-mysql-org/go-mysql
 
 Cetus https://github.com/session-replay-tools/cetus
+
 
 ## GRPC
 
