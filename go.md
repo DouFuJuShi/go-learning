@@ -110,6 +110,8 @@ dst https://github.com/dave/dst
 singleflight https://golang.org/x/sync/singleflight
 
 ## other
-Pay https://github.com/go-pay/gopay   
-envoy https://github.com/envoyproxy/envoy
+Pay https://github.com/go-pay/gopay     
+
+envoy https://github.com/envoyproxy/envoy    
+
 hey https://github.com/rakyll/hey
