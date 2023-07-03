@@ -1,6 +1,6 @@
 # Golang
-## GO101
-https://gfw.go101.org/article/packages-and-imports.html
+## Doc
+Go101 https://gfw.go101.org/article/packages-and-imports.html
 
 ## Distributed Transactions
 dtm https://github.com/dtm-labs/dtm     
