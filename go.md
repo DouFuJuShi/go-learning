@@ -79,6 +79,10 @@ tcpcopy https://github.com/session-replay-tools/tcpcopy
 jennifer https://github.com/dave/jennifer
 
 dst https://github.com/dave/dst
+
+## Distribute Lock
+redsync https://github.com/go-redsync/redsync
+
 ## other
 Pay https://github.com/go-pay/gopay   
 envoy https://github.com/envoyproxy/envoy
