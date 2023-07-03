@@ -2,7 +2,7 @@
 ## Doc
 Go101 https://gfw.go101.org/article/packages-and-imports.html
 
-## Go style guide
+## Go Style Guide
 Uber Style Guide https://github.com/uber-go/guide    
 
 Standard Go Project Layout https://github.com/golang-standards/project-layout/blob/master/README_zh.md
