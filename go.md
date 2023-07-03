@@ -24,6 +24,9 @@ go-redis https://github.com/redis/go-redis
 
 disque https://github.com/antirez/disque
 
+## Distribute Lock
+redsync https://github.com/go-redsync/redsync
+
 ## Kafka
 sarama  https://github.com/Shopify/sarama
 
@@ -80,8 +83,9 @@ jennifer https://github.com/dave/jennifer
 
 dst https://github.com/dave/dst
 
-## Distribute Lock
-redsync https://github.com/go-redsync/redsync
+
+## singleflight
+singleflight golang.org/x/sync/singleflight
 
 ## other
 Pay https://github.com/go-pay/gopay   
