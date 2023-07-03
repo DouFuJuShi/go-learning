@@ -85,6 +85,8 @@ go-quartz https://github.com/reugn/go-quartz
 
 temporal https://github.com/temporalio/temporal
 
+asynq https://github.com/hibiken/asynq
+
 ## Rate limit
 tollbooth https://github.com/didip/tollbooth    
 
