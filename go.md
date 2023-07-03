@@ -64,6 +64,10 @@ golangci-lint https://github.com/golangci/golangci-lint
 
 google uuid https://github.com/google/uuid
 
+sonyflake[Twitter's Snowflake] https://github.com/sony/sonyflake
+
+go.uuid https://github.com/satori/go.uuid
+
 
 ## Rate limit
 tollbooth https://github.com/didip/tollbooth    
