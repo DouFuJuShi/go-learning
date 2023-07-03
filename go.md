@@ -109,6 +109,9 @@ dst https://github.com/dave/dst
 ## singleflight
 singleflight https://golang.org/x/sync/singleflight
 
+## Captcha
+base64Captcha https://github.com/mojocn/base64Captcha
+
 ## other
 Pay https://github.com/go-pay/gopay     
 
