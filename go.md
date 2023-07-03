@@ -87,6 +87,8 @@ temporal https://github.com/temporalio/temporal
 
 asynq https://github.com/hibiken/asynq
 
+kala https://github.com/ajvb/kala
+
 ## Rate limit
 tollbooth https://github.com/didip/tollbooth    
 
