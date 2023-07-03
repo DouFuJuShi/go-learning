@@ -68,6 +68,10 @@ sonyflake[Twitter's Snowflake] https://github.com/sony/sonyflake
 
 go.uuid https://github.com/satori/go.uuid
 
+## JWT 
+
+glang-jwt https://github.com/golang-jwt/jwt   
+
 
 ## Rate limit
 tollbooth https://github.com/didip/tollbooth    
