@@ -97,7 +97,7 @@ dst https://github.com/dave/dst
 
 
 ## singleflight
-singleflight golang.org/x/sync/singleflight
+singleflight https://golang.org/x/sync/singleflight
 
 ## other
 Pay https://github.com/go-pay/gopay   
