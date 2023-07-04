@@ -105,6 +105,9 @@ jennifer https://github.com/dave/jennifer
 
 dst https://github.com/dave/dst
 
+## MQ
+rocketmq-client-go https://github.com/apache/rocketmq-client-go
+
 
 ## singleflight
 singleflight https://golang.org/x/sync/singleflight
