@@ -18,10 +18,6 @@
   
   Understanding Linux CPU Load - when should you be worried? http://blog.scoutapp.com/articles/2009/07/31/understanding-load-averages
  
-## JAVA
-  
-  architect-awesome https://github.com/xingshaocheng/architect-awesome/blob/master/README.md
-
 ## PHP
 The Right Way http://www.phptherightway.com/
 
@@ -97,11 +93,6 @@ https://github.com/hedengcheng/tech
   
   https://konghq.com/
   
-
-### Envoy
-
-  https://www.envoyproxy.io/
-
 
 ### Redis
 
