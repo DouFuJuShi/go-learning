@@ -36,4 +36,4 @@ ln -s development-mysql8.yaml development.yaml
 vim development.yaml
 ```
 
-## create mysql databases && tables
+## Create MySQL8 Databases && Tables
