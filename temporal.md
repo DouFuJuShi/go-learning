@@ -67,3 +67,6 @@ update-schema --schema-dir ./temporal/schema/mysql/v8/temporal/versioned
 --endpoint 127.0.0.1 --port 3306 --user root --password temporal  --database temporal_visibility --plugin mysql \
 update-schema --schema-dir ./temporal/schema/mysql/v8/visibility/versioned
 ```
+
+
+## start server
