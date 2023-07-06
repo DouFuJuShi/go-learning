@@ -28,11 +28,13 @@ mysql -h 127.0.0.1  -uroot -ptemporal
 ```shell
 cd /path/to/temporal_1.21.0_darwin_amd64/config
 
+# if exists, `rm` it
 rm development.yaml
 
+#ln
 ln -s development-mysql8.yaml development.yaml
 
-# 修改数据库的配置
+# update database info
 vim development.yaml
 ```
 
