@@ -27,6 +27,8 @@ grpc-go https://github.com/grpc/grpc-go
 
 gRPCurl https://github.com/fullstorydev/grpcurl
 
+go-grpc-middleware https://github.com/grpc-ecosystem/go-grpc-middleware
+
 grpc-gateway https://github.com/grpc-ecosystem/grpc-gateway
 
 ## Database Tools
