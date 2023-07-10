@@ -92,6 +92,8 @@ asynq https://github.com/hibiken/asynq
 kala https://github.com/ajvb/kala
 
 ## Rate limit
+sentinel https://github.com/alibaba/sentinel-golang
+
 tollbooth https://github.com/didip/tollbooth    
 
 uber-go/ratelimit https://github.com/uber-go/ratelimit
