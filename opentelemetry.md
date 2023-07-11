@@ -49,8 +49,8 @@ func main() {
 
     // TracerProvider go.opentelemetry.io/otel/sdk/trace
     provider := sdktrace.NewTracerProvider(
-        sdktrace.WithSampler(sdktrace.AlwaysSample()), // 采样设置
-        sdktrace.WithBatcher(exporter), // exporter设置
+        sdktrace.WithSampler(sdktrace.AlwaysSample()),
+        sdktrace.WithBatcher(exporter), 
         sdktrace.WithResource(resources), 
     )
 
@@ -65,12 +65,15 @@ func main() {
     // root span
     rootName := "root_span"
     var rootStartOption []trace.SpanStartOption
-    parentCtx, span := tracer.Start(context.Background(), rootName, rootStartOption...)
-    defer span.End()
+    parentCtx, rootSpan := tracer.Start(context.Background(), rootName, rootStartOption...)
+    defer rootSpan.End()
 
     // child span
     childName := "child_span"
     var childStartOption []trace.SpanStartOption
-    tracer.Start(parentCtx, childName, childStartOption...)
+    childCtx, childSpan := tracer.Start(parentCtx, childName, childStartOption...)
+
+    // set Attributes to span
+    childSpan.SetAttributes(attribute.String("controller", "books"))
 }
 ```
