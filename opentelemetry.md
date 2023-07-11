@@ -3,13 +3,15 @@
 ```go
 
 import (
+    "go.opentelemetry.io/otel/sdk/resource"
+    sdktrace "go.opentelemetry.io/otel/sdk/trace"
+
     "go.opentelemetry.io/otel/attribute"
     "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
     "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 
     "go.opentelemetry.io/otel"
-    "go.opentelemetry.io/otel/sdk/resource"
-    sdktrace "go.opentelemetry.io/otel/sdk/trace"
+    "go.opentelemetry.io/otel/trace"
 
     semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 )
@@ -54,5 +56,21 @@ func main() {
 
     // SetTracerProvider "go.opentelemetry.io/otel"
     otel.SetTracerProvider(tp)
+
+    // tracer
+    tracerName := "tracer"
+    var tracerOption []trace.TracerOption
+    tracer := otel.GetTracerProvider().Tracer(tracerName, tracerOption...)
+
+    // root span
+    rootName := "root_span"
+    var rootStartOption []trace.SpanStartOption
+    parentCtx, span := tracer.Start(context.Background(), rootName, rootStartOption...)
+    defer span.End()
+
+    // child span
+    childName := "child_span"
+    var childStartOption []trace.SpanStartOption
+    tracer.Start(parentCtx, childName, childStartOption...)
 }
 ```
