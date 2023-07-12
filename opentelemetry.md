@@ -79,6 +79,7 @@ func main() {
 ```
 
 ## Demo
+```go
 package main
 
 import (
@@ -253,3 +254,5 @@ func main() {
 		}
 	}
 }
+
+```
