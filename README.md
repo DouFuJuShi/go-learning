@@ -33,21 +33,6 @@ php-fig(PHP代码规范) https://github.com/php-fig/fig-standards/tree/master/ac
 
 phptrace https://github.com/Qihoo360/phptrace
 
-### PHP Library
-
-  Oauth2.0 https://github.com/thephpleague/oauth2-server
-  
-  Json Web Token https://github.com/lcobucci/jwt
-  
-  JpGraph http://jpgraph.net/
-  
-  PHP Image Manipulation https://github.com/Intervention/image
-
-  PHPExcel(PhpSpreadsheet) https://github.com/PHPOffice/PhpSpreadsheet
-
-  PHP Redis Client https://github.com/phpredis/phpredis
-  
-  Guzzle(PHP HTTP client) http://docs.guzzlephp.org/en/stable/
 
 ## MySQL
 
@@ -85,7 +70,7 @@ https://dinglin.iteye.com/category/130817
 
 https://github.com/hedengcheng/tech
 
-### OpenResty
+## OpenResty
 
   https://github.com/openresty/lua-nginx-module
   
@@ -96,7 +81,7 @@ https://github.com/hedengcheng/tech
   https://konghq.com/
   
 
-### Redis
+## Redis
 
   Redis https://redis.io
   
@@ -120,37 +105,9 @@ https://github.com/hedengcheng/tech
   
   Redis Cluster Specification https://redis.io/topics/cluster-spec
 
-### Memcached
-
-memagent https://code.google.com/archive/p/memagent/
-
-### ElasticSearch
+## ElasticSearch
 
 Elasticsearch权威指南中文版 https://github.com/elasticsearch-cn/elasticsearch-definitive-guide
 
 JDBC importer for Elasticsearch https://github.com/jprante/elasticsearch-jdbc
 
-### Message Queue
-RabbitMQ https://www.rabbitmq.com/
-
-Beanstalkd http://kr.github.io/beanstalkd/
-
-Disque https://github.com/antirez/disque
-
-### Cache 
-缓存更新的套路 https://coolshell.cn/articles/17416.html
-
-Memcache mutex设计模式 https://timyang.net/programming/memcache-mutex/
-
-### Oauth2.0
-  
-https://oauth.net/code/
-
-### 阿里java开发手册
-
-https://github.com/alibaba/p3c
-
-### zsh
-https://ohmyz.sh/
-
-https://github.com/robbyrussell/oh-my-zsh
