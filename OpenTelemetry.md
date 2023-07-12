@@ -262,9 +262,14 @@ func main() {
 }
 ```
 
-## opentelemetry-go-contrib
+## Baggage
+https://opentelemetry.io/docs/concepts/signals/baggage/
 
+## opentelemetry-go-contrib
 See ===> https://github.com/open-telemetry/opentelemetry-go-contrib
 
 ## docs
-https://github.com/open-telemetry/docs-cn
+see ==> https://github.com/open-telemetry/docs-cn
+
+## distributed tracing tools 
+https://uptrace.dev/blog/distributed-tracing-tools.html
