@@ -263,9 +263,11 @@ func main() {
 ```
 
 ## passthrough
-https://opentelemetry.io/docs/concepts/signals/baggage/
-https://uptrace.dev/opentelemetry/distributed-tracing.html#context-propagation
-[example/passthrough](https://github.com/open-telemetry/opentelemetry-go/tree/main/example/passthrough)
+https://opentelemetry.io/docs/concepts/signals/baggage/    
+
+https://uptrace.dev/opentelemetry/distributed-tracing.html#context-propagation    
+
+[example](https://github.com/open-telemetry/opentelemetry-go/tree/main/example/passthrough)
 
 ## opentelemetry-go-contrib
 See ===> https://github.com/open-telemetry/opentelemetry-go-contrib
