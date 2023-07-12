@@ -265,3 +265,6 @@ func main() {
 ## opentelemetry-go-contrib
 
 See ===> https://github.com/open-telemetry/opentelemetry-go-contrib
+
+## docs
+https://github.com/open-telemetry/docs-cn
