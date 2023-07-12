@@ -1,7 +1,7 @@
 # OpenTelemetry
 
 ```go
-
+// https://signoz.io/docs/instrumentation/golang/
 import (
     "go.opentelemetry.io/otel/sdk/resource"
     sdktrace "go.opentelemetry.io/otel/sdk/trace"
