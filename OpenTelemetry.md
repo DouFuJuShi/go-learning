@@ -264,6 +264,7 @@ func main() {
 
 ## Baggage
 https://opentelemetry.io/docs/concepts/signals/baggage/
+https://uptrace.dev/opentelemetry/distributed-tracing.html#context-propagation
 
 ## opentelemetry-go-contrib
 See ===> https://github.com/open-telemetry/opentelemetry-go-contrib
