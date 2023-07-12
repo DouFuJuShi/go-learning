@@ -9,6 +9,8 @@ import (
     "go.opentelemetry.io/otel/attribute"
     "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
     "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+    // "google.golang.org/grpc"
+    "google.golang.org/grpc/credentials"
 
     "go.opentelemetry.io/otel"
     "go.opentelemetry.io/otel/trace"
@@ -16,7 +18,11 @@ import (
     semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 )
 
-var collectorURL = "collector endpoint"
+var (
+	serviceName  = os.Getenv("SERVICE_NAME")
+	collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	insecure     = os.Getenv("INSECURE_MODE")
+)
 
 func main() {
     // exporter go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc
