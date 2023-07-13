@@ -1,5 +1,7 @@
 # OpenTelemetry
 
+![流程](https://github.com/DouFuJuShi/learning/assets/13195119/b19f8c4d-e752-422e-b179-10117f6c3deb)
+
 ```go
 // https://signoz.io/docs/instrumentation/golang/
 import (
