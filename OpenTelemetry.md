@@ -273,7 +273,7 @@ https://uptrace.dev/opentelemetry/distributed-tracing.html#context-propagation
 See ===> https://github.com/open-telemetry/opentelemetry-go-contrib
 
 ## docs
-see ==> https://github.com/open-telemetry/docs-cn
+See ==> https://github.com/open-telemetry/docs-cn
 
 ## distributed tracing tools 
-https://uptrace.dev/blog/distributed-tracing-tools.html
+See ==> https://uptrace.dev/blog/distributed-tracing-tools.html
