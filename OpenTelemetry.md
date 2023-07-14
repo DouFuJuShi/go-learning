@@ -273,7 +273,9 @@ https://uptrace.dev/opentelemetry/distributed-tracing.html#context-propagation
 [Passthrough Example](https://github.com/open-telemetry/opentelemetry-go/tree/main/example/passthrough)
 
 ## Opentelemetry-Go-Contrib
-See ===> https://github.com/open-telemetry/opentelemetry-go-contrib
+[opentelemetry-go-contrib](https://github.com/open-telemetry/opentelemetry-go-contrib)
+
+[uptrace](https://uptrace.dev/get/instrument/)
 
 ## Docs
 See ==> https://github.com/open-telemetry/docs-cn
