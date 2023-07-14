@@ -86,7 +86,7 @@ func main() {
 }
 ```
 
-## Demo
+## Fib Demo
 ```go
 package main
 
