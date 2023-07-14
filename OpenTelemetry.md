@@ -266,9 +266,11 @@ func main() {
 
 ## Context Propagation
 
-https://opentelemetry.io/docs/concepts/signals/baggage/    
+[baggage](https://opentelemetry.io/docs/concepts/signals/baggage/)     
 
-https://uptrace.dev/opentelemetry/distributed-tracing.html#context-propagation    
+[uptrace context-propagation](https://uptrace.dev/opentelemetry/distributed-tracing.html#context-propagation)   
+
+[b3-propagation](https://github.com/openzipkin/b3-propagation)
 
 [Passthrough Example](https://github.com/open-telemetry/opentelemetry-go/tree/main/example/passthrough)
 
