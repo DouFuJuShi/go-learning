@@ -284,3 +284,10 @@ See ==> https://github.com/open-telemetry/docs-cn
 
 ## Distributed Tracing Tools 
 See ==> https://uptrace.dev/blog/distributed-tracing-tools.html
+
+
+## Redis Tracing
+https://github.com/redis/go-redis/tree/master/extra/redisotel
+
+## GORM Tracing 
+https://github.com/uptrace/opentelemetry-go-extra/otelgorm
