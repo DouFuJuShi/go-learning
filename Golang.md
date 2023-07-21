@@ -16,7 +16,9 @@ google pprof https://github.com/google/pprof
 Holmes https://github.com/mosn/holmes
 
 ## Go Debugger
-delve https://github.com/go-delve/delve
+delve https://github.com/go-delve/delve    
+
+delv eUIs https://github.com/go-delve/delve/blob/master/Documentation/EditorIntegration.md
 
 ## Dependency Injection 
 
