@@ -11,9 +11,12 @@ Standard Go Project Layout https://github.com/golang-standards/project-layout/bl
 ## Go profiler
 go-profiler-notes https://github.com/DataDog/go-profiler-notes    
 
+go-pprof-practice https://github.com/wolfogre/go-pprof-practice   
+
 google pprof https://github.com/google/pprof
 
 Holmes https://github.com/mosn/holmes
+
 
 ## Go Debugger
 delve https://github.com/go-delve/delve    
