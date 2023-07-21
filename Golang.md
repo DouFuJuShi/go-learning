@@ -15,6 +15,9 @@ google pprof https://github.com/google/pprof
 
 Holmes https://github.com/mosn/holmes
 
+## Go Debugger
+delve https://github.com/go-delve/delve
+
 ## Dependency Injection 
 
 wire https://github.com/google/wire
