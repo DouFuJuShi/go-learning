@@ -1,5 +1,5 @@
 # MySQL
-MySQL sys https://github.com/mysql/mysql-sys
+MySQL SYS https://github.com/mysql/mysql-sys
 
 innodb_diagrams https://github.com/jeremycole/innodb_diagrams
 
