@@ -5,11 +5,11 @@ https://rocketmq.apache.org/
 
 https://github.com/apache/rocketmq
 
-## go client sdk
+## Go SDK
 
 RocketMQ 4.X https://github.com/apache/rocketmq-client-go   
 
-RocketMQ 5.X https://github.com/apache/rocketmq-clients
+RocketMQ 5.X https://github.com/apache/rocketmq-clients/golang
 
 
 ## Installtion
