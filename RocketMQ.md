@@ -1,24 +1,30 @@
 # RocketMQ
 
 ## offical site
-https://rocketmq.apache.org/
+https://rocketmq.apache.org/    
 
-## github
 https://github.com/apache/rocketmq
 
 ## go client sdk
-https://github.com/apache/rocketmq-client-go
+
+RocketMQ 4.X https://github.com/apache/rocketmq-client-go   
+
+RocketMQ 5.X https://github.com/apache/rocketmq-clients
 
 
 ## Installtion
 
 
-### Proxy 开启 gprc
+### Proxy Setting
 ```json
 {
   "rocketMQClusterName": "orderCluster",
   "namesrvAddr": "127.0.0.1:9000;127.0.0.1:9001;127.0.0.1:9002",
-  "grpcServerPort": 8081,
+  "grpcServerPort": 8081, 
   "remotingListenPort": 8080
 }
 ```
+- rocketMQClusterName 设置集群名
+- namesrvAddr 设置namesrv地址
+- grpcServerPort 设置GRPC监听端口并开启GRPC协议
+- remotingListenPort 设置remoting监听端口并且开启remoting监听
