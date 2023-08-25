@@ -713,3 +713,12 @@ Config Path: /path/to/rocketmq-all-5.1.3-bin-release/conf/rmq-proxy.json
 | 参数名 | 说明 |
 | :--- | :--- |
 | globalWhiteRemoteAddresses | 全局白名单配置，策略如下： 空：忽略白名单，继续执行下面校验 全匹配模式：全部放行不会执行后面校验 例如：* 或 ... 或 ::::::: 多 IP 模式：表示白名单 IP 在设置区间段的放行 例如：192.168.0.{1,2} 或 192.168.1.1,192.168.1.2 或 192.168.*. 或 192.168.1-10.5-50 |
+| accessKey | 用户唯一标识 |
+| secretKey | 访问密码 |
+| whiteRemoteAddress | 用户级白名单，格式同 globalWhiteRemoteAddresses |
+| admin | 是否为管理员，管理员拥有所有资源访问权限 true or false |
+| secretKey | 访问密码 |
+| defaultTopicPerm | 默认主题权限，默认值 DENY |
+| defaultGroupPerm | 默认消费组权限，默认值 DENY |
+| topicPerms | 详细的主题权限 |
+| groupPerms | 详细的消费组权限 |
