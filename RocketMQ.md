@@ -678,6 +678,7 @@ Config Path: /path/to/rocketmq-all-5.1.3-bin-release/conf/rmq-proxy.json
    aclEnable = true # 默认 false，开启 ACL 需要设置为 true
    ```
 2. plain_acl.yml 配置
+   默认 /path/to/rocketmq-all-5.1.3-bin-release/conf/plain_acl.yml，可以通过 -Drocketmq.acl.plain.file 指定 ACL 文件名称
 ```yaml
     globalWhiteRemoteAddresses:
       - 10.10.103.*
