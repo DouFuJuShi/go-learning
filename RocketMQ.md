@@ -70,7 +70,7 @@ disableNettyWorkerGroup=false
 ```
 
 ### broker setting
-```text
+```properties
 brokerConfigPath=
 rocketmqHome=/Users/aqi/Downloads/rocketmq-all-5.1.3-bin-release
 namesrvAddr=
