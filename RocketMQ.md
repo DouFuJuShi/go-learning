@@ -1,6 +1,6 @@
 # RocketMQ
 
-## offical site
+## Offical Site
 https://rocketmq.apache.org/    
 
 https://github.com/apache/rocketmq
@@ -42,9 +42,9 @@ RocketMQ 5.X https://github.com/apache/rocketmq-clients/golang
 │   ├── dledger
 │   │   └── fast-try.sh
 │   ├── export.sh
-│   ├── mqadmin
+│   ├── mqadmin # admin tool
 │   ├── mqadmin.cmd
-│   ├── mqbroker
+│   ├── mqbroker # 部署Broker服务器
 │   ├── mqbroker.cmd
 │   ├── mqbroker.numanode0
 │   ├── mqbroker.numanode1
@@ -53,13 +53,13 @@ RocketMQ 5.X https://github.com/apache/rocketmq-clients/golang
 │   ├── mqbrokercontainer
 │   ├── mqcontroller
 │   ├── mqcontroller.cmd
-│   ├── mqnamesrv
+│   ├── mqnamesrv # name server
 │   ├── mqnamesrv.cmd
-│   ├── mqproxy
+│   ├── mqproxy 
 │   ├── mqproxy.cmd
-│   ├── mqshutdown
+│   ├── mqshutdown # 关闭运行中的 broker proxy namesrv controller
 │   ├── mqshutdown.cmd
-│   ├── os.sh
+│   ├── os.sh # 在部署Broker服务器之前，强烈建议运行**os.sh**，这是为了优化您的操作系统以获得更好的性能。os.sh参数设置仅供参考。您可以根据目标主机配置调整它们。
 │   ├── play.cmd
 │   ├── play.sh
 │   ├── runbroker.cmd
@@ -114,7 +114,7 @@ RocketMQ 5.X https://github.com/apache/rocketmq-clients/golang
 │   │   ├── broker-n1.conf
 │   │   └── broker-n2.conf
 │   ├── plain_acl.yml
-│   ├── rmq-proxy.json
+│   ├── rmq-proxy.json # proxy的配置文件
 │   ├── rmq.broker.logback.xml
 │   ├── rmq.client.logback.xml
 │   ├── rmq.controller.logback.xml
@@ -670,3 +670,40 @@ Config Path: /path/to/rocketmq-all-5.1.3-bin-release/conf/rmq-proxy.json
 - namesrvAddr 设置namesrv地址
 - grpcServerPort 设置GRPC监听端口并开启GRPC协议
 - remotingListenPort 设置remoting监听端口并且开启remoting监听
+
+
+### ACL 权限控制
+1. Broker 配置
+   ```properties
+   aclEnable = true # 默认 false，开启 ACL 需要设置为 true
+   ```
+2. plain_acl.yml 配置
+   ```yaml
+   globalWhiteRemoteAddresses:
+  - 10.10.103.*
+  - 192.168.0.*
+
+accounts:
+  - accessKey: RocketMQ
+    secretKey: 12345678
+    whiteRemoteAddress:
+    admin: false
+    defaultTopicPerm: DENY
+    defaultGroupPerm: SUB
+    topicPerms:
+      - topicA=DENY
+      - topicB=PUB|SUB
+      - topicC=SUB
+    groupPerms:
+      # the group should convert to retry topic
+      - groupA=DENY
+      - groupB=PUB|SUB
+      - groupC=SUB
+
+  - accessKey: rocketmq2
+    secretKey: 12345678
+    whiteRemoteAddress: 192.168.1.*
+    # if it is admin, it could access all resources
+    admin: true
+```
+|参数名|说明|
