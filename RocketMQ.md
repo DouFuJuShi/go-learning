@@ -679,32 +679,32 @@ Config Path: /path/to/rocketmq-all-5.1.3-bin-release/conf/rmq-proxy.json
    ```
 2. plain_acl.yml 配置
    ```yaml
-   globalWhiteRemoteAddresses:
-  - 10.10.103.*
-  - 192.168.0.*
-
-accounts:
-  - accessKey: RocketMQ
-    secretKey: 12345678
-    whiteRemoteAddress:
-    admin: false
-    defaultTopicPerm: DENY
-    defaultGroupPerm: SUB
-    topicPerms:
-      - topicA=DENY
-      - topicB=PUB|SUB
-      - topicC=SUB
-    groupPerms:
-      # the group should convert to retry topic
-      - groupA=DENY
-      - groupB=PUB|SUB
-      - groupC=SUB
-
-  - accessKey: rocketmq2
-    secretKey: 12345678
-    whiteRemoteAddress: 192.168.1.*
-    # if it is admin, it could access all resources
-    admin: true
+    globalWhiteRemoteAddresses:
+      - 10.10.103.*
+      - 192.168.0.*
+    
+    accounts:
+      - accessKey: RocketMQ
+        secretKey: 12345678
+        whiteRemoteAddress:
+        admin: false
+        defaultTopicPerm: DENY
+        defaultGroupPerm: SUB
+        topicPerms:
+          - topicA=DENY
+          - topicB=PUB|SUB
+          - topicC=SUB
+        groupPerms:
+          # the group should convert to retry topic
+          - groupA=DENY
+          - groupB=PUB|SUB
+          - groupC=SUB
+    
+      - accessKey: rocketmq2
+        secretKey: 12345678
+        whiteRemoteAddress: 192.168.1.*
+        # if it is admin, it could access all resources
+        admin: true
 ```
 
 |参数名|说明|
