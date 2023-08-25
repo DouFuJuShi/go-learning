@@ -13,6 +13,229 @@ RocketMQ 5.X https://github.com/apache/rocketmq-clients/golang
 
 
 ## Installtion
+
+```shell
+# rocketmq-all-5.1.3-bin-release tree
+.
+├── LICENSE
+├── NOTICE
+├── README.md
+├── benchmark
+│   ├── batchproducer.sh
+│   ├── consumer.sh
+│   ├── producer.sh
+│   ├── runclass.sh
+│   ├── shutdown.sh
+│   └── tproducer.sh
+├── bin
+│   ├── README.md
+│   ├── cachedog.sh
+│   ├── cleancache.sh
+│   ├── cleancache.v1.sh
+│   ├── controller
+│   │   ├── fast-try-independent-deployment.cmd
+│   │   ├── fast-try-independent-deployment.sh
+│   │   ├── fast-try-namesrv-plugin.cmd
+│   │   ├── fast-try-namesrv-plugin.sh
+│   │   ├── fast-try.cmd
+│   │   └── fast-try.sh
+│   ├── dledger
+│   │   └── fast-try.sh
+│   ├── export.sh
+│   ├── mqadmin
+│   ├── mqadmin.cmd
+│   ├── mqbroker
+│   ├── mqbroker.cmd
+│   ├── mqbroker.numanode0
+│   ├── mqbroker.numanode1
+│   ├── mqbroker.numanode2
+│   ├── mqbroker.numanode3
+│   ├── mqbrokercontainer
+│   ├── mqcontroller
+│   ├── mqcontroller.cmd
+│   ├── mqnamesrv
+│   ├── mqnamesrv.cmd
+│   ├── mqproxy
+│   ├── mqproxy.cmd
+│   ├── mqshutdown
+│   ├── mqshutdown.cmd
+│   ├── os.sh
+│   ├── play.cmd
+│   ├── play.sh
+│   ├── runbroker.cmd
+│   ├── runbroker.sh
+│   ├── runserver.cmd
+│   ├── runserver.sh
+│   ├── setcache.sh
+│   ├── startfsrv.sh
+│   ├── tools.cmd
+│   └── tools.sh
+├── conf
+│   ├── 2m-2s-async
+│   │   ├── broker-a-s.properties
+│   │   ├── broker-a.properties
+│   │   ├── broker-b-s.properties
+│   │   └── broker-b.properties
+│   ├── 2m-2s-sync
+│   │   ├── broker-a-s.properties
+│   │   ├── broker-a.properties
+│   │   ├── broker-b-s.properties
+│   │   └── broker-b.properties
+│   ├── 2m-noslave
+│   │   ├── broker-a.properties
+│   │   ├── broker-b.properties
+│   │   └── broker-trace.properties
+│   ├── broker.conf
+│   ├── container
+│   │   └── 2container-2m-2s
+│   │       ├── broker-a-in-container1.conf
+│   │       ├── broker-a-in-container2.conf
+│   │       ├── broker-b-in-container1.conf
+│   │       ├── broker-b-in-container2.conf
+│   │       ├── broker-container1.conf
+│   │       ├── broker-container2.conf
+│   │       └── nameserver.conf
+│   ├── controller
+│   │   ├── cluster-3n-independent
+│   │   │   ├── controller-n0.conf
+│   │   │   ├── controller-n1.conf
+│   │   │   └── controller-n2.conf
+│   │   ├── cluster-3n-namesrv-plugin
+│   │   │   ├── namesrv-n0.conf
+│   │   │   ├── namesrv-n1.conf
+│   │   │   └── namesrv-n2.conf
+│   │   ├── controller-standalone.conf
+│   │   └── quick-start
+│   │       ├── broker-n0.conf
+│   │       ├── broker-n1.conf
+│   │       └── namesrv.conf
+│   ├── dledger
+│   │   ├── broker-n0.conf
+│   │   ├── broker-n1.conf
+│   │   └── broker-n2.conf
+│   ├── plain_acl.yml
+│   ├── rmq-proxy.json
+│   ├── rmq.broker.logback.xml
+│   ├── rmq.client.logback.xml
+│   ├── rmq.controller.logback.xml
+│   ├── rmq.namesrv.logback.xml
+│   ├── rmq.proxy.logback.xml
+│   ├── rmq.tools.logback.xml
+│   └── tools.yml
+└── lib
+    ├── animal-sniffer-annotations-1.21.jar
+    ├── annotations-13.0.jar
+    ├── annotations-4.1.1.4.jar
+    ├── annotations-api-6.0.53.jar
+    ├── awaitility-4.1.0.jar
+    ├── bcpkix-jdk15on-1.69.jar
+    ├── bcprov-jdk15on-1.69.jar
+    ├── bcutil-jdk15on-1.69.jar
+    ├── caffeine-2.9.3.jar
+    ├── checker-qual-3.12.0.jar
+    ├── commons-beanutils-1.9.4.jar
+    ├── commons-cli-1.5.0.jar
+    ├── commons-codec-1.13.jar
+    ├── commons-collections-3.2.2.jar
+    ├── commons-digester-2.1.jar
+    ├── commons-io-2.7.jar
+    ├── commons-lang3-3.12.0.jar
+    ├── commons-logging-1.2.jar
+    ├── commons-validator-1.7.jar
+    ├── concurrentlinkedhashmap-lru-1.4.2.jar
+    ├── disruptor-1.2.10.jar
+    ├── dledger-0.3.1.2.jar
+    ├── error_prone_annotations-2.14.0.jar
+    ├── failureaccess-1.0.1.jar
+    ├── fastjson-1.2.83.jar
+    ├── grpc-api-1.50.0.jar
+    ├── grpc-context-1.50.0.jar
+    ├── grpc-core-1.50.0.jar
+    ├── grpc-netty-shaded-1.50.0.jar
+    ├── grpc-protobuf-1.50.0.jar
+    ├── grpc-protobuf-lite-1.50.0.jar
+    ├── grpc-services-1.50.0.jar
+    ├── grpc-stub-1.50.0.jar
+    ├── gson-2.9.0.jar
+    ├── guava-31.1-jre.jar
+    ├── hamcrest-2.1.jar
+    ├── j2objc-annotations-1.3.jar
+    ├── jaeger-thrift-1.6.0.jar
+    ├── jaeger-tracerresolver-1.6.0.jar
+    ├── javassist-3.20.0-GA.jar
+    ├── javax.annotation-api-1.3.2.jar
+    ├── jna-4.2.2.jar
+    ├── jsr305-3.0.2.jar
+    ├── jul-to-slf4j-2.0.6.jar
+    ├── kotlin-stdlib-1.6.20.jar
+    ├── kotlin-stdlib-common-1.6.20.jar
+    ├── kotlin-stdlib-jdk7-1.6.20.jar
+    ├── kotlin-stdlib-jdk8-1.6.20.jar
+    ├── libthrift-0.14.1.jar
+    ├── listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar
+    ├── lz4-java-1.8.0.jar
+    ├── netty-all-4.1.65.Final.jar
+    ├── netty-tcnative-boringssl-static-2.0.53.Final-linux-aarch_64.jar
+    ├── netty-tcnative-boringssl-static-2.0.53.Final-linux-x86_64.jar
+    ├── netty-tcnative-boringssl-static-2.0.53.Final-osx-aarch_64.jar
+    ├── netty-tcnative-boringssl-static-2.0.53.Final-osx-x86_64.jar
+    ├── netty-tcnative-boringssl-static-2.0.53.Final-windows-x86_64.jar
+    ├── netty-tcnative-boringssl-static-2.0.53.Final.jar
+    ├── netty-tcnative-classes-2.0.53.Final.jar
+    ├── okhttp-4.11.0.jar
+    ├── okio-3.2.0.jar
+    ├── okio-jvm-3.0.0.jar
+    ├── openmessaging-api-0.3.1-alpha.jar
+    ├── opentelemetry-api-1.26.0.jar
+    ├── opentelemetry-api-events-1.26.0-alpha.jar
+    ├── opentelemetry-api-logs-1.26.0-alpha.jar
+    ├── opentelemetry-context-1.26.0.jar
+    ├── opentelemetry-exporter-common-1.26.0.jar
+    ├── opentelemetry-exporter-logging-1.26.0.jar
+    ├── opentelemetry-exporter-otlp-1.26.0.jar
+    ├── opentelemetry-exporter-otlp-common-1.26.0.jar
+    ├── opentelemetry-exporter-prometheus-1.26.0-alpha.jar
+    ├── opentelemetry-extension-incubator-1.26.0-alpha.jar
+    ├── opentelemetry-sdk-1.26.0.jar
+    ├── opentelemetry-sdk-common-1.26.0.jar
+    ├── opentelemetry-sdk-extension-autoconfigure-spi-1.26.0.jar
+    ├── opentelemetry-sdk-logs-1.26.0-alpha.jar
+    ├── opentelemetry-sdk-metrics-1.26.0.jar
+    ├── opentelemetry-sdk-trace-1.26.0.jar
+    ├── opentelemetry-semconv-1.26.0-alpha.jar
+    ├── opentracing-noop-0.33.0.jar
+    ├── opentracing-tracerresolver-0.1.8.jar
+    ├── opentracing-util-0.33.0.jar
+    ├── perfmark-api-0.25.0.jar
+    ├── proto-google-common-protos-2.9.0.jar
+    ├── protobuf-java-3.20.1.jar
+    ├── protobuf-java-util-3.20.1.jar
+    ├── rocketmq-acl-5.1.3.jar
+    ├── rocketmq-broker-5.1.3.jar
+    ├── rocketmq-client-5.1.3.jar
+    ├── rocketmq-common-5.1.3.jar
+    ├── rocketmq-container-5.1.3.jar
+    ├── rocketmq-controller-5.1.3.jar
+    ├── rocketmq-example-5.1.3.jar
+    ├── rocketmq-filter-5.1.3.jar
+    ├── rocketmq-logback-classic-1.0.1.jar
+    ├── rocketmq-namesrv-5.1.3.jar
+    ├── rocketmq-openmessaging-5.1.3.jar
+    ├── rocketmq-proto-2.0.2.jar
+    ├── rocketmq-proxy-5.1.3.jar
+    ├── rocketmq-remoting-5.1.3.jar
+    ├── rocketmq-shaded-slf4j-api-bridge-1.0.0.jar
+    ├── rocketmq-slf4j-api-1.0.1.jar
+    ├── rocketmq-srvutil-5.1.3.jar
+    ├── rocketmq-store-5.1.3.jar
+    ├── rocketmq-tiered-store-5.1.3.jar
+    ├── rocketmq-tools-5.1.3.jar
+    ├── slf4j-api-2.0.3.jar
+    ├── snakeyaml-1.32.jar
+    ├── tomcat-annotations-api-8.5.46.jar
+    ├── tomcat-embed-core-8.5.46.jar
+    └── zstd-jni-1.5.2-2.jar
+```
 ### namesrv Setting
 ```properties
 rocketmqHome=/Users/aqi/Downloads/rocketmq-all-5.1.3-bin-release
@@ -69,7 +292,7 @@ disableCallbackExecutor=false
 disableNettyWorkerGroup=false
 ```
 
-### broker setting
+### broker Setting
 ```properties
 brokerConfigPath=
 rocketmqHome=/Users/aqi/Downloads/rocketmq-all-5.1.3-bin-release
@@ -350,7 +573,7 @@ flushDiskType=ASYNC_FLUSH
 syncFlushTimeout=5000
 putMessageTimeout=8000
 slaveTimeout=3000
-messageDelayLevel=1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
+messageDelayLevel=1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h # 延迟消息级别
 flushDelayOffsetInterval=10000
 cleanFileForciblyEnable=true
 warmMapedFileEnable=false
