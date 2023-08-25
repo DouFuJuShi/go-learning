@@ -14,7 +14,7 @@ RocketMQ 5.X https://github.com/apache/rocketmq-clients/golang
 
 ## Installtion
 ### namesrv Setting
-```property
+```properties
 rocketmqHome=/Users/aqi/Downloads/rocketmq-all-5.1.3-bin-release
 kvConfigPath=/Users/aqi/namesrv/kvConfig.json
 configStorePath=/Users/aqi/namesrv/namesrv.properties
