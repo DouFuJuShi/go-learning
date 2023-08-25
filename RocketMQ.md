@@ -16,6 +16,10 @@ RocketMQ 5.X https://github.com/apache/rocketmq-clients/golang
 
 
 ### Proxy Setting
+
+Config Path: /path/to/rocketmq-all-5.1.3-bin-release/conf/rmq-proxy.json   
+
+
 ```json
 {
   "rocketMQClusterName": "orderCluster",
@@ -24,6 +28,8 @@ RocketMQ 5.X https://github.com/apache/rocketmq-clients/golang
   "remotingListenPort": 8080
 }
 ```
+
+
 - rocketMQClusterName 设置集群名
 - namesrvAddr 设置namesrv地址
 - grpcServerPort 设置GRPC监听端口并开启GRPC协议
