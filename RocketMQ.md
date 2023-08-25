@@ -10,4 +10,15 @@ https://github.com/apache/rocketmq
 https://github.com/apache/rocketmq-client-go
 
 
-## installtion
+## Installtion
+
+
+### Proxy 开启 gprc
+```json
+{
+  "rocketMQClusterName": "orderCluster",
+  "namesrvAddr": "127.0.0.1:9000;127.0.0.1:9001;127.0.0.1:9002",
+  "grpcServerPort": 8081,
+  "remotingListenPort": 8080
+}
+```
