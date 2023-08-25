@@ -19,7 +19,7 @@ RocketMQ 5.X https://github.com/apache/rocketmq-clients/golang
 ```json
 {
   "rocketMQClusterName": "orderCluster",
-  "namesrvAddr": "127.0.0.1:9000;127.0.0.1:9001;127.0.0.1:9002",
+  "namesrvAddr": "127.0.0.1:19876;127.0.0.1:29876;127.0.0.1:39876",
   "grpcServerPort": 8081, 
   "remotingListenPort": 8080
 }
