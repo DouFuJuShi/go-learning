@@ -59,6 +59,8 @@ seata-go https://github.com/seata/seata-go
 ## Distribute Lock
 redsync https://github.com/go-redsync/redsync
 
+redislock https://github.com/bsm/redislock
+
 ## Redis 
 go-redis https://github.com/redis/go-redis
 
