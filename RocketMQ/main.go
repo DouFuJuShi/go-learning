@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/apache/rocketmq-client-go/v2"
 	"github.com/apache/rocketmq-client-go/v2/primitive"
 	"github.com/apache/rocketmq-client-go/v2/producer"
-	"os"
-	"time"
 )
 
 // 积分服务使用
@@ -22,6 +23,7 @@ func (o *OtherListener) ExecuteLocalTransaction(message *primitive.Message) prim
 }
 func (o *OtherListener) CheckLocalTransaction(ext *primitive.MessageExt) primitive.LocalTransactionState {
 	// 注意，rocketmq回调时，不会调用到这里，只会调用到上一层的 Listener 里的 CheckLocalTransaction 方法
+	fmt.Println("OtherListener:CheckLocalTransaction")
 	return primitive.CommitMessageState
 }
 
@@ -34,6 +36,7 @@ func (l *Listener) ExecuteLocalTransaction(message *primitive.Message) primitive
 	p, err := rocketmq.NewTransactionProducer(
 		&o,
 		producer.WithNameServer([]string{"127.0.0.1:9876"}),
+		producer.WithGroupName("transaction_jifen"),
 	)
 	if err != nil {
 		panic(err)
@@ -44,7 +47,7 @@ func (l *Listener) ExecuteLocalTransaction(message *primitive.Message) primitive
 		os.Exit(1)
 	}
 	// 注意，这里不能使用 p.Shutdown()
-	//这会导致所有都与borker的连接关闭，引发很多问题
+	// 这会导致所有都与borker的连接关闭，引发很多问题
 	// 外层的不是同一个producer也会被影响到
 	msg := &primitive.Message{
 		Topic: "transTopicJifen",
@@ -72,6 +75,7 @@ func main() {
 	p, err := rocketmq.NewTransactionProducer(
 		&l,
 		producer.WithNameServer([]string{"127.0.0.1:9876"}),
+		producer.WithGroupName("`transaction_kucun`"),
 	)
 	if err != nil {
 		panic(err)
@@ -89,7 +93,7 @@ func main() {
 	}
 	msg := &primitive.Message{
 		Topic: "transTopic",
-		Body:  []byte("kucun!"),
+		Body:  []byte("sttock!"),
 	}
 	// 1. SendMessageInTransaction 阻塞，然后执行 ExecuteLocalTransaction
 	// 2. ExecuteLocalTransaction 执行结束后 SendMessageInTransaction 解除阻塞
