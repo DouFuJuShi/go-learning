@@ -67,8 +67,9 @@ go-redis https://github.com/redis/go-redis
 disque https://github.com/antirez/disque
 
 ## Kafka
-sarama  https://github.com/Shopify/sarama
+sarama  https://github.com/Shopify/sarama    
 
+confluent-kafka-go https://github.com/confluentinc/confluent-kafka-go
 
 ## HTTP
 
