@@ -7,6 +7,8 @@ Uber Style Guide https://github.com/uber-go/guide
 
 Standard Go Project Layout https://github.com/golang-standards/project-layout/blob/master/README_zh.md
 
+## Design Pattern
+golang-design-pattern https://github.com/senghoo/golang-design-pattern   
 
 ## Go profiler
 go-profiler-notes https://github.com/DataDog/go-profiler-notes    
