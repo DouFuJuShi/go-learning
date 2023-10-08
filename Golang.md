@@ -141,6 +141,12 @@ singleflight https://golang.org/x/sync/singleflight
 ## Captcha
 base64Captcha https://github.com/mojocn/base64Captcha
 
+## HTTP benchmarking tool
+
+wrk https://github.com/wg/wrk    
+
+hey https://github.com/rakyll/hey     
+
 ## other
 Pay https://github.com/go-pay/gopay     
 
