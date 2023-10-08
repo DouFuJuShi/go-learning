@@ -37,7 +37,9 @@ dig https://github.com/uber-go/dig
 
 grpc-go https://github.com/grpc/grpc-go    
 
-gRPCurl https://github.com/fullstorydev/grpcurl
+gRPCurl https://github.com/fullstorydev/grpcurl     
+
+evans https://github.com/ktr0731/evans
 
 go-grpc-middleware https://github.com/grpc-ecosystem/go-grpc-middleware
 
