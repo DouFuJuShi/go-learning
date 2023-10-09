@@ -47,7 +47,11 @@ grpc-gateway https://github.com/grpc-ecosystem/grpc-gateway
 
 ## Protobuff
 
-googleapis https://github.com/googleapis/googleapis    
+googleapis https://github.com/googleapis/googleapis     
+
+data-plane-api https://github.com/envoyproxy/data-plane-api
+
+istio-api https://github.com/istio/api      
 
 
 ## Database Tools
