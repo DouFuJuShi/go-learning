@@ -151,6 +151,11 @@ wrk https://github.com/wg/wrk
 
 hey https://github.com/rakyll/hey     
 
+## Better structured concurrency for go
+
+conc https://github.com/sourcegraph/conc   
+
+
 ## other
 Pay https://github.com/go-pay/gopay     
 
