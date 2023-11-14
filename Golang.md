@@ -172,7 +172,7 @@ sonyflake[Twitter's Snowflake] https://github.com/sony/sonyflake
 go.uuid https://github.com/satori/go.uuid
 
 
-### code generate
+### Code Generate
 jennifer https://github.com/dave/jennifer
 
 dst https://github.com/dave/dst
