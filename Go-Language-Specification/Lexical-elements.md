@@ -192,7 +192,7 @@ imaginary_lit = (decimal_digits | int_lit | float_lit) "i" .
 0x1p-2i       // == 0x1p-2 * 1i == 0.25i
 ```
 
-## Rune字面量
+## Rune字面量 Rune Literals
 
 rune 字面量表示 rune 常量([rune constant](https://go.dev/ref/spec#Constants))，即标识 Unicode 代码点的整数值。符文文字表示为用单引号括起来的一个或多个字符，如“x”或“\n”。引号内可以出现除换行符和未转义单引号之外的任何字符。单引号字符表示字符本身的 Unicode 值，而以反斜杠开头的多字符序列则以各种格式编码值。
 最简单的形式表示引号内的单个字符；由于 Go 源文本是以 UTF-8 编码的 Unicode 字符，因此多个 UTF-8 编码的字节可以表示单个整数值。例如，文字“a”保存一个字节，表示文字 a，Unicode U+0061，值 0x61，而“ä”保存两个字节 (0xc3 0xa4)，表示文字 a-分音符，U+00E4，值 0xe4。
@@ -252,7 +252,7 @@ escaped_char     = `\` ( "a" | "b" | "f" | "n" | "r" | "t" | "v" | `\` | "'" | `
 '\U00110000' // illegal: invalid Unicode code point
 ```
 
-## String字面量
+## String字面量 String Literals
 
 字符串字面量表示通过连接字符序列获得的字符串常量。有两种形式：原始字符串字面量和解释字符串字面量。
 
