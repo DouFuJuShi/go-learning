@@ -24,6 +24,8 @@ sysbench https://github.com/akopytov/sysbench
 optimizr_trace https://dev.mysql.com/doc/internals/en/tracing-example.html
 
 MySQL source https://github.com/mysql/mysql-server
+
+python-mysql-replication https://github.com/julien-duponchelle/python-mysql-replication
   
 ## MySQL博客
 
