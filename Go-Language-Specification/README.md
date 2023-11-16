@@ -1,4 +1,4 @@
-基于个人理解的Go语言手册
+基于个人理解的Go语言编程规范
 
 [介绍 Introdution](Introdution.md)
 
