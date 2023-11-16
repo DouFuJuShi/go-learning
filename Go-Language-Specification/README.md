@@ -4,13 +4,13 @@ $基于个人理解的Go语言编程规范$
 
 **目录**
 
-[介绍 Introdution](Introdution.md)
+- [x] [介绍 Introdution](Introdution.md)
 
-[符号表示法 Notation](Notation.md)
+- [x] [符号表示法 Notation](Notation.md)
 
-[源代码表示 Source Code Representation](Source-code-representation.md)
+- [x] [源代码表示 Source Code Representation](Source-code-representation.md)
 
-[语法元素 Lexical elements](Lexical-elements.md)
+- [x] [语法元素 Lexical elements](Lexical-elements.md)
 
 [常量 Contants](Constants.md)
 
