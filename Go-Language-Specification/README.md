@@ -12,9 +12,9 @@ $Go语言编程规范$<sub>---基于个人理解翻译</sub>
 
 - [x] [语法元素 Lexical elements](Lexical-elements.md)
 
-- [ ] [常量 Contants](Constants.md)
+- [x] [常量 Contants](Constants.md)
 
-- [ ] [变量 Variables](Variables.md)
+- [x] [变量 Variables](Variables.md)
 
 - [ ] [类型 Types](Types.md)
 
