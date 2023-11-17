@@ -37,11 +37,11 @@ Go 使用块进行词法作用域：
 
 标签由带标签的语句( [labeled statements](https://go.dev/ref/spec#Labeled_statements))声明，并用在“break”、“continue”和“goto”语句中。定义从未使用过的标签是非法的。与其他标识符相比，标签不是块作用域的，并且不会与非标签的标识符发生冲突。标签的作用域是声明它的函数体，不包括任何嵌套函数的体。
 
-### 空白标识符 Blank identifier
+## 空白标识符 Blank identifier
 
 空白标识符由下划线字符 _ 表示。它用作匿名占位符，而不是常规（非空白）标识符，并且在声明、操作数和赋值语句中具有特殊含义。
 
-### 预声明标识符 Predeclared identifiers
+## 预声明标识符 Predeclared identifiers
 
 以下标识符在 Universe 块([universe block](https://go.dev/ref/spec#Blocks))中隐式声明：
 
@@ -63,7 +63,7 @@ Functions:
     make max min new panic print println real recover
 ```
 
-### 导出标识符 Exported identifiers
+## 导出标识符 Exported identifiers
 
 一个标识符可以导出，以便在另一个包中访问。如果同时具备以下条件，则标识符被导出：
 
@@ -73,11 +73,11 @@ Functions:
 
 其他标识符不会导出。
 
-### 标识符的唯一性 Uniqueness of identifiers
+## 标识符的唯一性 Uniqueness of identifiers
 
 在一组标识符中，如果一个标识符与其他标识符都不同，那么这个标识符就被称为唯一标识符。如果两个标识符的拼写不同，或者出现在不同的软件包中且没有导出，那么它们就是不同的。否则，它们就是相同的。
 
-### 常量定义 Constant declarations
+## 常量定义 Constant declarations
 
 常量声明将标识符列表（常量名称）绑定到常量表达式列表的值。标识符的数量必须等于表达式的数量，并且左边的第n个标识符绑定到右边第n个表达式的值。
 
@@ -158,7 +158,7 @@ const (
 
 最后一个示例利用了最后一个非空表达式列表的隐式重复。
 
-### 类型声明 Type declarations
+## 类型声明 Type declarations
 
 类型声明将标识符（即类型名）与类型绑定。类型声明有两种形式：别名声明和类型定义。
 
@@ -167,7 +167,7 @@ TypeDecl = "type" ( TypeSpec | "(" { TypeSpec ";" } ")" ) .
 TypeSpec = AliasDecl | TypeDef .
 ```
 
-#### 别名声明 Alias declarations
+### 别名声明 Alias declarations
 
 别名声明将标识符绑定到给定类型。
 
@@ -184,7 +184,7 @@ type (
 )
 ```
 
-#### 类型定义 Type definitions
+### 类型定义 Type definitions
 
 类型定义创建了一个新的、与众不同的类型，其底层类型和操作与给定类型相同，并绑定了一个标识符（类型名）。
 
@@ -280,7 +280,7 @@ func f[T any]() {
 func (l *List[T]) Len() int  { … }
 ```
 
-### 类型形参声明 Type parameter declarations
+## 类型形参声明 Type parameter declarations
 
 类型参数列表声明泛型函数或类型声明的类型参数。类型参数列表看起来像普通的函数参数列表([function parameter list](https://go.dev/ref/spec#Function_types))，只是类型参数名称必须全部存在并且列表用方括号而不是圆括号括起来。
 
@@ -323,7 +323,7 @@ type T5[P T4[P]] …                    //          T5 refers to T4
 type T6[P int] struct{ f *T6[P] }     // ok: reference to T6 is not in type parameter list
 ```
 
-#### 类型约束 Type constraints
+### 类型约束 Type constraints
 
 类型约束是一个接口，它定义了相应类型参数的允许类型参数集，并控制该类型参数值所支持的操作。
 
@@ -356,7 +356,7 @@ interface{ ~struct{ any } }  // type parameter only: does not implement comparab
 
 可比较的接口和（直接或间接）嵌入可比较的接口<mark>只能用作类型约束</mark>。它们不能是值或变量的类型，也不能是其他非接口类型的组件。
 
-#### 满足类型约束 Satisfying a type constraint
+### 满足类型约束 Satisfying a type constraint
 
 如果类型 T 是 类型约束接口 C 所定义类型集的元素，则类型参数 T 满足类型约束 C；即，如果 T 实现 C。作为例外，严格可比较类型约束也可以由可比较（不一定严格可比较）类型参数来满足。更确切地说：
 
@@ -381,7 +381,7 @@ interface{ m() }   interface{ comparable; m() }   // satisfied: interface{ m() }
 
 由于约束满足规则中的例外，比较类型参数类型的操作数可能会在运行时出现恐慌（即使可比较的类型参数始终是严格可比较的）。
 
-### 变量声明 Variable declarations
+## 变量声明 Variable declarations
 
 变量声明创建一个或多个变量，将相应的标识符绑定到它们，并为每个变量赋予一个类型和一个初始值。
 
@@ -415,7 +415,7 @@ var n = nil            // illegal
 
 实现限制：<mark>如果从未使用过变量，则编译器可能会认为在函数体内声明该变量是非法的。</mark>
 
-### 简短变量声明 Short variable declarations
+## 简短变量声明 Short variable declarations
 
 简短的变量声明使用以下语法：
 
@@ -447,7 +447,7 @@ x, y, x := 1, 2, 3                        // illegal: x repeated on left side of
 
 短变量声明只能出现在函数内部。在某些上下文中，例如“if”、“for”或“switch”语句的初始值设定项，它们可用于声明局部临时变量。
 
-### 函数声明 Function declarations
+## 函数声明 Function declarations
 
 函数声明将一个标识符（即函数名）绑定到一个函数上。
 
@@ -487,7 +487,7 @@ func min[T ~int|~float64](x, y T) T {
 func flushICache(begin, end uintptr)  // implemented externally
 ```
 
-### 方法声明 Method declarations
+## 方法声明 Method declarations
 
 方法是带有接收器的函数。方法声明将一个标识符（即方法名）与方法绑定，并将方法与接收器的基本类型关联起来。
 

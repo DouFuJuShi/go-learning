@@ -1,8 +1,8 @@
-# $Go语言编程规范$<sub>---基于个人理解翻译</sub>
+# Go语言编程规范<sub>---基于个人理解翻译</sub>
 
 ---
 
-**目录**
+## 目录
 
 - [x] [介绍 Introdution](Introdution.md)
 
