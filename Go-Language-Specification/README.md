@@ -18,7 +18,7 @@ $Go语言编程规范$<sub>---基于个人理解翻译</sub>
 
 - [x] [类型 Types](Types.md)
 
-- [ ] [类型以及值的属性 Properties of types and values](Properties-of-types-and-values.md)
+- [x] [类型以及值的属性 Properties of types and values](Properties-of-types-and-values.md)
 
 - [x] [代码块 Blocks](Blocks.md)
 
