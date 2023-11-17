@@ -18,7 +18,7 @@
 
 - [x] [类型 Types](Types.md)
 
-- [x] [类型以及值的属性 Properties of types and values](Properties-of-types-and-values.md)
+- [x] [类型和值的属性 Properties of types and values](Properties-of-types-and-values.md)
 
 - [x] [代码块 Blocks](Blocks.md)
 
