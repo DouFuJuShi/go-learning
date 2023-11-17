@@ -16,11 +16,11 @@ $Go语言编程规范$<sub>---基于个人理解翻译</sub>
 
 - [x] [变量 Variables](Variables.md)
 
-- [ ] [类型 Types](Types.md)
+- [x] [类型 Types](Types.md)
 
 - [ ] [类型以及值的属性 Properties of types and values](Properties-of-types-and-values.md)
 
-- [ ] [代码块 Blocks](Blocks.md)
+- [x] [代码块 Blocks](Blocks.md)
 
 - [ ] [声明和范围 Declarations and scope](Declarations-and-scope.md)
 
