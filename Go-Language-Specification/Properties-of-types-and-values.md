@@ -201,7 +201,7 @@ x                   T           x is not representable by a value of T because
 1e1000              float64     1e1000 overflows to IEEE +Inf after rounding
 ```
 
-### 方法集 Method sets
+## 方法集 Method sets
 
 类型的方法集决定了可以对该类型的操作数调用的方法。每个类型都有一个与其关联的（可能是空的）方法集：
 
