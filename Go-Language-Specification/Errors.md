@@ -11,5 +11,5 @@ type error interface {
 这是表示错误条件的常规接口，nil 值表示无错误。例如，可以定义一个从文件中读取数据的函数：
 
 ```go
-
+func Read(f *File, b []byte) (n int, err error)
 ```
