@@ -28,7 +28,7 @@
 
 - [ ] [语句 Statements](Statements.md)
 
-- [ ] [内建函数 Built-in functions](builtin-functions.md)
+- [x] [内建函数 Built-in functions](builtin-functions.md)
 
 - [ ] [包 Packages](Packages.md)
 
