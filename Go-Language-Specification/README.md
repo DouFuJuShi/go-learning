@@ -22,7 +22,7 @@
 
 - [x] [代码块 Blocks](Blocks.md)
 
-- [ ] [声明和范围 Declarations and scope](Declarations-and-scope.md)
+- [x] [声明和范围 Declarations and scope](Declarations-and-scope.md)
 
 - [ ] [表达式 Expressions](Expressions.md)
 
