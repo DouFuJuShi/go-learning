@@ -30,9 +30,9 @@
 
 - [x] [内建函数 Built-in functions](builtin-functions.md)
 
-- [ ] [包 Packages](Packages.md)
+- [x] [包 Packages](Packages.md)
 
-- [ ] [程序的初始化和运行 Program initialization and execution](Program-initialization-and-execution.md)
+- [x] [程序的初始化和运行 Program initialization and execution](Program-initialization-and-execution.md)
 
 - [x] [错误 Errors](errors.md)
 
