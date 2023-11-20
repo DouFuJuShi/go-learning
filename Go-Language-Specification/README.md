@@ -38,6 +38,6 @@
 
 - [x] [运行时恐慌 Run-time panics](Runtime-panics.md)
 
-- [ ] [系统注意事项 System considerations](System-considerations.md)
+- [x] [系统注意事项 System considerations](System-considerations.md)
 
-- [ ] [附录 Appendix](Appendix.md)
+- [x] [附录 Appendix](Appendix.md)
