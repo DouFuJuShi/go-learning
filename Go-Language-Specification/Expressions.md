@@ -1,3 +1,7 @@
+---
+
+---
+
 # 表达式 Expressions
 
 表达式通过将运算符和函数应用于操作数来指定值的计算。
@@ -844,7 +848,657 @@ E ➞ int
 
 类型参数 Ak 可以是复合类型，包含其他绑定类型参数 Pk 作为元素类型（或者甚至只是另一个绑定类型参数）。在重复简化的过程中，每个类型参数中的绑定类型参数被替换为这些类型参数的相应类型参数，直到每个类型参数都没有绑定类型参数。
 
-
 如果类型参数通过绑定类型参数包含对自身的循环引用，则简化以及类型推断都会失败。否则，类型推断成功。
 
 ## 类型统一 Type unification
+
+类型推断通过类型统一来求解类型方程。类型统一递归地比较方程的 LHS 和 RHS 类型，其中一个或两个类型可以是或包含绑定类型参数，并查找这些类型参数的类型参数，以便 LHS 和 RHS 匹配（变得相同或赋值兼容，取决于上下文）。为此，类型推断维护了绑定类型参数到推断类型参数的映射；在类型统一期间会查阅和更新该地图。最初，绑定类型参数是已知的，但映射是空的。在类型统一期间，如果推断出新的类型参数 A，则从类型参数到参数的相应映射 P ➞ A 会添加到映射中。相反，在比较类型时，已知类型参数（已存在映射条目的类型参数）会取代其相应的类型参数。随着类型推断的进行，映射的填充量会越来越大，直到考虑了所有方程，或者直到统一失败。如果统一步骤没有失败并且映射具有每个类型参数的条目，则类型推断成功。
+
+例如，给定具有绑定类型参数 P 的类型方程
+
+    [10]struct{ elem P, list []P } ≡<sub>A</sub> [10]struct{ elem string; list []string }
+
+类型推断从空映射开始。统一首先比较LHS和RHS类型的顶层结构。两者都是相同长度的数组；如果元素类型统一，它们就会统一。两种元素类型都是结构体；如果它们具有相同数量、相同名称的字段并且字段类型统一，则它们是统一的。 P 的类型参数尚不清楚（没有映射条目），因此将 P 与字符串统一会将映射 P ➞ 字符串添加到映射中。统一列表字段的类型需要统一 []P 和 []string，从而统一 P 和 string。由于此时 P 的类型参数是已知的（P 有一个映射条目），因此它的类型参数 string 取代了 P。并且由于 string 与 string 相同，因此该统一步骤也成功。方程的 LHS 和 RHS 的统一现已完成。类型推断成功，因为只有一个类型方程，没有统一步骤失败，并且映射已完全填充。
+
+统一使用精确统一和松散统一的组合，具体取决于两种类型是否必须相同、分配兼容或仅在结构上相等。各个类型统一规则在附录中详细说明。
+
+对于 X ≡<sub>A</sub> Y 形式的方程，其中 X 和 Y 是赋值所涉及的类型（包括参数传递和返回语句），顶级类型结构可以松散地统一，但元素类型必须精确统一，以匹配赋值规则。
+
+对于  P ≡<sub>C</sub> C 形式的方程，其中 P 是类型参数，C 是其相应的约束，统一规则有点复杂：
+
+- 如果 C 具有核心类型 core(C) 并且 P 具有已知类型参数 A，则 core(C) 和 A 必须松散统一。如果 P 没有已知的类型参数，并且 C 恰好包含一个不是基础（波形符）类型的类型项 T，则统一会将映射 P ➞ T 添加到映射中。
+
+- 如果 C 没有核心类型并且 P 具有已知类型参数 A，则 A 必须具有 C 的所有方法（如果有），并且相应的方法类型必须完全统一。
+
+当根据类型约束求解类型方程时，求解一个方程可能会推断出其他类型参数，这反过来又可以求解依赖于这些类型参数的其他方程。只要推断出新类型参数，类型推断就会重复类型统一。
+
+## 操作符 Operators
+
+运算符将操作数组合成表达式。
+
+```ebnf
+Expression = UnaryExpr | Expression binary_op Expression .
+UnaryExpr  = PrimaryExpr | unary_op UnaryExpr .
+
+binary_op  = "||" | "&&" | rel_op | add_op | mul_op .
+rel_op     = "==" | "!=" | "<" | "<=" | ">" | ">=" .
+add_op     = "+" | "-" | "|" | "^" .
+mul_op     = "*" | "/" | "%" | "<<" | ">>" | "&" | "&^" .
+
+unary_op   = "+" | "-" | "!" | "^" | "*" | "&" | "<-" .
+```
+
+比较将在别处讨论。对于其他二元运算符，操作数类型必须相同，除非运算涉及移位或无类型常量。对于仅涉及常量的运算，请参阅有关常量表达式的部分。
+
+除移位操作外，如果一个操作数是无类型常量而另一个操作数不是，则该常量将隐式转换为另一个操作数的类型。
+
+移位表达式中的右操作数必须具有整数类型或者是可由 uint 类型值表示的无类型常量。如果非常量移位表达式的左操作数是无类型常量，则它首先会隐式转换为移位表达式仅由其左操作数替换时所假定的类型。
+
+```go
+var a [1024]byte
+var s uint = 33
+
+// The results of the following examples are given for 64-bit ints.
+var i = 1<<s                   // 1 has type int
+var j int32 = 1<<s             // 1 has type int32; j == 0
+var k = uint64(1<<s)           // 1 has type uint64; k == 1<<33
+var m int = 1.0<<s             // 1.0 has type int; m == 1<<33
+var n = 1.0<<s == j            // 1.0 has type int32; n == true
+var o = 1<<s == 2<<s           // 1 and 2 have type int; o == false
+var p = 1<<s == 1<<33          // 1 has type int; p == true
+var u = 1.0<<s                 // illegal: 1.0 has type float64, cannot shift
+var u1 = 1.0<<s != 0           // illegal: 1.0 has type float64, cannot shift
+var u2 = 1<<s != 1.0           // illegal: 1 has type float64, cannot shift
+var v1 float32 = 1<<s          // illegal: 1 has type float32, cannot shift
+var v2 = string(1<<s)          // illegal: 1 is converted to a string, cannot shift
+var w int64 = 1.0<<33          // 1.0<<33 is a constant shift expression; w == 1<<33
+var x = a[1.0<<s]              // panics: 1.0 has type int, but 1<<33 overflows array bounds
+var b = make([]byte, 1.0<<s)   // 1.0 has type int; len(b) == 1<<33
+
+// The results of the following examples are given for 32-bit ints,
+// which means the shifts will overflow.
+var mm int = 1.0<<s            // 1.0 has type int; mm == 0
+var oo = 1<<s == 2<<s          // 1 and 2 have type int; oo == true
+var pp = 1<<s == 1<<33         // illegal: 1 has type int, but 1<<33 overflows int
+var xx = a[1.0<<s]             // 1.0 has type int; xx == a[0]
+var bb = make([]byte, 1.0<<s)  // 1.0 has type int; len(bb) == 0
+```
+
+### 运算符优先级  Operator precedence
+
+二元运算符有五个优先级。乘法运算符绑定最强，其次是加法运算符、比较运算符、&&（逻辑与），最后是 || （逻辑或）：
+
+```go
+Precedence    Operator
+    5             *  /  %  <<  >>  &  &^
+    4             +  -  |  ^
+    3             ==  !=  <  <=  >  >=
+    2             &&
+    1             ||
+```
+
+相同优先级的二元运算符从左到右关联。例如，x / y * z 与 (x / y) * z 相同。
+
+```go
++x
+23 + 3*x[i]
+x <= f()
+^a >> b
+f() || g()
+x == y+1 && <-chanInt > 0
+```
+
+### 算术表达式 Arithmetic operators
+
+算术运算符适用于数值并产生与第一个操作数相同类型的结果。四个标准算术运算符（+、-、*、/）适用于整数、浮点和复数类型； + 也适用于字符串。按位逻辑运算符和移位运算符仅适用于整数。
+
+```go
++    sum                    integers, floats, complex values, strings
+-    difference             integers, floats, complex values
+*    product                integers, floats, complex values
+/    quotient               integers, floats, complex values
+%    remainder              integers
+
+&    bitwise AND            integers
+|    bitwise OR             integers
+^    bitwise XOR            integers
+&^   bit clear (AND NOT)    integers
+
+<<   left shift             integer << integer >= 0
+>>   right shift            integer >> integer >= 0
+```
+
+如果操作数类型是类型参数，则该运算符必须应用于该类型集中的每个类型。操作数表示为实例化类型参数的类型参数的值，并且使用该类型参数的精度来计算操作。例如，给定函数：
+
+```go
+func dotProduct[F ~float32|~float64](v1, v2 []F) F {
+    var s F
+    for i, x := range v1 {
+        y := v2[i]
+        s += x * y
+    }
+    return s
+}
+```
+
+乘积 x * y 和加法 s += x * y 分别以 float32 或 float64 精度计算，具体取决于 F 的类型参数。
+
+#### 整数运算符 Integer operators
+
+对于两个整数值 x 和 y，整数商 q = x / y 和余数 r = x % y 满足以下关系：
+
+```go
+x = q*y + r  and  |r| < |y|
+```
+
+x / y 被截断为零（“截断除法”）。
+
+```go
+ x     y     x / y     x % y
+ 5     3       1         2
+-5     3      -1        -2
+ 5    -3      -1         2
+-5    -3       1        -2
+```
+
+此规则的一个例外是，如果被除数 x 是 x 的 int 类型的最大负值，则由于补码整数溢出，商 q = x / -1 等于 x（且 r = 0）：
+
+```go
+                         x, q
+int8                     -128
+int16                  -32768
+int32             -2147483648
+int64    -9223372036854775808
+```
+
+如果除数是常数，则它不能为零。如果除数在运行时为零，则会发生运行时恐慌。如果被除数为非负且除数为 2 的常数幂，则除法可以用右移代替，余数的计算可以用按位 AND 运算代替：
+
+```go
+ x     x / 4     x % 4     x >> 2     x & 3
+ 11      2         3         2          3
+-11     -2        -3        -3          1
+```
+
+移位运算符将左操作数移位右操作数指定的移位计数，该计数必须为非负数。如果运行时班次计数为负，则会发生运行时恐慌。如果左操作数是有符号整数，则移位运算符实现算术移位；如果左操作数是无符号整数，则移位运算符实现逻辑移位。轮班数没有上限。移位的行为就像将左操作数移位 n 次，移位次数为 n。因此，x << 1 与 x*2 相同，x >> 1 与 x/2 相同，但朝负无穷大截断。
+
+对于整数操作数，一元运算符 +、- 和 ^ 定义如下：
+
+```go
++x                          is 0 + x
+-x    negation              is 0 - x
+^x    bitwise complement    is m ^ x  with m = "all bits set to 1" for unsigned x
+                                      and  m = -1 for signed x
+```
+
+#### 整形溢出 Integer overflow
+
+对于无符号整数值，+、-、* 和 << 运算以模 2n 计算，其中 n 是无符号整数类型的位宽度。宽松地说，这些无符号整数运算在溢出时会丢弃高位，并且程序可能依赖于“环绕”。
+
+对于有符号整数，运算 +、-、*、/ 和 << 可能合法溢出，并且结果值存在，并且由有符号整数表示、运算及其操作数确定性定义。溢出不会导致运行时恐慌。编译器可能不会在不发生溢出的假设下优化代码。例如，它可能不会假设 x < x + 1 始终为真。
+
+#### 浮点数操作符 Floating-point operators
+
+对于浮点数和复数，+x 与 x 相同，而 -x 是 x 的负数。浮点或复数除以零的结果未在 IEEE-754 标准之外指定；是否发生运行时恐慌是特定于实现的。
+实现可以将多个浮点运算组合成单个融合运算（可能跨语句），并产生与单独执行和舍入指令所获得的值不同的结果。显式浮点类型转换舍入到目标类型的精度，从而防止融合会丢弃该舍入。
+例如，某些架构提供“融合乘加”(FMA) 指令，用于计算 x*y + z，而不对中间结果 x*y 进行舍入。这些示例显示了 Go 实现何时可以使用该指令：
+
+```go
+// FMA allowed for computing r, because x*y is not explicitly rounded:
+r  = x*y + z
+r  = z;   r += x*y
+t  = x*y; r = t + z
+*p = x*y; r = *p + z
+r  = x*y + float64(z)
+
+// FMA disallowed for computing r, because it would omit rounding of x*y:
+r  = float64(x*y) + z
+r  = z; r += float64(x*y)
+t  = float64(x*y); r = t + z
+```
+
+#### 字符串连接 String concatenation
+
+字符串可以使用 + 操作符或 += 赋值操作符进行连接：
+
+```go
+s := "hi" + string(c)
+s += " and good bye"
+```
+
+字符串加法通过连接操作数创建一个新字符串。
+
+### 比较操作符 Comparison operators
+
+比较运算符比较两个操作数并产生一个无类型布尔值。
+
+```go
+==    equal
+!=    not equal
+<     less
+<=    less or equal
+>     greater
+>=    greater or equal
+```
+
+在任何比较中，第一个操作数必须可分配给第二个操作数的类型，反之亦然。
+
+相等运算符 == 和 != 适用于可比较类型的操作数。排序运算符 <、<=、> 和 >= 适用于有序类型的操作数。这些术语和比较结果定义如下：
+
+- 布尔类型是可比较的。如果两个布尔值都为 true 或同时为 false，则它们相等。
+
+- 整数类型是可比较且有序的。以通常的方式比较两个整数值。
+
+- 浮点类型是可比较的并且是有序的。按照 IEEE-754 标准的定义比较两个浮点值。
+
+- 复杂类型具有可比性。如果 real(u) == real(v) 且 imag(u) == imag(v)，则两个复数值 u 和 v 相等。
+
+- 字符串类型是可比较且有序的。两个字符串值按词法字节进行比较。
+
+- 指针类型是可比较的。如果两个指针值指向同一个变量或者两者的值为 nil，则它们相等。指向不同零大小变量的指针可能相等也可能不相等。
+
+- 通道类型具有可比性。如果两个通道值是通过同一个 make 调用创建的，或者两者的值均为 nil，则它们相等。
+
+- 非类型参数的接口类型是可比较的。如果两个接口值具有相同的动态类型和相等的动态值，或者两者的值均为 nil，则它们相等。
+
+- 如果类型 X 是可比较的并且 X 实现 T，则非接口类型 X 的值 x 和接口类型 T 的值 t 可以进行比较。如果 t 的动态类型与 X 相同并且 t 的动态值等于 x，则它们相等。
+
+- 如果结构体类型的所有字段类型都具有可比较性，则结构类型具有可比较性。如果两个结构体值对应的非空白字段值相等，则它们相等。字段按源顺序进行比较，一旦两个字段值不同（或所有字段都已比较），比较就会停止。
+
+- 如果数组元素类型具有可比较性，则数组类型具有可比较性。如果两个数组的对应元素值相等，则它们相等。元素按索引升序进行比较，一旦两个元素值不同（或所有元素都已比较），比较就会停止。
+
+- 如果类型参数严格可比较，则它们是可比较的（见下文）。
+
+如果该类型不可比较，则比较具有相同动态类型的两个接口值会导致运行时恐慌。此行为不仅适用于直接接口值比较，还适用于将接口值数组或结构与接口值字段进行比较。
+
+<mark>切片、映射和函数类型不具有可比性</mark>。然而，作为特殊情况，切片、映射或函数值可以与预先声明的标识符 nil 进行比较。还允许将指针、通道和接口值与 nil 进行比较，并且遵循上述一般规则。
+
+```go
+const c = 3 < 4            // c is the untyped boolean constant true
+
+type MyBool bool
+var x, y int
+var (
+    // The result of a comparison is an untyped boolean.
+    // The usual assignment rules apply.
+    b3        = x == y // b3 has type bool
+    b4 bool   = x == y // b4 has type bool
+    b5 MyBool = x == y // b5 has type MyBool
+)
+```
+
+如果类型是可比较的并且不是接口类型也不是由接口类型组成的，则该类型是严格可比较的。具体来说：
+
+- 布尔、数字、字符串、指针和通道类型是严格可比较的。
+
+- 如果结构体类型的所有字段类型都严格可比较，则结构类型也严格可比较。
+
+- 如果数组元素类型是严格可比较的，则数组类型是严格可比较的。
+
+- 如果类型集中的所有类型都是严格可比较的，则类型参数是严格可比较的。
+
+### 逻辑操作符 Logical operators
+
+逻辑运算符适用于布尔值并产生与操作数相同类型的结果。有条件地评估正确的操作数。
+
+```go
+&&    conditional AND    p && q  is  "if p then q else false"
+||    conditional OR     p || q  is  "if p then true else q"
+!     NOT                !p      is  "not p"
+```
+
+### 地址操作符 Address operators
+
+对于 T 类型的操作数 x，地址运算 &x 生成一个指向 x 的 *T 类型的指针。操作数必须是可寻址的，即变量、指针间接或切片索引操作；或可寻址结构操作数的字段选择器；或可寻址数组的数组索引操作。作为可寻址性要求的一个例外，x 也可以是（可能带括号的）复合文字。如果 x 的计算会导致运行时恐慌，那么 &x 的计算也会导致运行时恐慌。
+
+对于指针类型 *T 的操作数 x，指针间接寻址 *x 表示 x 指向的类型 T 的变量。如果 x 为零，则尝试计算 *x 将导致运行时恐慌。
+
+```go
+&x
+&a[f(2)]
+&Point{2, 3}
+*p
+*pf(x)
+
+var x *int = nil
+*x   // causes a run-time panic
+&*x  // causes a run-time panic
+```
+
+### 接收操作符 Receive operator
+
+对于核心类型为通道的操作数ch，接收操作<-ch的值是从通道ch接收的值。通道方向必须允许接收操作，并且接收操作的类型是通道的元素类型。该表达式会阻塞，直到有值可用为止。从零通道接收永远阻塞。关闭通道上的接收操作始终可以立即进行，在收到任何先前发送的值后生成元素类型的零值。
+
+```go
+v1 := <-ch
+v2 = <-ch
+f(<-ch)
+<-strobe  // wait until clock pulse and discard received value
+```
+
+用于赋值语句或特殊形式初始化的接收表达式
+
+```go
+x, ok = <-ch
+x, ok := <-ch
+var x, ok = <-ch
+var x, ok T = <-ch
+```
+
+产生一个额外的无类型布尔结果，报告通信是否成功。如果接收到的值是通过成功的发送操作传递到通道的，则 ok 的值为 true；如果由于通道关闭且为空而生成零值，则 ok 的值为 false。
+
+### 类型转换 Conversions
+
+转换将表达式的类型更改为转换指定的类型。转换可能按字面意思出现在源中，也可能由表达式出现的上下文暗示。
+
+显式转换是 T(x) 形式的表达式，其中 T 是类型，x 是可以转换为类型 T 的表达式。
+
+```go
+Conversion = Type "(" Expression [ "," ] ")" .
+```
+
+如果类型以运算符 * 或 <- 开头，或者如果类型以关键字 func 开头并且没有结果列表，则必须在必要时使用括号以避免歧义：
+
+```go
+*Point(p)        // same as *(Point(p))
+(*Point)(p)      // p is converted to *Point
+<-chan int(c)    // same as <-(chan int(c))
+(<-chan int)(c)  // c is converted to <-chan int
+func()(x)        // function signature func() x
+(func())(x)      // x is converted to func()
+(func() int)(x)  // x is converted to func() int
+func() int(x)    // x is converted to func() int (unambiguous)
+```
+
+如果 x 可由 T 的值表示，则常量值 x 可以转换为类型 T。作为特殊情况，可以使用与非常量 x 相同的规则将整数常量 x 显式转换为字符串类型。
+
+将常量转换为非类型参数的类型会生成类型化常量。
+
+```go
+uint(iota)               // iota value of type uint
+float32(2.718281828)     // 2.718281828 of type float32
+complex128(1)            // 1.0 + 0.0i of type complex128
+float32(0.49999999)      // 0.5 of type float32
+float64(-1e-1000)        // 0.0 of type float64
+string('x')              // "x" of type string
+string(0x266c)           // "♬" of type string
+myString("foo" + "bar")  // "foobar" of type myString
+string([]byte{'a'})      // not a constant: []byte{'a'} is not a constant
+(*int)(nil)              // not a constant: nil is not a constant, *int is not a boolean, numeric, or string type
+int(1.2)                 // illegal: 1.2 cannot be represented as an int
+string(65.0)             // illegal: 65.0 is not an integer constant
+```
+
+将常量转换为类型参数会生成该类型的非常量值，该值表示为实例化该类型参数所用的类型参数的值。例如，给定函数：
+
+```go
+func f[P ~float32|~float64]() {
+    … P(1.1) …
+}
+```
+
+转换 P(1.1) 会产生 P 类型的非常量值，并且值 1.1 表示为 float32 或 float64，具体取决于 f 的类型参数。因此，如果使用 float32 类型实例化 f，则将以与相应的非常量 float32 加法相同的精度计算表达式 P(1.1) + 1.2 的数值。
+
+在以下任何情况下，非常量值 x 都可以转换为类型 T：
+
+- x 可分配 [assignable](https://go.dev/ref/spec#Assignability) T。
+
+- 忽略结构标记（见下文），x 的类型和 T 不是类型参数[type parameters](https://go.dev/ref/spec#Type_parameter_declarations)，但具有相同的基础类型 [identical](https://go.dev/ref/spec#Type_identity) [underlying types](https://go.dev/ref/spec#Underlying_types).。
+
+- 忽略结构体标记（见下文），x 的类型和 T 是非命名类型的指针类型，并且它们的指针基类型不是类型参数，但具有相同的基础类型。
+
+- x的类型和T都是整数或浮点类型。
+
+- x 的类型和 T 都是复杂类型。
+
+- x 是整数或字节或符文切片，T 是字符串类型。
+
+- x 是一个字符串，T 是一个字节或符文切片。
+
+- x 是切片，T 是数组或指向数组的指针，切片和数组类型具有相同的元素类型。
+
+此外，如果 T 或 x 的类型 V 是类型参数，并且满足以下条件之一，则 x 也可以转换为类型 T：
+
+- V和T都是类型参数，V的类型集中的每种类型的值都可以转换为T的类型集中的每种类型。
+
+- 只有 V 是类型参数，V 类型集中的每个类型的值都可以转换为 T。
+
+- 只有 T 是类型参数，x 可以转换为 T 类型集中的每种类型。
+
+出于转换目的比较结构类型的标识时，结构标签[Struct tags](https://go.dev/ref/spec#Struct_types)将被忽略：
+
+```go
+type Person struct {
+    Name    string
+    Address *struct {
+        Street string
+        City   string
+    }
+}
+
+var data *struct {
+    Name    string `json:"name"`
+    Address *struct {
+        Street string `json:"street"`
+        City   string `json:"city"`
+    } `json:"address"`
+}
+
+var person = (*Person)(data)  // ignoring tags, the underlying types are identical
+```
+
+特定规则适用于数字类型之间或字符串类型之间的（非常量）转换。这些转换可能会改变 x 的表示形式并产生运行时成本。所有其他转换仅更改类型，但不更改 x 的表示形式。
+
+没有语言机制可以在指针和整数之间进行转换。 unsafe 包在受限情况下实现了此功能。
+
+#### 数值类型之间的转换 Conversions between numeric types
+
+对于非常量数值的转换，适用以下规则：
+
+1. 整数类型之间转换时，如果值为有符号整数，则符号扩展为隐式无限精度；否则为零扩展。然后它被截断以适合结果类型的大小。例如，如果 v := uint16(0x10F0)，则 uint32(int8(v)) == 0xFFFFFFF0。转换始终产生有效值；没有溢出的迹象。
+
+2. 将浮点数转换为整数时，小数部分将被丢弃（向零截断）。
+
+3. 将整数或浮点数转换为浮点类型，或将复数转换为另一种复数类型时，结果值将四舍五入为目标类型指定的精度。例如，float32 类型的变量 x 的值可以使用超出 IEEE-754 32 位数字的附加精度来存储，但 float32(x) 表示将 x 的值舍入到 32 位精度的结果。同样，x + 0.1 可以使用超过 32 位的精度，但 float32(x + 0.1) 则不会。
+
+在所有涉及浮点数或复数值的非常数转换中，如果结果类型不能表示该值，则转换成功，但结果值取决于执行情况。
+
+#### 字符串与其他类型的转换 Conversions to and from a string type
+
+1. 将字节切片转换为字符串类型会生成一个字符串，其连续字节是该切片的元素。
+   
+   ```go
+   string([]byte{'h', 'e', 'l', 'l', '\xc3', '\xb8'})   // "hellø"
+   string([]byte{})                                     // ""
+   string([]byte(nil))                                  // ""
+   
+   type bytes []byte
+   string(bytes{'h', 'e', 'l', 'l', '\xc3', '\xb8'})    // "hellø"
+   
+   type myByte byte
+   string([]myByte{'w', 'o', 'r', 'l', 'd', '!'})       // "world!"
+   myString([]myByte{'\xf0', '\x9f', '\x8c', '\x8d'})   // "🌍"
+   ```
+
+2. 将符文切片转换为字符串类型会生成一个字符串，该字符串是转换为字符串的各个符文值的串联。
+   
+   ```go
+   string([]rune{0x767d, 0x9d6c, 0x7fd4})   // "\u767d\u9d6c\u7fd4" == "白鵬翔"
+   string([]rune{})                         // ""
+   string([]rune(nil))                      // ""
+   
+   type runes []rune
+   string(runes{0x767d, 0x9d6c, 0x7fd4})    // "\u767d\u9d6c\u7fd4" == "白鵬翔"
+   
+   type myRune rune
+   string([]myRune{0x266b, 0x266c})         // "\u266b\u266c" == "♫♬"
+   myString([]myRune{0x1f30e})              // "\U0001f30e" == "🌎"
+   ```
+
+3. 将字符串类型的值转换为字节类型的切片会生成一个切片，其连续元素是字符串的字节。
+   
+   ```go
+   []byte("hellø")             // []byte{'h', 'e', 'l', 'l', '\xc3', '\xb8'}
+   []byte("")                  // []byte{}
+   
+   bytes("hellø")              // []byte{'h', 'e', 'l', 'l', '\xc3', '\xb8'}
+   
+   []myByte("world!")          // []myByte{'w', 'o', 'r', 'l', 'd', '!'}
+   []myByte(myString("🌏"))    // []myByte{'\xf0', '\x9f', '\x8c', '\x8f'}
+   ```
+
+4. 将字符串类型的值转换为 runes 类型的切片会生成一个包含字符串的各个 Unicode 代码点的切片。
+   
+   ```go
+   []rune(myString("白鵬翔"))   // []rune{0x767d, 0x9d6c, 0x7fd4}
+   []rune("")                  // []rune{}
+   
+   runes("白鵬翔")              // []rune{0x767d, 0x9d6c, 0x7fd4}
+   
+   []myRune("♫♬")              // []myRune{0x266b, 0x266c}
+   []myRune(myString("🌐"))    // []myRune{0x1f310}
+   ```
+
+5. 最后，由于历史原因，整数值可能会转换为字符串类型。这种形式的转换生成一个字符串，其中包含具有给定整数值的 Unicode 代码点的（可能是多字节）UTF-8 表示形式。有效 Unicode 代码点范围之外的值将转换为“\uFFFD”。
+   
+   ```go
+   string('a')          // "a"
+   string(65)           // "A"
+   string('\xf8')       // "\u00f8" == "ø" == "\xc3\xb8"
+   string(-1)           // "\ufffd" == "\xef\xbf\xbd"
+   
+   type myString string
+   myString('\u65e5')   // "\u65e5" == "日" == "\xe6\x97\xa5"
+   ```
+
+注意：这种形式的转换最终可能会从语言中删除。 go vet 工具将某些整数到字符串的转换标记为潜在错误。应改用 utf8.AppendRune 或 utf8.EncodeRune 等库函数。
+
+#### 从切片到数组或数组指针的转换 Conversions from slice to array or array pointer
+
+将切片转换为数组会生成一个包含切片基础数组元素的数组。类似地，将切片转换为数组指针会生成指向切片底层数组的指针。在这两种情况下，如果切片的长度小于数组的长度，则会发生运行时恐慌。
+
+```go
+s := make([]byte, 2, 4)
+
+a0 := [0]byte(s)
+a1 := [1]byte(s[1:])     // a1[0] == s[1]
+a2 := [2]byte(s)         // a2[0] == s[0]
+a4 := [4]byte(s)         // panics: len([4]byte) > len(s)
+
+s0 := (*[0]byte)(s)      // s0 != nil
+s1 := (*[1]byte)(s[1:])  // &s1[0] == &s[1]
+s2 := (*[2]byte)(s)      // &s2[0] == &s[0]
+s4 := (*[4]byte)(s)      // panics: len([4]byte) > len(s)
+
+var t []string
+t0 := [0]string(t)       // ok for nil slice t
+t1 := (*[0]string)(t)    // t1 == nil
+t2 := (*[1]string)(t)    // panics: len([1]string) > len(t)
+
+u := make([]byte, 0)
+u0 := (*[0]byte)(u)      // u0 != nil
+```
+
+## 常量表达式 Constant expressions
+
+常量表达式只能包含常量操作数，并在编译时求值。
+只要使用布尔、数字或字符串类型的操作数是合法的，无类型布尔、数字和字符串常量就可以分别用作操作数。
+常量比较总是会产生无类型布尔常量。如果常量移位表达式的左操作数是无类型常量，则结果是整型常量；否则它是与左操作数相同类型的常量，必须是整数类型。
+对无类型常量的任何其他操作都会产生同类的无类型常量；即布尔、整数、浮点、复数或字符串常量。如果二元运算（移位除外）的无类型操作数属于不同类型，则结果是此列表后面出现的操作数类型：整数、符文、浮点、复数。例如，无类型整型常量除以无类型复数常量会产生无类型复数常量。
+
+```go
+const a = 2 + 3.0          // a == 5.0   (untyped floating-point constant)
+const b = 15 / 4           // b == 3     (untyped integer constant)
+const c = 15 / 4.0         // c == 3.75  (untyped floating-point constant)
+const Θ float64 = 3/2      // Θ == 1.0   (type float64, 3/2 is integer division)
+const Π float64 = 3/2.     // Π == 1.5   (type float64, 3/2. is float division)
+const d = 1 << 3.0         // d == 8     (untyped integer constant)
+const e = 1.0 << 3         // e == 8     (untyped integer constant)
+const f = int32(1) << 33   // illegal    (constant 8589934592 overflows int32)
+const g = float64(2) >> 1  // illegal    (float64(2) is a typed floating-point constant)
+const h = "foo" > "bar"    // h == true  (untyped boolean constant)
+const j = true             // j == true  (untyped boolean constant)
+const k = 'w' + 1          // k == 'x'   (untyped rune constant)
+const l = "hi"             // l == "hi"  (untyped string constant)
+const m = string(k)        // m == "x"   (type string)
+const Σ = 1 - 0.707i       //            (untyped complex constant)
+const Δ = Σ + 2.0e-4       //            (untyped complex constant)
+const Φ = iota*1i - 1/1i   //            (untyped complex constant)
+```
+
+将内置函数 complex 应用于无类型整数、符文或浮点常量会生成无类型复数常量。
+
+```go
+const ic = complex(0, c)   // ic == 3.75i  (untyped complex constant)
+const iΘ = complex(0, Θ)   // iΘ == 1i     (type complex128)
+```
+
+常量表达式总是被精确计算；中间值和常量本身可能需要比语言中任何预声明类型支持的精度大得多的精度。以下为法律声明：
+
+```go
+const Huge = 1 << 100         // Huge == 1267650600228229401496703205376  (untyped integer constant)
+const Four int8 = Huge >> 98  // Four == 4                                (type int8)
+```
+
+常量除法或余数运算的除数不得为零：
+
+```go
+3.14 / 0.0   // illegal: division by zero
+```
+
+类型常量的值必须始终可以由常量类型的值准确表示。以下常量表达式是非法的：
+
+```go
+uint(-1)     // -1 cannot be represented as a uint
+int(3.14)    // 3.14 cannot be represented as an int
+int64(Huge)  // 1267650600228229401496703205376 cannot be represented as an int64
+Four * 300   // operand 300 cannot be represented as an int8 (type of Four)
+Four * 100   // product 400 cannot be represented as an int8 (type of Four)
+```
+
+一元按位求补运算符 ^ 使用的掩码与非常量的规则匹配：对于无符号常量，掩码为全 1；对于有符号和无类型常量，掩码为全 1。
+
+```go
+^1         // untyped integer constant, equal to -2
+uint8(^1)  // illegal: same as uint8(-2), -2 cannot be represented as a uint8
+^uint8(1)  // typed uint8 constant, same as 0xFF ^ uint8(1) = uint8(0xFE)
+int8(^1)   // same as int8(-2)
+^int8(1)   // same as -1 ^ int8(1) = -2
+```
+
+实现限制：编译器在计算无类型浮点或复杂常量表达式时可以使用舍入；请参阅常量部分中的实现限制。这种舍入可能会导致浮点常量表达式在整数上下文中无效，即使在使用无限精度计算时它是整数，反之亦然。
+
+## 执行顺序 Order of evaluation
+
+在包级别，初始化依赖关系确定变量声明中各个初始化表达式的求值顺序。否则，在计算表达式、赋值或 return 语句的操作数时，所有函数调用、方法调用和通信操作都按词法从左到右的顺序进行计算。
+
+例如，在（函数局部）赋值中
+
+```go
+y[f()], ok = g(h(), i()+x[j()], <-c), k()
+```
+
+函数调用和通信按照 f()、h()、i()、j()、<-c、g() 和 k() 的顺序发生。然而，这些事件与 x 的评估和索引以及 y 的评估相比的顺序并未指定。
+
+```go
+a := 1
+f := func() int { a++; return a }
+x := []int{a, f()}            // x may be [1, 2] or [2, 2]: evaluation order between a and f() is not specified
+m := map[int]int{a: 1, a: 2}  // m may be {2: 1} or {2: 2}: evaluation order between the two map assignments is not specified
+n := map[int]int{a: f()}      // n may be {2: 3} or {3: 3}: evaluation order between the key and the value is not specified
+```
+
+在包级别，初始化依赖项会覆盖各个初始化表达式的从左到右规则，但不会覆盖每个表达式中的操作数：
+
+```go
+var a, b, c = f() + v(), g(), sqr(u()) + v()
+
+func f() int        { return c }
+func g() int        { return a }
+func sqr(x int) int { return x*x }
+
+// functions u and v are independent of all other variables and functions
+```
+
+函数调用按 u()、sqr()、v()、f()、v() 和 g() 的顺序发生。
+
+单个表达式中的浮点运算根据运算符的结合性进行计算。显式括号通过覆盖默认关联性来影响计算。在表达式 x + (y + z) 中，在添加 x 之前执行加法 y + z。

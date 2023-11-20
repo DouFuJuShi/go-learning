@@ -24,7 +24,7 @@
 
 - [x] [声明和范围 Declarations and scope](Declarations-and-scope.md)
 
-- [ ] [表达式 Expressions](Expressions.md)
+- [x] [表达式 Expressions](Expressions.md)
 
 - [x] [语句 Statements](Statements.md)
 
