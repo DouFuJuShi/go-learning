@@ -63,15 +63,15 @@ var a, b = f() // a and b are initialized together, before x is initialized
 
 ```go
 var (
-	a = c + b  // == 9
-	b = f()    // == 4
-	c = f()    // == 5
-	d = 3      // == 5 after initialization has finished
+    a = c + b  // == 9
+    b = f()    // == 4
+    c = f()    // == 5
+    d = 3      // == 5 after initialization has finished
 )
 
 func f() int {
-	d++
-	return d
+    d++
+    return d
 }
 ```
 

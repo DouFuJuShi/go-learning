@@ -26,7 +26,7 @@
 
 - [ ] [表达式 Expressions](Expressions.md)
 
-- [ ] [语句 Statements](Statements.md)
+- [x] [语句 Statements](Statements.md)
 
 - [x] [内建函数 Built-in functions](builtin-functions.md)
 
