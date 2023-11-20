@@ -723,3 +723,128 @@ Greeting("goodbye:", s...)
 ```
 
 在 Greeting 中，who 将具有与 s 相同的值，并具有相同的底层数组。
+
+## 范型函数和范型类型的的实力化 Instantiations
+
+泛型函数或类型是通过用类型实参替换类型形参来实例化的。实例化分两步进行：
+
+1. 每个类型参数都替换为泛型声明中其对应的类型参数。这种替换发生在整个函数或类型声明中，包括类型参数列表本身以及该列表中的任何类型。
+
+2. 替换后，每个类型参数必须满足相应类型参数的约束（如有必要，请实例化）。否则实例化失败。
+
+实例化一个类型会产生一个新的非泛型命名类型；实例化一个函数会产生一个新的非泛型函数。
+
+```go
+type parameter list    type arguments    after substitution
+
+[P any]                int               int satisfies any
+[S ~[]E, E any]        []int, int        []int satisfies ~[]int, int satisfies any
+[P io.Writer]          string            illegal: string doesn't satisfy io.Writer
+[P comparable]         any               any satisfies (but does not implement) comparable
+```
+
+使用泛型函数时，可以显式提供类型参数，也可以部分或完全从使用函数的上下文中推断出类型参数。如果函数可以推断出类型参数列表，则可以完全省略类型参数列表：
+
+- 用普通参数调用，
+
+- 分配给具有已知类型的变量
+
+- 作为参数传递给另一个函数，或者
+
+- 结果返回。
+
+在所有其他情况下，必须存在（可能是部分的）类型参数列表。如果类型参数列表不存在或不完整，则所有缺失的类型参数都必须可以从使用该函数的上下文中推断出来。
+
+```go
+// sum returns the sum (concatenation, for strings) of its arguments.
+func sum[T ~int | ~float64 | ~string](x... T) T { … }
+
+x := sum                       // illegal: the type of x is unknown
+intSum := sum[int]             // intSum has type func(x... int) int
+a := intSum(2, 3)              // a has value 5 of type int
+b := sum[float64](2.0, 3)      // b has value 5.0 of type float64
+c := sum(b, -1)                // c has value 4.0 of type float64
+
+type sumFunc func(x... string) string
+var f sumFunc = sum            // same as var f sumFunc = sum[string]
+f = sum                        // same as f = sum[string]
+```
+
+部分类型参数列表不能为空；至少必须存在第一个参数。该列表是类型参数完整列表的前缀，剩下的参数将被推断。宽松地说，类型参数可以从“从右到左”省略。
+
+```go
+func apply[S ~[]E, E any](s S, f func(E) E) S { … }
+
+f0 := apply[]                  // illegal: type argument list cannot be empty
+f1 := apply[[]int]             // type argument for S explicitly provided, type argument for E inferred
+f2 := apply[[]string, string]  // both type arguments explicitly provided
+
+var bytes []byte
+r := apply(bytes, func(byte) byte { … })  // both type arguments inferred from the function arguments
+```
+
+对于泛型类型，必须始终显式提供所有类型参数。
+
+## 类型推断 Type inference
+
+如果可以从使用函数的上下文（包括函数类型参数的约束）推断出某些或全部类型参数，则使用泛型函数可以省略这些类型参数。如果类型推断可以推断出缺失的类型参数，并且推断出的类型参数的实例化成功，则类型推断成功。否则，类型推断失败，程序无效。
+
+类型推断使用类型对之间的类型关系进行推断：例如，函数参数必须可分配给其各自的函数参数；这在参数类型和形参类型之间建立了关系。如果这两种类型中的任何一个包含类型参数，则类型推断会查找类型参数来替换类型参数，以满足可赋值关系。类似地，类型推断使用类型参数必须满足其各自类型参数的约束这一事实。
+
+每对这样的匹配类型对应于包含来自一个或可能多个泛型函数的一个或多个类型参数的类型方程。推断缺失的类型参数意味着求解相应类型参数的类型方程结果集。
+
+例如，给定
+
+```go
+// dedup returns a copy of the argument slice with any duplicate entries removed.
+func dedup[S ~[]E, E comparable](S) S { … }
+
+type Slice []int
+var s Slice
+s = dedup(s)   // same as s = dedup[Slice, int](s)
+```
+
+Slice 类型的变量 s 必须可分配给函数参数类型 S 才能使程序有效。为了降低复杂性，类型推断忽略了赋值的方向性，因此 Slice 和 S 之间的类型关系可以通过（对称）类型方程 Slice ≡A S（或 S ≡<sub>A</sub> Slice）来表达，其中 A 中的 ≡A 表示 LHS 和 RHS 类型必须根据可分配性规则匹配（有关详细信息，请参阅类型统一部分）。类似地，类型参数 S 必须满足其约束 ~[]E。这可以表示为 S ≡<sub>C</sub> ~[]E，其中 X ≡<sub>C</sub> Y 代表“X 满足约束 Y”。这些观察结果得出一组两个方程
+
+Slice ≡<sub>A</sub> S      (1)
+
+S     ≡<sub>C</sub> ~[]E   (2)
+
+现在可以求解类型参数 S 和 E。从 (1) 编译器可以推断出 S 的类型参数是 Slice。类似地，由于 Slice 的基础类型是 []int 并且 []int 必须与约束的 []E 匹配，因此编译器可以推断 E 必须是 int。因此，对于这两个方程，类型推断推断出
+
+S ➞ Slice
+
+E ➞ int
+
+给定一组类型方程，要求解的类型参数是需要实例化且未提供显式类型参数的函数的类型参数。这些类型参数称为绑定类型参数。例如，在上面的 dedup 示例中，类型参数 P 和 E 绑定到 dedup。通用函数调用的参数可以是通用函数本身。该函数的类型参数包含在绑定类型参数集中。函数参数的类型可以包含来自其他函数的类型参数（例如包含函数调用的泛型函数）。这些类型参数也可能出现在类型方程中，但它们不受该上下文的约束。类型方程始终仅针对绑定类型参数进行求解。
+
+类型推断支持泛型函数的调用以及将泛型函数分配给（显式函数类型）变量。这包括将泛型函数作为参数传递给其他（可能也是泛型）函数，以及返回泛型函数作为结果。类型推断对针对每种情况的一组方程进行操作。等式如下（为了清楚起见，省略了类型参数列表）：
+
+- 对于函数调用 f(a0, a1, …)，其中 f 或函数参数 ai 是泛型函数：
+  每对 (ai, pi) 相应的函数自变量和参数（其中 ai 不是无类型常量）都会生成方程 typeof(pi) ≡<sub>A</sub> typeof(ai)。
+  如果 ai 是无类型常量 cj，并且 typeof(pi) 是绑定类型参数 Pk，则 (cj, Pk) 对与类型方程分开收集。
+
+- 对于将泛型函数 f 的 v = f 赋值给函数类型的（非泛型）变量 v：`typeof(v) ≡A typeof(f)`.
+
+- 对于 return 语句 return …, f, … 其中 f 是作为结果返回到函数类型的（非泛型）结果变量 r 的泛型函​​数：`typeof(r) ≡A typeof(f)`.
+
+此外，每个类型参数 Pk 和相应的类型约束 Ck 都会产生类型方程 Pk ≡<sub>C</sub> Ck。
+
+在考虑非类型化常量之前，类型推断优先考虑从类型化操作数获取的类型信息。因此，推理分两个阶段进行：
+
+1. 使用类型统一来求解类型方程以获得绑定类型参数。如果统一失败，类型推断就会失败。
+
+2. 对于尚未推断出类型参数且收集了具有相同类型参数的一对或多对 (cj, Pk) 的每个绑定类型参数 Pk，以相同的方式确定所有这些对中常量 cj 的常量类型至于常量表达式。 Pk 的类型参数是确定的常量类型的默认类型。如果由于常量类型冲突而无法确定常量类型，则类型推断失败。
+
+如果在这两个阶段之后尚未找到所有类型参数，则类型推断将失败。
+
+如果这两个阶段都成功，则类型推断会为每个绑定类型形参确定类型实参：
+
+        Pk ➞ Ak
+
+类型参数 Ak 可以是复合类型，包含其他绑定类型参数 Pk 作为元素类型（或者甚至只是另一个绑定类型参数）。在重复简化的过程中，每个类型参数中的绑定类型参数被替换为这些类型参数的相应类型参数，直到每个类型参数都没有绑定类型参数。
+
+
+如果类型参数通过绑定类型参数包含对自身的循环引用，则简化以及类型推断都会失败。否则，类型推断成功。
+
+## 类型统一 Type unification
