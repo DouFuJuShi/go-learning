@@ -11,9 +11,9 @@ TypeLit   = ArrayType | StructType | PointerType | FunctionType | InterfaceType 
             SliceType | MapType | ChannelType .
 ```
 
-该语言预先声明了某些类型名称。其他的则通过类型声明([type declarations](https://go.dev/ref/spec#Type_declarations))或类型参数列表([type parameter lists](https://go.dev/ref/spec#Type_parameter_declarations))来引入。复合类型（数组、结构体、指针、函数、接口、切片、映射和通道类型）可以使用类型文字来构造。
+该语言预先声明了某些类型名称。其他的则通过类型声明([type declarations](https://go.dev/ref/spec#Type_declarations))或类型参数列表([type parameter lists](https://go.dev/ref/spec#Type_parameter_declarations))来引入。复合类型 <mark>*Composite types*</mark>（数组、结构体、指针、函数、接口、切片、映射和通道类型）可以使用类型文字<mark>*type literal*</mark>来构造。
 
-预声明类型、定义类型和类型参数称为命名类型(Named Types)。如果别名声明中给定的类型是命名类型，则别名表示命名类型。
+<mark>预声明类型、定义类型和类型参数称为命名类型(Named Types)。如果别名声明中给定的类型是命名类型，则别名表示命名类型。</mark>
 
 ## Boolean types
 

@@ -2,7 +2,7 @@
 
 ## 底层类型 Underlying types
 
-每个类型 T 都有一个底层类型( *underlying type*)：如果 T 是预声明的布尔、数字或字符串类型之一，或者类型字面量，则相应的底层类型是 T 本身。否则，T 的底层类型是 T 在其声明中引用的类型的底层类型。对于作为其类型约束( [type constraint](https://go.dev/ref/spec#Type_constraints))的底层类型的类型形参，它始终是一个接口。
+每个类型 T 都有一个底层类型( *underlying type*)：如果 T 是预声明的布尔、数字或字符串类型之一，或者类型字面量，则相应的底层类型是 T 本身。否则，T 的底层类型就是 声明T类型是所指(引用)类型的底层类型。对于作为其类型约束( [type constraint](https://go.dev/ref/spec#Type_constraints))的底层类型的类型形参，它始终是一个接口。
 
 ```go
 type (
@@ -78,7 +78,7 @@ interface{ ~[]byte | myString }           // bytestring
 
 ## 类型标识 Type identity
 
-<mark>两种类型要么相同，要么不同</mark>。<mark>[Named type](https://go.dev/ref/spec#Types)(预先声明的类型、定义的类型和类型参数称为命名类型。如果别名声明中给出的类型是命名类型，则别名表示命名类型。) 总是不同于其他任何类型。</mark>否则，如果两个类型的底层类型字面量结构相同，也即<mark>它们具有相同的字面结构并且相应组件也具有相同的类型</mark>，那么这两个类型就是相同的。详细说明：
+<mark>两种类型要么相同，要么不同</mark>。<mark>[Named type](https://go.dev/ref/spec#Types)(预先声明的类型、定义的类型和类型形参称为命名类型。如果别名声明中给出的类型是命名类型，则别名表示命名类型。) 总是不同于其他任何类型。</mark>否则，如果两个类型的底层类型字面量结构相同，也即<mark>它们具有相同的字面结构并且相应组件也具有相同的类型</mark>，那么这两个类型就是相同的。详细说明：
 
 - 如果两个数组类型具有<mark>相同的元素类型和相同的数组长度</mark>，则它们是相同的。
 
@@ -139,13 +139,21 @@ func(x int, y float64) *[]string, func(int, float64) (result *[]string), and A5
 
 B0 和 B1 是不同的，因为它们是由不同类型定义创建的新​​类型<sup>1</sup>； func(int, float64) *B0 和 func(x int, y float64) *[]string 不同，因为 B0 与 []string 不同<sup>2</sup>； P1和P2是不同的，因为它们是不同的类型参数<sup>3</sup>。 D0[int, string] 和 struct{ x int; y string } 是不同的，因为前者是实例化的定义类型，而后者是类型文字（但它们仍然是可赋值的）<sup>4</sup>。
 
+<mark>个人理解</mark>：
+
+1. 命名类型跟它自己一致
+
+2. 别名类型跟别名声明中引用的类型一致
+
+3. 非命名类型(复合类型字面量)参考上面的详细说明
+
 ## 可赋值性 Assignability
 
 如果满足以下条件之一，则 V 类型的值 x 可分配给 T 类型的变量（“x 可分配给 T”）：
 
-- V 和 T 类型相同。
+- V 和 T <mark>类型相同</mark>。
 
-- V 和 T 具有相同的底层类型，但不是类型形参，并且 V 或 T 中至少之一不是命名类型。
+- V 和 T <mark>具有相同的底层类型，但不是类型形参</mark>，<mark>并且 V 或 T 中至少一个不是命名类型</mark>。
 
 - V和T是具有相同元素类型的通道类型，V是双向通道，并且V或T中至少一个不是命名类型。
 
