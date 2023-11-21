@@ -112,3 +112,9 @@ func (T) ab() []int   { return []int{a, b} }
 ## 程序执行 Program execution
 
 一个完整的程序是通过将一个称为main包的未导入的包与它导入的所有包以传递方式链接起来创建的。主包必须具有包名称 main 并声明一个不带参数且不返回值的函数 main。
+
+```go
+func main() { … }
+```
+
+程序执行首先初始化程序，然后调用 main 包中的 main 函数。当该函数调用返回时，程序退出。它不会等待其他（非主）goroutine 完成。
