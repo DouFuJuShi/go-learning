@@ -4,7 +4,7 @@
 
 ## 目录
 
-- [x] [介绍 Introdution](Introdution.md)
+- [x] [介绍 Introduction](Introduction.md)
 
 - [x] [符号表示法 Notation](Notation.md)
 
