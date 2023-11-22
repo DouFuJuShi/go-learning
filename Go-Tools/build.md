@@ -190,3 +190,107 @@ go help packages
 - cmd “cmd” 扩展为 Go 存储库的命令及其内部库。
 
 - ...  "..."是一个通配符，能匹配任何字符串，包含空字符串以及包含斜杠的字符串，这样的模式扩展到 GOPATH 树中找到的名称与模式匹配的所有包目录。为了使常见模式更加方便，有两种特殊情况。首先，模式末尾的 /... 可以匹配空字符串，因此 net/... 可以匹配 net 及其子目录中的包，例如 net/http。其次，<mark>任何包含通配符的斜杠分隔模式元素永远不会参与vendored包路径中“vendor”元素的匹配</mark>，因此 ./... 不匹配 ./vendor 或 ./ 子目录中的包mycode/vendor，但 ./vendor/... 和 ./mycode/vendor/... 可以。但请注意，本身包含代码的名为供应商的目录不是vendored包：cmd/vendor 将是名为vendor的命令，并且模式 cmd/... 与它匹配。有关供应商的更多信息，请参阅 golang.org/s/go15vendor。
+
+## Build constraints
+
+构建约束，也称为构建标签，是文件应包含在包中的条件。构建约束由开始的行注释给出
+
+```go
+//go:build
+```
+
+约束可以出现在任何类型的源文件中（不仅仅是 Go），但它们必须出现在文件顶部附近，前面只能有空行和其他行注释。这些规则意味着在 Go 文件中，构建约束必须出现在 package 子句之前。
+
+为了区分构建约束和包文档，构建约束后面应该跟一个空行。
+
+构建约束注释被评估为包含由 ||、&& 和 ! 组合的构建标签的表达式。运算符和括号。运算符的含义与 Go 中相同。
+
+例如，以下构建约束会在满足“linux”和“386”约束时，或者在满足“darwin”但不满足“cgo”时约束要构建的文件：
+
+```go
+//go:build (linux && 386) || (darwin && !cgo)
+```
+
+一个文件包含多个 //go:build 行是错误的。
+
+在特定的构建过程中，要满足以下构建标记的要求：
+
+- 目标操作系统，由runtime.GOOS拼写，使用GOOS环境变量设置。
+
+- 目标架构，由runtime.GOARCH拼写，使用GOARCH环境变量设置。
+
+- 任何架构功能，采用 GOARCH.feature 形式（例如“amd64.v2”），如下详述。
+
+- “unix”，如果 GOOS 是 Unix 或类 Unix 系统。
+
+- 正在使用的编译器，“gc”或“gccgo”
+
+- “cgo”，如果支持 cgo 命令（请参阅“go 帮助环境”中的 CGO_ENABLED）。
+
+- 每个 Go 主要版本的术语，直到当前版本：从 Go 版本 1.1 开始为“go1.1”，从 Go 1.12 开始为“go1.12”，依此类推。
+
+- -tags 标志给出的任何附加标签（请参阅“go help build”）。
+
+测试版或次要版本没有单独的构建标签。
+
+如果文件名在去掉扩展名和可能的 _test 后缀后，符合以下任何一种模式：
+
+```go
+*_GOOS
+*_GOARCH
+*_GOOS_GOARCH
+```
+
+（示例：source_windows_amd64.go）其中 GOOS 和 GOARCH 分别表示任何已知的操作系统和体系结构值，则该文件被视为具有需要这些术语的隐式构建约束（除了文件中的任何显式约束之外）。
+
+使用 GOOS=android 除了 android 标签和文件之外，还与 GOOS=linux 匹配构建标签和文件。
+
+除了 illumos 标签和文件之外，使用 GOOS=illumos 还可以与 GOOS=solaris 一样匹配构建标签和文件。
+
+除了 ios 标签和文件之外，使用 GOOS=ios 还可以与 GOOS=darwin 一样匹配构建标签和文件。
+
+定义的架构功能构建标签是：
+
+- 对于 GOARCH=386、GO386=387 和 GO386=sse2 分别设置 386.387 和 386.sse2 构建标记。
+
+- 对于 GOARCH=amd64、GOAMD64=v1、v2 和 v3 对应于 amd64.v1、amd64.v2 和 amd64.v3 功能构建标签。
+
+- 对于 GOARCH=arm，GOARM=5、6 和 7 对应于arm.5、arm.6 和arm.7 功能构建标签。
+
+- 对于 GOARCH=mips 或 mipsle，GOMIPS=hardfloat 和 softfloat 对应于 mips.hardfloat 和 mips.softfloat（或 mipsle.hardfloat 和 mipsle.softfloat）功能构建标记。
+
+- 对于 GOARCH=mips64 或 mips64le，GOMIPS64=hardfloat 和 softfloat 对应于 mips64.hardfloat 和 mips64.softfloat（或 mips64le.hardfloat 和 mips64le.softfloat）功能构建标记。
+
+- 对于 GOARCH=ppc64 或 ppc64le，GOPPC64=power8、power9 和 power10 对应于 ppc64.power8、ppc64.power9 和 ppc64.power10（或 ppc64le.power8、ppc64le.power9 和 ppc64le.power10）功能构建标签。
+
+- 对于 GOARCH=wasm，GOWASM=satconv 和signext 对应于 wasm.satconv 和 wasm.signext 功能构建标签。
+
+对于 GOARCH=amd64、arm、ppc64 和 ppc64le，特定功能级别也会为所有先前级别设置功能构建标签。例如，GOAMD64=v2 设置 amd64.v1 和 amd64.v2 功能标志。这可以确保在引入 GOAMD64=v4 时，使用 v2 功能的代码可以继续编译。处理缺少特定功能级别的代码应使用否定：
+
+```shell
+//go:build !amd64.v2
+```
+
+要防止某个文件被考虑用于任何构建：
+
+```go
+//go:build ignore
+```
+
+（任何其他不满意的词也可以，但“忽略”是约定俗成的。）
+
+仅在使用 cgo 时且仅在 Linux 和 OS X 上构建文件：
+
+```go
+//go:build cgo && (linux || darwin)
+```
+
+这样的文件通常与实现其他系统默认功能的另一个文件配对，在这种情况下，该文件将带有约束：
+
+```go
+//go:build !(cgo && (linux || darwin))
+```
+
+将文件命名为 dns_windows.go 将导致仅在为 Windows 构建包时才包含该文件；同样，仅在构建 32 位 x86 包时才会包含 math_386.s。
+
+Go 版本 1.16 及更早版本使用不同的语法来构建约束，并带有“// +build”前缀。当遇到旧语法时，gofmt 命令将添加等效的 //go:build 约束。
