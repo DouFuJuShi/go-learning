@@ -434,21 +434,21 @@ type ReadCloser interface {
 
 在最一般的形式中，接口元素也可以是任意的类型项 T，或者是指定底层类型 T 的 ~T 形式的项，或者是项 t1|t2|...|tn 的联合。这些元素与方法规范一起，可以如下精确定义接口的类型集：
 
-- 空接口的类型集合是所有非接口类型的集合。
+- 空接口的类型集合是所有<mark>非接口类型</mark>的集合。
 
-- 非空接口的类型集是其接口元素的类型集的交集。
+- 非空接口的类型集是<mark>其接口元素的类型集的交集</mark>。
 
-- 方法规范的类型集是其方法集包括该方法的所有非接口类型的集合。
+- 方法规范的类型集是所有方法集中包含（该方法规范中定义的方法）的非接口类型的集合。
 
-- 非接口类型项的类型集是仅由该类型组成的集合。
+- 非接口类型项的类型集是<mark>仅由该类型组成的集合</mark>。
 
-- ~T 类型项所表达的类型集是底层类型为 T 的类型集合。
+- ~T 类型项所表达的类型集是<mark>底层类型为 T 的类型</mark>集合。
 
-- 并集 t1|t2|…|tn 的类型集是所有类型项tn类型集的并集。
+- 并集 t<sub>1</sub>|t<sub>2</sub>|…|t<sub>n</sub> 的类型集是所有<mark>类型项t<sub>n</sub>类型集的并集</mark>。
 
 量化“所有非接口类型的集合”不仅指当前程序中声明的所有（非接口）类型，还指所有可能程序中的所有可能类型，因此是无限的。类似地，给定实现特定方法的所有非接口类型的集合，这些类型的方法集的交集将恰好包含该方法，即使手头程序中的所有类型总是将该方法与另一个方法配对。
 
-根据构造，接口的类型集从不包含接口类型。
+根据构造，<mark>接口的类型集从不包含接口类型</mark>。
 
 ```go
 // An interface representing only the type int.
@@ -474,7 +474,7 @@ interface {
 }
 ```
 
-在 ~T 形式的术语中，T 的底层类型必须是自身，T 不能是接口。
+<mark>在 ~T 形式的术语中，T 的底层类型必须是自身，T 不能是接口</mark>。
 
 ```go
 type MyInt int
@@ -497,7 +497,7 @@ type Float interface {
 }
 ```
 
-T 或 ~T 形式的项中的类型 T 不能是类型参数([type parameter](https://go.dev/ref/spec#Type_parameter_declarations))，并且所有非接口项的类型集必须是成对不相交的（类型集的成对交集必须为空）。给定一个类型参数 P：
+<mark>T 或 ~T 形式的项中的类型 T 不能是类型参数</mark>([type parameter](https://go.dev/ref/spec#Type_parameter_declarations))，并且所有非接口项的类型集必须是成对不相交的（类型集的成对交集必须为空）。给定一个类型参数 P：
 
 <mark>非基本接口只能用作类型约束，或用作其他接口的约束元素</mark>。<mark>它们不能作为值或变量的类型，也不能作为其他非接口类型的组成部分。</mark>
 
@@ -548,7 +548,7 @@ type Bad4 interface {
 
 如果 T 实现了一个接口，则 T 类型的值就实现了该接口。
 
-## Map Types
+## 映射类型 Map Types
 
 映射是一种类型（称为元素类型）的无序元素组，由另一种类型（称为键类型）的一组唯一键进行索引。未初始化的映射的值为 nil。
 
@@ -576,7 +576,7 @@ make(map[string]int, 100)
 
 初始容量不限制其大小：映射会增长以容纳其中存储的项目数量，但 nil 映射除外。 nil 映射相当于空映射，只不过不能添加任何元素。
 
-### Channel types
+### 通道类型 Channel types
 
 通道提供了一种并发执行函数([concurrently executing functions](https://go.dev/ref/spec#Go_statements))的机制，通过发送([sending](https://go.dev/ref/spec#Send_statements))和接收([receiving](https://go.dev/ref/spec#Receive_operator))指定元素类型的值来进行通信。未初始化的通道的值为 nil。
 
