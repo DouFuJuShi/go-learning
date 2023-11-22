@@ -5,10 +5,10 @@
 Go是一个管理Go源代码的工具。
 
 ```shell
-go <command> [arguments]## [bug](bug.md)
+go <command> [arguments]
 ```
 
-command是：
+command 列表如下：
 
 ```
 bug         start a bug report
