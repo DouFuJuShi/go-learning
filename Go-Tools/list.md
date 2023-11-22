@@ -210,3 +210,11 @@ list -m 的参数被解释为模块列表，而不是包列表。主模块是包
 
 有关指定包的更多信息，请参阅“转到帮助包”。
 有关模块的更多信息，请参阅 https://golang.org/ref/mod。
+
+使用案例：
+
+1. 列出某个库所有的版本
+
+```shell
+go list -m -versions github.com/gin-gonic/gin
+```
