@@ -555,6 +555,7 @@ type Bad4 interface {
 ```go
 MapType     = "map" "[" KeyType "]" ElementType .
 KeyType     = Type .
+
 ```
 
 比较运算符([comparison operators](https://go.dev/ref/spec#Comparison_operators)) == 和 != 必须为键类型的操作数完全定义；因此键类型不能是函数、映射或切片。如果键类型是接口类型，则必须为动态键值定义这些比较运算符；失败将导致运行时恐慌。
