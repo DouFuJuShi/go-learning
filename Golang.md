@@ -167,7 +167,8 @@ gopay https://github.com/go-pay/gopay
 ### UUID  
 google uuid https://github.com/google/uuid
 
-sonyflake[Twitter's Snowflake] https://github.com/sony/sonyflake
+sonyflake[Twitter's Snowflake] https://github.com/sony/sonyflake   
+
 snowflake[Twitter's Snowflake] https://github.com/bwmarrin/snowflake
 
 go.uuid https://github.com/satori/go.uuid
