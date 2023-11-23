@@ -8,7 +8,7 @@ Go 是一门新语言。尽管它借鉴了现有语言的思想，但它具有�
 
 ## 例子 Examples
 
-[Go 包源]([- The Go Programming Language](https://go.dev/src/))不仅用作核心库，还用作如何使用该语言的示例。此外，许多包包含可工作的、独立的可执行示例，您可以直接从 golang.org 网站运行，例如这个（如有必要，单击“示例”一词将其打开）。如果您对如何解决问题或如何实现某些内容有疑问，库中的文档、代码和示例可以提供答案、想法和背景。
+Go 包源([The Go Programming Language](https://go.dev/src/))不仅用作核心库，还用作如何使用该语言的示例。此外，许多包包含可工作的、独立的可执行示例，您可以直接从 golang.org 网站运行，例如这个（如有必要，单击“示例”一词将其打开）。如果您对如何解决问题或如何实现某些内容有疑问，库中的文档、代码和示例可以提供答案、想法和背景。
 
 # 格式 Formatting
 
@@ -1057,7 +1057,6 @@ func (b ByteSize) String() string {
     }
     return fmt.Sprintf("%.2fB", b)
 }
-
 ```
 
 表达式 YB 打印为 1.00YB，而 ByteSize(1e13) 打印为 9.09TB。
@@ -1236,7 +1235,6 @@ case string:
 case Stringer:
     return str.String()
 }
-
 ```
 
 第一种情况找到了具体的值；第二个将接口转换为另一个接口。以这种方式混合类型是完全可以的。
@@ -1368,7 +1366,6 @@ func (ch Chan) ServeHTTP(w http.ResponseWriter, req *http.Request) {
     ch <- req
     fmt.Fprint(w, "notification sent")
 }
-
 ```
 
 最后，假设我们想在 /args 上显示调用服务器二进制文件时使用的参数。编写一个函数来打印参数很容易。
