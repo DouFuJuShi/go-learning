@@ -81,25 +81,25 @@ Edit 提供了用于编辑 go.work 的命令行界面，主要供工具或脚本
 
 ```go
 type GoWork struct {
-	Go        string
-	Toolchain string
-	Use       []Use
-	Replace   []Replace
+    Go        string
+    Toolchain string
+    Use       []Use
+    Replace   []Replace
 }
 
 type Use struct {
-	DiskPath   string
-	ModulePath string
+    DiskPath   string
+    ModulePath string
 }
 
 type Replace struct {
-	Old Module
-	New Module
+    Old Module
+    New Module
 }
 
 type Module struct {
-	Path    string
-	Version string
+    Path    string
+    Version string
 }
 ```
 
@@ -117,4 +117,10 @@ go work init 可以选择接受工作区模块的路径作为参数。如果省�
 
 ## 将模块添加到工作区文件  Add modules to workspace file
 
+Use 提供了一个命令行界面，用于将目录（可选）以递归方式添加到 go.work 文件中。
 
+对于命令行 go.work 文件中列出的每个参数目录， use 指令将添加到 go.work 文件中（如果存在）；如果不存在，则从 go.work 文件中删除。如果任何剩余的 use 指令引用不存在的模块，则使用失败。
+
+使用更新 go.work 中的 go 行来指定一个版本，该版本至少与所用模块中的所有 go 行（包括先前存在的模块和新添加的模块）一样新。毫无疑问，此更新是 go work use 所做的唯一事情。
+
+-r 标志在参数目录中递归搜索模块，并且 use 命令的操作就像将每个目录指定为参数一样：即，将为存在的目录添加 use 指令，并为不存在的目录删除 use 指令。

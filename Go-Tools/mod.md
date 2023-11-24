@@ -185,3 +185,45 @@ Tidy 确保 go.mod 与模块中的源代码匹配。它添加构建当前模块�
 ```go
 go mod vendor [-e] [-v] [-o outdir]
 ```
+
+供应商重置主模块的供应商目录以包含构建和测试所有主模块的包所需的所有包。它不包括供应包的测试代码。
+
+-v 标志使供应商将供应的模块和包的名称打印到标准错误。
+
+-e 标志导致供应商尝试继续，尽管在加载包时遇到错误。
+
+-o 标志使供应商在给定路径而不是“vendor”处创建供应商目录。 go 命令只能使用模块根目录中名为“vendor”的供应商目录，因此该标志主要对其他工具有用。
+
+## 验证依赖项是否具有预期内容  Verify dependencies have expected content
+
+```go
+go mod verify
+```
+
+Verify 检查存储在本地下载源缓存中的当前模块的依赖项在下载后是否被修改。如果所有模块都未修改，verify 会打印 "所有模块已验证"。否则，它会报告哪些模块被修改，并导致 "go mod "以非零状态退出。
+
+## 解释为什么需要包或模块  why packages or modules are needed
+
+```go
+go mod why [-m] [-vendor] packages...
+```
+
+why 在导入图中显示从主模块到每个列出软件包的最短路径。如果给定了 -m 标志，why 会将参数视为模块列表，并查找每个模块中任何软件包的路径。
+
+默认情况下，why 查询与“go list all”匹配的包的图表，其中包括对可达包的测试。 -vendor 标志导致为什么要排除依赖项测试。
+
+输出是一系列节，每个节对应命令行上的每个包或模块名称，由空行分隔。每个节以注释行“# package”或“# module”开头，给出目标包或模块。后续行给出了通过导入图的路径，每行一个包。如果主模块未引用包或模块，则该节将显示一个带括号的注释来指示这一事实。
+
+案例：
+
+```shell
+$ go mod why golang.org/x/text/language golang.org/x/text/encoding
+# golang.org/x/text/language
+rsc.io/quote
+rsc.io/sampler
+golang.org/x/text/language
+
+# golang.org/x/text/encoding
+(main module does not need package golang.org/x/text/encoding)
+$
+```
