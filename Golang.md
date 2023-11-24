@@ -164,12 +164,17 @@ base64Captcha https://github.com/mojocn/base64Captcha
 gopay https://github.com/go-pay/gopay 
 
 
-### UUID  
+### Distributed ID generation algorithm  分布式唯一ID生成算法
+
 google uuid https://github.com/google/uuid
 
-sonyflake[Twitter's Snowflake] https://github.com/sony/sonyflake
+sonyflake[Twitter's Snowflake] https://github.com/sony/sonyflake   
 
-go.uuid https://github.com/satori/go.uuid
+snowflake[Twitter's Snowflake] https://github.com/bwmarrin/snowflake
+
+go.uuid https://github.com/satori/go.uuid   
+
+Leaf https://github.com/Meituan-Dianping/Leaf
 
 
 ### Code Generate
