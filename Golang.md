@@ -10,6 +10,8 @@ Standard Go Project Layout https://github.com/golang-standards/project-layout/bl
 ## Design Pattern
 golang-design-pattern https://github.com/senghoo/golang-design-pattern   
 
+golang-design-pattern https://github.com/mohuishou/go-design-pattern
+
 ## Go profiler
 go-profiler-notes https://github.com/DataDog/go-profiler-notes    
 
