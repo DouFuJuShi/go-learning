@@ -94,4 +94,4 @@ go get -t github.com/google/gops/
 
 点击 Run | Attach to Process (`⌥Opt``⇧Shift``F5`) 在通知窗口中，单击调用“go get gops”链接。
 
-![](/Users/aqi/Downloads/go-learning/go_invoke_go_get_gops.png)
+![](../go_invoke_go_get_gops.png)
