@@ -74,9 +74,9 @@ sudo dscl . append /Groups/_developer GroupMembership $(whoami)
 
 makefile 将自动创建和安装自签名证书。
 
-## 使用调试器附加到正在运行的 Go 进程
+## 使用调试器Attach到正在运行的 Go 进程
 
-在 GoLand 中，可以将调试器附加到本地计算机、远程计算机或 Docker 容器中正在运行的 Go 进程。
+在 GoLand 中，可以将调试器Attach到本地计算机、远程计算机或 Docker 容器中正在运行的 Go 进程。
 
 ### Attach 本地进程
 
