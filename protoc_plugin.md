@@ -1,4 +1,4 @@
-#protoc_plugin
+# protoc_plugin
 
 ## Library
 
