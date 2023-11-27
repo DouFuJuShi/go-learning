@@ -34,8 +34,6 @@ found packages native (proc.go) and your_operating_system_and_architecture_combi
 
 这意味着你的操作系统和CPU架构的组合不被支持，检查go版本的输出。   
 
-
-
 ### Homebrew
 
 ```shell
@@ -76,8 +74,6 @@ sudo dscl . append /Groups/_developer GroupMembership $(whoami)
 
 makefile 将自动创建和安装自签名证书。
 
-
-
 ## 使用调试器附加到正在运行的 Go 进程
 
 在 GoLand 中，可以将调试器附加到本地计算机、远程计算机或 Docker 容器中正在运行的 Go 进程。
@@ -92,6 +88,4 @@ makefile 将自动创建和安装自签名证书。
 go get -t github.com/google/gops/
 ```
 
-点击 Run | Attach to Process (`⌥Opt``⇧Shift``F5`) 在通知窗口中，单击调用“go get gops”链接。
-
-![](../go_invoke_go_get_gops.png)
+点击 Run | Attach to Process (`⌥Opt``⇧Shift``F5`) 在通知窗口中，单击调用“go get gops”链接。![](go_invoke_go_get_gops.png)
