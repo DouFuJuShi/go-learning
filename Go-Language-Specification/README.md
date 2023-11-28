@@ -34,7 +34,7 @@
 
 - [x] [程序的初始化和运行 Program initialization and execution](Program-initialization-and-execution.md)
 
-- [x] [错误 Errors](errors.md)
+- [x] [错误 Errors](Errors.md)
 
 - [x] [运行时恐慌 Run-time panics](Runtime-panics.md)
 
