@@ -94,7 +94,6 @@ go get -t github.com/google/gops/
 
       1) . 打开Terminal 窗口（view | Tool Windows | Terminal）并根据您的 Go 版本运行以下命令：
 
-
 ```shell
 // Go 1.10 and later:
 $ go build -gcflags="all=-N -l" -o myApp
@@ -264,3 +263,10 @@ dlv --listen=:2345 --headless=true --api-version=2 attach <PID>
 您可以按 `⌘Сmd``F2`在远程调试会话期间终止远程进程。请注意，终止进程后您无法重新连接该进程。
 
 ![](images/go_terminate_the_remote_process.animated.gif)
+
+参考：
+
+   1. [GitHub - go-delve/delve: Delve is a debugger for the Go programming language.](https://github.com/go-delve/delve)
+
+2. [Attach to running Go processes with the debugger | GoLand Documentation](https://www.jetbrains.com/help/go/attach-to-running-go-processes-with-debugger.html)
+3. [go build](./Go-Tools/build.md)
