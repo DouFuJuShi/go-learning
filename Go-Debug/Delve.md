@@ -1,4 +1,4 @@
-# Delve + Goland 进行Go进程调试
+# Delve + Goland 调试 Go进程
 
 ---
 
