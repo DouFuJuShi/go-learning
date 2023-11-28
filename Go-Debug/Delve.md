@@ -192,3 +192,75 @@ dlv --listen=:2345 --headless=true --api-version=2 attach <PID>
 3. 在应用程序中的断点处触发事件。如果您使用提供的[代码示例](https://github.com/apronichev/documentation-code-examples/blob/master/debuggingTutorial/main.go)，请在浏览器中打开 http://<host_address>:8080/ 链接。
 
 ![](images/go_start_the_debugging_process_on_the_client_computer.animated.gif)
+
+### Debug Docker container中的进程
+
+您可以将调试器附加到在 Docker 容器中运行的 Go 进程。有关 Docker 的更多信息，请参阅 Docker。
+
+出于示例目的，您可以为此 Go 应用程序使用以下 Dockerfile。将 **Dockerfile** 和 **main.go** 保存在 **$GOPATH/src/debuggingTutorial** 中。请注意，Dockerfile 使用debuggingTutorial 目录。如果您为项目使用不同的目录，请更改 Dockerfile 中的目录名称。
+
+#### 1. 创建 Dockerfile 配置
+
+1. 单击**Edit | Run Configurations**。或者，单击工具栏上的run/debug配置列表，然后选择**Edit Configurations**。
+
+2. 在**Run/Debug Configurations**配置对话框中，单击添加按钮 (![](images/app.general.add.svg)) 并选择 **Docker | Dockerfile**。
+
+3. 在 **Dockerfile** 字段中，单击**Browse**图标 (![](images/app.actions.menu-open.svg)) 并导航到文件浏览器中的 **Dockerfile**。如果您使用本节中的示例，请导航到此 [Dockerfile](https://github.com/apronichev/documentation-code-examples/blob/master/debuggingTutorial/Dockerfile)。
+
+4. 在 **Container name**字段中，输入容器名称（例如，debugging-tutorial.txt）。
+
+5. 在**Bind port**s字段中，单击**Browse**图标 (![](images/app.actions.menu-open.svg))。单击**Add**按钮 (![](images/app.general.add.svg))。在“主机端口”列中，键入 8080。单击“**Container port**”列，键入 8080。此外，为端口 40000 添加相同的绑定。
+
+![](images/go_docker_bind_ports.png)
+
+6. 在**Run options**字段中，指定 Docker 的命令行选项。对于 Dockerfile 中提供的示例，禁用安全配置文件并添加 SYS_PTRACE Linux 功能。
+
+```go
+--security-opt="apparmor=unconfined" --cap-add=SYS_PTRACE
+```
+
+7. 点击**OK**
+
+![](images/go_create_dockerfile_configuration.png)
+
+#### 2. 运行 Dockerfile 配置
+
+从工具栏上的 **run/debug configurations** 列表中，选择创建的 Dockerfile 配置并单击 **Run <configuration_name>** 按钮(![](images/app.actions.execute.svg))
+
+![](images/go_run_dockerfile_configuration.animated.gif)
+
+#### 3. 创建 Go Remote 运行/调试配置
+
+1. 单击**Edit | Run Configurations**。或者，单击工具栏上的运行/调试配置列表，然后选择 **Edit Configurations**。
+
+2. 在“**Run/Debug Configurations**”对话框中，单击“添加”按钮 (![](images/app.general.add.svg)) 并选择“**Go Remote**”。
+
+3. 在**Host**字段中，键入主机 IP 地址（例如 localhost）。
+
+4. 在**Port**字段中，键入您配置的调试器端口。在提供的示例中，该值为 40000。
+
+5. 点击“**OK**”
+
+![](images/go_create_the_remote_run_debug_configuration_for_docker.animated.gif)
+
+#### 4. 启动调试过程
+
+1. 在“**Services**”工具窗口（**View | Tool Windows | Services**）中，展开**Docker | Containers**。容器。确保创建的容器正在运行并侦听预配置的调试器端口。
+
+2. 单击代码行附近的装订线以放置断点。例如，在提供的代码示例中，将断点放在第 23 行 (message := fmt.Sprintf("Hello %s!", r.UserAgent()))。在断点中阅读有关断点的更多信息。
+
+3. 从工具栏上的**run/debug configurations**列表中，选择[the created Go Remote configuration](https://www.jetbrains.com/help/go/attach-to-running-go-processes-with-debugger.html#step-3-create-the-go-remote-run-debug-configuration)，然后单击“Debug <configuration_name>”按钮 (![](images/app.actions.startDebugger.svg))。
+
+        或者用快捷键`⌃Ctrl``⌥Opt``D`,the created Go Remote configuration
+
+4. 在应用程序中的断点处触发事件。如果您使用提供的 [the provided code example](https://github.com/apronichev/documentation-code-examples/blob/master/debuggingTutorial/main.go)，请在浏览器中打开 http://localhost:8080/ 链接。
+
+![](images/go_start_the_debugging_process_for_docker.animated.gif)
+
+## 技巧
+
+### 终止远程进程
+
+您可以按 `⌘Сmd``F2`在远程调试会话期间终止远程进程。请注意，终止进程后您无法重新连接该进程。
+
+![](images/go_terminate_the_remote_process.animated.gif)
