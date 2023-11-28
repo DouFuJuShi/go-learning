@@ -269,4 +269,4 @@ dlv --listen=:2345 --headless=true --api-version=2 attach <PID>
    1. [GitHub - go-delve/delve: Delve is a debugger for the Go programming language.](https://github.com/go-delve/delve)
 
 2. [Attach to running Go processes with the debugger | GoLand Documentation](https://www.jetbrains.com/help/go/attach-to-running-go-processes-with-debugger.html)
-3. [go build](./Go-Tools/build.md)
+3. [go build](../Go-Tools/build.md)
