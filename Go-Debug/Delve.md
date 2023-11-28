@@ -4,7 +4,7 @@
 
 ## 安装
 
-### 方案一：克隆git仓库进行编译
+### 方案一：git clone仓库编译
 
 ```sh-session
 $ git clone https://github.com/go-delve/delve
@@ -62,7 +62,7 @@ sudo dscl . append /Groups/_developer GroupMembership $(whoami)
 
 ### 编译 macOS 原生后端
 
-您不需要 macOS 本机后端，它存在已知问题。如果您仍然想构建它：
+您不需要 macOS 本机后端，它存在[已知问题](https://github.com/go-delve/delve/issues/1112)。如果您仍然想构建它：
 
 1. 运行 xcode-select --install
 
@@ -78,7 +78,7 @@ makefile 将自动创建和安装自签名证书。
 
 在 GoLand 中，可以将调试器Attach到本地计算机、远程计算机或 Docker 容器中正在运行的 Go 进程。
 
-### 本地主机进程
+### 调试本地主机进程
 
 您可以调试从命令行启动的应用程序。在这种情况下，应用程序在 IDE 外部运行，但在同一台本地计算机上运行。要调试应用程序，您需要在 IDE 中打开项目并将调试器附加到正在运行的进程。
 
@@ -112,7 +112,7 @@ $ go build -gcflags="-N -l" -o myApp
 
 由于 Go 工具链、Delve 和 GoLand 之间不兼容，符号链接或符号链接与调试不兼容。
 
-#### 3. debug正在运行的进程
+#### 3. 调试正在运行的进程
 
 1. 单击代码行附近的装订线以放置断点。例如，在提供的代码示例中，将断点放在第 23 行 (message := fmt.Sprintf("Hello %s!", r.UserAgent()))。在断点中阅读有关断点的更多信息。
 
@@ -124,7 +124,7 @@ $ go build -gcflags="-N -l" -o myApp
 
 ![](images/go_attach_to_the_running_process.animated.gif)
 
-### 远程主机进程
+### 调试远程主机进程
 
 您可以连接到远程计算机（主机）并将调试器附加到主机上运行的 Go 进程。远程调试器 (Delve) 必须在远程计算机上运行。
 
@@ -192,7 +192,7 @@ dlv --listen=:2345 --headless --continue --api-version=2 --accept-multiclient at
 
 ![](images/go_start_the_debugging_process_on_the_client_computer.animated.gif)
 
-### Docker容器进程
+### 调试Docker容器进程
 
 您可以将调试器附加到在 Docker 容器中运行的 Go 进程。有关 Docker 的更多信息，请参阅 Docker。
 
