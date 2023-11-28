@@ -264,7 +264,7 @@ dlv --listen=:2345 --headless=true --api-version=2 attach <PID>
 
 ![](images/go_terminate_the_remote_process.animated.gif)
 
-参考：
+## 参考
 
    1. [GitHub - go-delve/delve: Delve is a debugger for the Go programming language.](https://github.com/go-delve/delve)
 
