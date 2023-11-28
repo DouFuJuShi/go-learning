@@ -12,7 +12,7 @@ $ cd delve
 $ go install github.com/go-delve/delve/cmd/dlv
 ```
 
-### 方案二：go版本 >= 1.16
+### 方案二：go version >= 1.16
 
 ```sh-session
 # Install the latest release:
