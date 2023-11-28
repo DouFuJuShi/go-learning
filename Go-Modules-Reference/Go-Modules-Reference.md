@@ -1,4 +1,4 @@
-# Go Modules Reference<sub>---[Go Modules Reference - The Go Programming Language](https://go.dev/ref/mod)</sub>
+# Go Modules Reference<sub>---[Go Modules Reference](https://go.dev/ref/mod)</sub>
 
 ## 介绍
 
