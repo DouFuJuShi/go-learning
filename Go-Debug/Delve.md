@@ -78,14 +78,117 @@ makefile 将自动创建和安装自签名证书。
 
 在 GoLand 中，可以将调试器Attach到本地计算机、远程计算机或 Docker 容器中正在运行的 Go 进程。
 
-### Attach 本地进程
+### Debug 本地进程
 
 您可以调试从命令行启动的应用程序。在这种情况下，应用程序在 IDE 外部运行，但在同一台本地计算机上运行。要调试应用程序，您需要在 IDE 中打开项目并将调试器附加到正在运行的进程。
 
-1. 安装 gops 包
+#### 1. 安装 gops 包
 
 ```shell
 go get -t github.com/google/gops/
 ```
 
 点击 Run | Attach to Process (`⌥Opt``⇧Shift``F5`) 在通知窗口中，单击调用“go get gops”链接。![](images/go_invoke_go_get_gops.png)
+
+#### 2. 编译和运行应用
+
+      1) . 打开Terminal 窗口（view | Tool Windows | Terminal）并根据您的 Go 版本运行以下命令：
+
+
+```shell
+// Go 1.10 and later:
+$ go build -gcflags="all=-N -l" -o myApp
+
+// Go 1.9 and earlier:
+$ go build -gcflags="-N -l" -o myApp
+```
+
+该命令编译 myApp 可执行文件，并禁用编译器优化和内联。
+
+    2). 运行已编译的可执行文件（例如./myApp）。
+
+![](images/go_build_application_with_gcflags.png)
+
+> 不要使用 -ldflags="all=-w" 或 -ldflags="-w" 标志。这些标志与调试应用程序不兼容，因为它们删除了 Delve 所需的必要 DWARF 信息。
+
+由于 Go 工具链、Delve 和 GoLand 之间不兼容，符号链接或符号链接与调试不兼容。
+
+#### 3. debug正在运行的进程
+
+1. 单击代码行附近的装订线以放置断点。例如，在提供的代码示例中，将断点放在第 23 行 (message := fmt.Sprintf("Hello %s!", r.UserAgent()))。在断点中阅读有关断点的更多信息。
+
+2. 点击 **Run | Attach to Process**`⌥Opt``⇧Shift``F5`.
+
+3. 在 **Attach with Debugger To** 窗口中，选择您的应用程序进程并按↩进入。
+
+4. 在应用程序中的断点处触发事件。如果您使用提供的[代码](https://github.com/apronichev/documentation-code-examples/blob/master/debuggingTutorial/main.go)示例，请在浏览器中打开 http://localhost:8080/ 链接。
+
+![](images/go_attach_to_the_running_process.animated.gif)
+
+### Debug 远程机器上的进程
+
+您可以连接到远程计算机（主机）并将调试器附加到主机上运行的 Go 进程。远程调试器 (Delve) 必须在远程计算机上运行。
+
+> 使用与应用程序相同的 Go 版本、主机和目标来编译 Delve，因为不同操作系统之间可能存在细微差异，这可能会导致调试会话无法按预期工作。
+
+#### 1. 在远程机器上编译应用
+
+1. 如果您使用 $GOPATH 方法，请确保在主机和客户端计算机上使用 $GOPATH 的相同相对路径来编译项目。例如，如果主机上的应用程序代码位于 $GOPATH/src/debuggingTutorial/ 中。客户端上的代码必须位于同一目录中（$GOPATH/src/debuggingTutorial/）。
+
+2. 打开终端工具窗口（视图 | 工具窗口 | 终端）并根据您的 Go 版本运行以下命令：
+
+```shell
+// Go 1.10 and later:
+$ go build -gcflags="all=-N -l" -o myApp
+
+// Go 1.9 and earlier:
+$ go build -gcflags="-N -l" -o myApp
+```
+
+此命令编译 myApp 可执行文件并禁用编译器优化和内联。
+
+![](images/go_build_application_with_gcflags_for_remote.png)
+
+#### 2. 在远程主机上运行 Delve
+
+您有两个选项可以在主机上启动调试器：
+
+- 调试器会为您运行该进程。如果您使用防火墙，请公开配置中使用的端口（例如 2345）。您可以使用任何未被占用的端口号。 myApp 是在步骤 1 上构建的可执行文件的名称。
+
+```shell
+dlv --listen=:2345 --headless=true --api-version=2 exec ./myApp
+```
+
+如果需要按原样将参数传递给二进制文件，请在前面的命令中添加双破折号 (--)，然后添加必要的选项（例如 -- --config=/path/to/config/file）。
+
+- 您运行进程，调试器就会连接到正在运行的进程。<PID> 是应用程序的进程标识符。您可以使用 Attach to Process 命令获取进程标识符。
+
+```go
+dlv --listen=:2345 --headless=true --api-version=2 attach <PID>
+```
+
+![](images/go_run_delve_on_the_host_machine.png)
+
+#### 3. 在客户端计算机上创建 Go Remote 运行/调试配置
+
+1. 单击**Edit | Run Configurations**。或者，单击工具栏上的运行/调试配置列表，然后选择**Edit Configurations**。
+
+2. 在 **Run/Debug Configurations** 窗口中, 点击 **Add** button (![the Add button](https://resources.jetbrains.com/help/img/idea/2023.2/app.general.add.svg)) and 选择 **** Go Remote****.
+
+3. 在**Host**字段中，输入主机 IP 地址（例如，192.168.1.33）。
+
+4. 在**Port**字段中，键入您在步骤 2 中配置的调试器端口（例如 2345）。
+
+5. 点击**OK**
+
+![](images/go_create_the_remote_run_debug_configuration.animated.gif)
+
+#### 4. 在客户端计算机上启动调试过程
+
+1. 单击代码行附近的装订线以放置断点。例如，在提供的代码示例中，将断点放在第 23 行 (message := fmt.Sprintf("Hello %s!", r.UserAgent()))。在断点中阅读有关断点的更多信息。
+
+2. 从工具栏上的运行/调试配置列表中，选择创建的 [Go Remote 配置]([Attach to running Go processes with the debugger | GoLand Documentation](https://www.jetbrains.com/help/go/attach-to-running-go-processes-with-debugger.html#step-3-create-the-remote-run-debug-configuration-on-the-client-computer))并单击“**Debug <configuration_name>**”按钮 (![](images/app.actions.startDebugger.svg))。
+
+3. 在应用程序中的断点处触发事件。如果您使用提供的[代码示例](https://github.com/apronichev/documentation-code-examples/blob/master/debuggingTutorial/main.go)，请在浏览器中打开 http://<host_address>:8080/ 链接。
+
+![](images/go_start_the_debugging_process_on_the_client_computer.animated.gif)
