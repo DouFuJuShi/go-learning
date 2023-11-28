@@ -155,15 +155,15 @@ $ go build -gcflags="-N -l" -o myApp
 - 调试器会为您运行该进程。如果您使用防火墙，请公开配置中使用的端口（例如 2345）。您可以使用任何未被占用的端口号。 myApp 是在步骤 1 上构建的可执行文件的名称。
 
 ```shell
-dlv --listen=:2345 --headless=true --api-version=2 exec ./myApp
+dlv --listen=:2345 --headless --continue --api-version=2 --accept-multiclient exec ./myApp
 ```
 
 如果需要按原样将参数传递给二进制文件，请在前面的命令中添加双破折号 (--)，然后添加必要的选项（例如 -- --config=/path/to/config/file）。
 
 - 您运行进程，调试器就会连接到正在运行的进程。<PID> 是应用程序的进程标识符。您可以使用 Attach to Process 命令获取进程标识符。
 
-```go
-dlv --listen=:2345 --headless=true --api-version=2 attach <PID>
+```shell
+dlv --listen=:2345 --headless --continue --api-version=2 --accept-multiclient attach <PID>
 ```
 
 ![](images/go_run_delve_on_the_host_machine.png)
@@ -270,3 +270,5 @@ dlv --listen=:2345 --headless=true --api-version=2 attach <PID>
 
 2. [Attach to running Go processes with the debugger | GoLand Documentation](https://www.jetbrains.com/help/go/attach-to-running-go-processes-with-debugger.html)
 3. [go build](../Go-Tools/build.md)
+4. https://github.com/go-delve/delve/blob/c4a10ecb167219f9a02d8b0ab07a780fc8508e62/Documentation/api/README.md
+5. https://github.com/go-delve/delve/blob/c4a10ecb167219f9a02d8b0ab07a780fc8508e62/Documentation/usage/dlv_attach.md
