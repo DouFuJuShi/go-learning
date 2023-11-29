@@ -1297,6 +1297,164 @@ go mod tidy 还可以添加或删除require 指令上 // indirect 的注释。 /
 
 ### go mod vendor
 
-```shel
+```shell
 go mod vendor [-e] [-v] [-o]
 ```
+
+go mod vendor 命令在主模块的根目录中构造一个名为vendor的目录，其中包含支持主模块中包的构建和测试所需的所有包的副本。不包括仅通过主模块外部的包测试导入的包。与 go mod tidy 和其他模块命令一样，构建vendor目录时不考虑除忽略之外的构建约束[build constraints](https://go.dev/ref/mod#glos-build-constraint)。
+
+启用vendoring后，go 命令将从vendor目录加载包，而不是将模块从其源下载到模块缓存中并使用这些下载的副本。有关更多信息，请参阅[Vendoring](https://go.dev/ref/mod#vendoring) 。
+
+go mod vendor 还创建文件vendor/modules.txt，其中包含vendor包的列表以及从中复制它们的模块版本。启用vendoring后，此清单将用作模块版本信息的来源，如 go list -m 和 go version -m 所报告的那样。当go命令读取vendor/modules.txt时，它会检查模块版本是否与go.mod一致。如果 go.mod 在生成了 vendor/modules.txt 后发生了变化，则应该再次运行 go mod vendor。
+
+请注意，在重新构建之前，go mod vendor 会删除vendor 目录（如果存在）。不应对vendor的包进行本地更改。 go 命令不会检查vendor目录中的包是否未被修改，但可以通过运行 go mod vendor 并检查是否没有进行任何更改来验证vendor目录的完整性。
+
+-e 标志（在 Go 1.16 中添加）会导致 go mod 供应商尝试继续，尽管在加载包时遇到错误。
+
+-v 标志使 go mod供应商将供应的模块和包的名称打印到标准错误。
+
+-o 标志（在 Go 1.18 中添加）使 go modvendor 在指定目录而不是供应商处输出供应商树。参数可以是绝对路径或相对于模块根的路径。
+
+### go mod verify
+
+```shell
+go mod verify
+```
+
+go mod verify 检查存储在模块缓存中的主模块的依赖关系自下载以来尚未被修改。要执行此检查， go mod verify 对每个下载的模块 .zip 文件和提取的目录进行哈希处理，然后将这些哈希值与首次下载模块时记录的哈希值进行比较。 go mod verify 检查构建列表中的每个模块（可以使用 go list -m all 打印）。
+
+如果所有模块均未修改，则 go mod verify 打印“所有模块已验证”。否则，它会报告哪些模块已更改并以非零状态退出。
+
+请注意，所有模块感知命​​令都会验证主模块的 go.sum 文件中的哈希值是否与下载到模块缓存中的模块记录的哈希值相匹配。如果 go.sum 中缺少哈希值（例如，因为该模块是第一次使用），则 go 命令将使用校验和数据库验证其哈希值（除非模块路径与 GOPRIVATE 或 GONOSUMDB 匹配）。有关详细信息，请参阅验证模块。
+
+相反，go mod verify 检查模块 .zip 文件及其提取的目录是否具有与首次下载时模块缓存中记录的哈希值相匹配的哈希值。这对于在下载并验证模块后检测模块缓存中文件的更改非常有用。 go mod verify 不会下载不在缓存中的模块的内容，并且它不会使用 go.sum 文件来验证模块内容。但是，go mod verify 可能会下载 go.mod 文件以执行最小版本选择。它将使用 go.sum 来验证这些文件，并且可能会为丢失的哈希值添加 go.sum 条目。
+
+### go mod why
+
+```shell
+go mod why [-m] [-vendor] packages...
+```
+
+go mod why 显示导入图中从主模块到每个列出的包的最短路径。
+
+输出是一系列节，每个节对应命令行上命名的每个包或模块，以空行分隔。每个节都以注释行开头，以 # 开头，给出目标包或模块。后续行给出了通过导入图的路径，每行一个包。如果主模块未引用包或模块，则该节将显示一个带括号的注释来指示这一事实。
+
+例如：
+
+```shell
+$ go mod why golang.org/x/text/language golang.org/x/text/encoding
+# golang.org/x/text/language
+rsc.io/quote
+rsc.io/sampler
+golang.org/x/text/language
+
+# golang.org/x/text/encoding
+(main module does not need package golang.org/x/text/encoding)
+```
+
+-m 标志导致 go mod 为什么将其参数视为模块列表。 go mod Why 将打印每个模块中任何包的路径。请注意，即使使用 -m，go mod Why 也会查询包图，而不是 go mod graph 打印的模块图。
+
+-vendor 标志导致 go mod 为什么忽略主模块之外的包测试中的导入（就像 go mod供应商所做的那样）。默认情况下，go mod Why 会考虑与 all 模式匹配的包图。在声明 go 1.16 或更高版本的模块中（使用 go.mod 中的 go 指令），此标志在 Go 1.16 之后无效，因为 all 的含义已更改以匹配 go mod 供应商匹配的包集。
+
+
+
+### go version -m
+
+```shell
+go version [-m] [-v] [file ...]
+```
+
+例如：
+
+```shell
+# Print Go version used to build go.
+$ go version
+
+# Print Go version used to build a specific executable.
+$ go version ~/go/bin/gopls
+
+# Print Go version and module versions used to build a specific executable.
+$ go version -m ~/go/bin/gopls
+
+# Print Go version and module versions used to build executables in a directory.
+$ go version -m ~/go/bin/
+```
+
+go version 报告用于构建命令行上指定的每个可执行文件的 Go 版本。
+
+如果命令行上没有命名文件，go version 会打印自己的版本信息。
+
+如果指定了目录，go version 会递归地遍历该目录，查找可识别的 Go 二进制文件并报告其版本。默认情况下，go 版本不会报告目录扫描期间发现的无法识别的文件。 -v 标志导致它报告无法识别的文件。
+
+-m 标志使 go version 打印每个可执行文件的嵌入模块版本信息（如果可用）。对于每个可执行文件，go version -m 都会打印一张包含制表符分隔列的表格，如下所示。
+
+```shell
+$ go version -m ~/go/bin/goimports
+/home/jrgopher/go/bin/goimports: go1.14.3
+        path    golang.org/x/tools/cmd/goimports
+        mod     golang.org/x/tools      v0.0.0-20200518203908-8018eb2c26ba      h1:0Lcy64USfQQL6GAJma8BdHCgeofcchQj+Z7j0SXYAzU=
+        dep     golang.org/x/mod        v0.2.0          h1:KU7oHjnv3XNWfa5COkzUifxZmxp1TyI7ImMXqFxLwvQ=
+        dep     golang.org/x/xerrors    v0.0.0-20191204190536-9bdfabe68543      h1:E7g+9GITq07hpfrRu66IVDexMakfv52eLZ2CXBWiKr4=
+```
+
+表格的格式将来可能会发生变化。可以从runtime/debug.ReadBuildInfo 获得相同的信息。
+
+表中每一行的含义由第一列中的单词确定。
+
+- **path**: 用于构建可执行文件的主包的路径。
+
+- **mod**:包含主包的模块。这些列分别是模块路径、版本和总和。主模块有版本（devel），没有sum。
+
+- **dep**: 提供链接到可执行文件的一个或多个包的模块。与 mod 格式相同。
+
+- **=>**: 替换前一行的模块。如果替换是本地目录，则仅列出目录路径（无版本或总和）。如果替换是模块版本，则会列出路径、版本和总和，就像 mod 和 dep 一样。被替换的模块没有总和。
+
+### go clean -modcache
+
+```go
+go clean [-modcache]
+```
+
+-modcache 标志导致 go clean 删除整个模块缓存，包括版本化依赖项的解压源代码。
+
+这通常是删除模块缓存的最佳方法。默认情况下，模块缓存中的大多数文件和目录都是只读的，以防止测试和编辑者在经过身份验证后无意中更改文件。不幸的是，这会导致像 rm -r 这样的命令失败，因为如果不先使其父目录可写，则无法删除文件。
+
+-modcacherw 标志（被 go build 和其他模块感知命​​令接受）导致模块缓存中的新目录可写。要将 -modcacherw 传递给所有模块感知命​​令，请将其添加到 GOFLAGS 变量中。 GOGFLAGS 可以在环境中设置或使用 go env -w 设置。例如，以下命令将其永久设置：
+
+```shell
+go env -w GOFLAGS=-modcacherw
+```
+
+-modcacherw 应谨慎使用；开发人员应小心不要更改模块缓存中的文件。 go mod verify 可用于检查缓存中的文件是否与主模块的 go.sum 文件中的哈希值匹配。
+
+### Version queries
+
+有多个命令允许您使用版本查询指定模块的版本，版本查询出现在命令行上模块或包路径后面的 @ 字符之后。
+
+例如：
+
+```shell
+go get example.com/m@latest
+go mod download example.com/m@master
+go list -m -json example.com/m@e3702bed2
+```
+
+版本查询可能是以下之一：
+
+- 完全指定的语义版本，例如 v1.2.3，它选择特定版本。请参阅版本了解语法。
+
+- 语义版本前缀，例如 v1 或 v1.2，它选择具有该前缀的最高可用版本。
+
+- 语义版本比较，例如 <v1.2.3 或 >=v1.5.6，它选择与比较目标最接近的可用版本（> 和 >= 为最低版本，< 和 <= 为最高版本）。
+
+- 底层源存储库的修订标识符，例如提交哈希前缀、修订标签或分支名称。如果修订版标记有语义版本，则此查询将选择该版本。否则，此查询将为基础提交选择伪版本。请注意，无法通过这种方式选择名称与其他版本查询匹配的分支和标签。例如，查询 v2 选择以 v2 开头的最新版本，而不是名为 v2 的分支。
+
+- 字符串latest，选择最高的可用发行版本。如果没有发布版本，latest 将选择最高的预发布版本。如果没有标记版本，latest 会在存储库默认分支的顶端选择一个伪版本进行提交。
+
+- 字符串升级，与最新版本类似，但如果当前需要模块的版本高于最新版本选择的版本（例如预发布版本），则升级将选择当前版本。
+
+- 字符串补丁，选择与当前所需版本具有相同主要版本号和次要版本号的最新可用版本。如果当前不需要版本，则 patch 相当于最新版本。从 Go 1.16 开始，go get 在使用 patch 时需要当前版本（但 -u=patch 标志没有此要求）。
+
+除了针对特定命名版本或修订的查询之外，所有查询都会考虑 go list -m -versions 报告的可用版本（请参阅 go list -m）。此列表仅包含标记版本，而不包含伪版本。不考虑主模块的 go.mod 文件中的排除指令不允许的模块版本。同一模块最新版本的 go.mod 文件中的撤回指令所覆盖的版本也会被忽略，除非 -retracted 标志与 go list -m 一起使用以及加载撤回指令时除外。
+
+发布版本优先于预发布版本。例如，如果版本 v1.2.2 和 v1.2.3-pre 可用，则最新查询将选择 v1.2.2，即使 v1.2.3-pre 更高。 <v1.2.4 查询也会选择 v1.2.2，即使 v1.2.3-pre 更接近 v1.2.4。如果没有可用的发布或预发布版本，则最新、升级和补丁查询将为存储库默认分支顶部的提交选择一个伪版本。其他查询会报错。
