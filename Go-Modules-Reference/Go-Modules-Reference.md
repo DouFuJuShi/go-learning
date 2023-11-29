@@ -1458,3 +1458,227 @@ go list -m -json example.com/m@e3702bed2
 除了针对特定命名版本或修订的查询之外，所有查询都会考虑 go list -m -versions 报告的可用版本（请参阅 go list -m）。此列表仅包含标记版本，而不包含伪版本。不考虑主模块的 go.mod 文件中的排除指令不允许的模块版本。同一模块最新版本的 go.mod 文件中的撤回指令所覆盖的版本也会被忽略，除非 -retracted 标志与 go list -m 一起使用以及加载撤回指令时除外。
 
 发布版本优先于预发布版本。例如，如果版本 v1.2.2 和 v1.2.3-pre 可用，则最新查询将选择 v1.2.2，即使 v1.2.3-pre 更高。 <v1.2.4 查询也会选择 v1.2.2，即使 v1.2.3-pre 更接近 v1.2.4。如果没有可用的发布或预发布版本，则最新、升级和补丁查询将为存储库默认分支顶部的提交选择一个伪版本。其他查询会报错。
+
+### Module commands outside a module 模块外的模块命令
+
+模块感知的 Go 命令通常在工作目录或父目录中的 go.mod 文件定义的主模块的上下文中运行。某些命令可能在没有 go.mod 文件的情况下以模块感知模式运行，但大多数命令的工作方式不同，或者在不存在 go.mod 文件时报告错误。
+
+有关启用和禁用模块感知模式的信息，请参阅模块感知命​​令。
+
+| Command         | Behavior                                                              |
+| --------------- | --------------------------------------------------------------------- |
+| go build        | 只能加载、导入和构建标准库中的包和在命令行中指定为 .go 文件的包。无法构建来自其他模块的包，因为没有地方记录模块需求并确保确定性构建。 |
+| go doc          |                                                                       |
+| go fix          |                                                                       |
+| go fmt          |                                                                       |
+| go generate     |                                                                       |
+| go install      |                                                                       |
+| go list         |                                                                       |
+| go run          |                                                                       |
+| go test         |                                                                       |
+| go vet          |                                                                       |
+| go get          | 包和可执行文件可以像平常一样构建和安装。请注意，当没有 go.mod 文件运行 go get 时，没有主模块，因此不应用替换和排除指令。  |
+| go list -m      | 大多数参数都需要显式版本查询，除非使用 -versions 标志。                                     |
+| go mod download | 大多数参数都需要显式版本查询。                                                       |
+| go mod edit     | 需要显式文件参数。                                                             |
+| go mod graph    | 这些命令需要 go.mod 文件，如果不存在，则会报告错误。                                        |
+| go mod tidy     |                                                                       |
+| go mod vendor   |                                                                       |
+| go mod verify   |                                                                       |
+| go mod why      |                                                                       |
+
+### go work init
+
+```go
+go work init [moddirs]
+```
+
+Init 初始化并在当前目录中写入一个新的 go.work 文件，实际上是在当前目录中创建一个新的工作空间。
+
+go work init 可以选择接受工作区模块的路径作为参数。如果省略该参数，将创建一个没有模块的空工作区。
+
+每个参数路径都会添加到 go.work 文件中的 use 指令中。当前的 go 版本也将在 go.work 文件中列出。
+
+### go work edit
+
+```shell
+go work edit [editing flags] [go.work]
+```
+
+go work edit 命令提供了用于编辑 go.work 的命令行界面，主要供工具或脚本使用。它只读取 go.work；它不会查找有关所涉及模块的信息。如果未指定文件，Edit 会在当前目录及其父目录中查找 go.work 文件
+
+编辑标志指定编辑操作的序列。
+
+- -fmt 标志重新格式化 go.work 文件而不进行其他更改。使用或重写 go.work 文件的任何其他修改也暗示了这种重新格式化。唯一需要此标志的情况是没有指定其他标志，如“go work edit -fmt”中。
+
+- -use=path 和 -dropuse=path 标志从 go.work 文件的模块目录集中添加和删除 use 指令。
+
+- -replace=old[@v]=new[@v] 标志添加给定模块路径和版本对的替换。如果old@v中的@v被省略，则会添加左侧没有版本的替换，适用于旧模块路径的所有版本。如果new@v中的@v被省略，则新路径应该是本地模块根目录，而不是模块路径。请注意，-replace 会覆盖旧[@v] 的任何冗余替换，因此省略 @v 将删除特定版本的现有替换。
+
+- -dropreplace=old[@v] 标志删除给定模块路径和版本对的替换。如果省略@v，则左侧没有版本的替换将被删除。
+
+- -go=version 标志设置预期的 Go 语言版本。
+
+编辑标志可以重复。更改将按给定的顺序应用。
+
+go work edit 有额外的标志来控制其输出
+
+- -print 标志以文本格式打印最终的 go.work，而不是将其写回 go.mod。
+
+- -json 标志以 JSON 格式打印最终的 go.work 文件，而不是将其写回 go.mod。 JSON 输出对应于以下 Go 类型：
+
+```go
+type Module struct {
+    Path    string
+    Version string
+}
+
+type GoWork struct {
+    Go        string
+    Directory []Directory
+    Replace   []Replace
+}
+
+type Use struct {
+    Path       string
+    ModulePath string
+}
+
+type Replace struct {
+    Old Module
+    New Module
+}
+```
+
+### go work use
+
+```shell
+go work use [-r] [moddirs]
+```
+
+go work use 命令提供了一个命令行界面，用于将目录（可选）递归添加到 go.work 文件。
+
+如果磁盘上存在命令行 go.work 文件中列出的每个参数目录，则 use 指令将添加到 go.work 文件中；如果磁盘上不存在，则将其从 go.work 文件中删除。
+
+-r 标志在参数目录中递归搜索模块，并且 use 命令的操作就像将每个目录指定为参数一样：即，将为存在的目录添加 use 指令，并为不存在的目录删除 use 指令。
+
+### go work sync
+
+```shell
+go work sync
+```
+
+go work sync 命令将工作区的构建列表同步回工作区的模块。
+
+工作区的构建列表是用于在工作区中进行构建的所有（传递）依赖模块的版本集。 go work sync 使用最小版本选择 (MVS) 算法生成构建列表，然后将这些版本同步回工作区中指定的每个模块（使用 use 指令）。
+
+计算出工作区构建列表后，工作区中每个模块的 go.mod 文件都会被重写，并使用与该模块相关的依赖项进行升级以匹配工作区构建列表。请注意，最小版本选择可保证每个模块的构建列表版本始终与每个工作区模块中的版本相同或更高。
+
+## Module proxies
+
+### GOPROXY 协议
+
+模块代理是一个 HTTP 服务器，可以响应下面指定路径的 GET 请求。这些请求没有查询参数，也不需要特定的标头，因此即使是从固定文件系统（包括 file:// URL）提供服务的站点也可以是模块代理。
+
+成功的 HTTP 响应必须具有状态代码 200（正常）。遵循重定向 (3xx)。状态代码为 4xx 和 5xx 的响应被视为错误。错误代码 404（未找到）和 410（已消失）表示请求的模块或版本在代理上不可用，但可能在其他地方找到。错误响应的内容类型应为 text/plain，字符集为 utf-8 或 us-ascii。
+
+go 命令可以配置为使用 GOPROXY 环境变量联系代理或源控制服务器，该变量接受代理 URL 列表。该列表可能包含关键字 direct 或 off（有关详细信息，请参阅环境变量）。列表元素可以用逗号 (,) 或竖线 (|) 分隔，这决定了错误回退行为。当 URL 后跟逗号时，只有在 404（未找到）或 410（已消失）响应后，go 命令才会回退到后面的源。当 URL 后跟管道时，go 命令会在发生任何错误（包括超时等非 HTTP 错误）后回退到后面的源。这种错误处理行为让代理充当未知模块的看门人。例如，对于不在批准列表中的模块，代理可能会响应错误 403（禁止）（请参阅服务私有模块的私有代理）。
+
+下表指定了模块代理必须响应的查询。对于每个路径，$base 是代理 URL 的路径部分，$module 是模块路径，$version 是版本。例如，如果代理 URL 是 https://example.com/mod，并且客户端正在请求版本 v0.3.2 的模块 golang.org/x/text 的 go.mod 文件，则客户端将发送 GET请求 https://example.com/mod/golang.org/x/text/@v/v0.3.2.mod。
+
+为了避免在不区分大小写的文件系统中提供服务时出现歧义，通过将每个大写字母替换为感叹号，后跟相应的小写字母，对 $module 和 $version 元素进行大小写编码。这允许模块 example.com/M 和 example.com/m 都存储在磁盘上，因为前者被编码为 example.com/!m。
+
+| Path                              | Description                                                                                                                                                                                                                        |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| \$base/\$module/@v/list           | 以纯文本形式返回给定模块的已知版本列表，每行一个。此列表不应包含伪版本。<br/>返回有关模块的特定版本的 JSON 格式的元数据。响应必须是与以下 Go 数据结构相对应的 JSON 对象：<br/>type Info struct {<br/>       Version string    // version string<br/>        Time    time.Time // commit time<br/>}           |
+| \$base/\$module/@v/\$version.info | 版本字段是必需的，并且必须包含有效的规范版本（请参阅版本）。请求路径中的$version不需要是相同的版本，甚至不需要是有效的版本；该端点可用于查找分支名称或修订标识符的版本。但是，如果 $version 是规范版本，且主版本与 $module 兼容，则成功响应中的 Version 字段必须相同。<br/>时间字段是可选的。如果存在，则它必须是 RFC 3339 格式的字符串。表示版本创建的时间。<br/>将来可能会添加更多字段，因此保留其他名称。 |
+| \$base/\$module/@v/\$version.mod  | 返回特定版本模块的 go.mod 文件。如果模块没有所请求版本的 go.mod 文件，则必须返回仅包含具有所请求模块路径的模块语句的文件。否则，必须返回原始的、未修改的 go.mod 文件。                                                                                                                                    |
+| \$base/\$module/@v/\$version.zip  | 返回包含特定版本模块内容的 zip 文件。有关如何格式化此 zip 文件的详细信息，请参阅模块 zip 文件。                                                                                                                                                                            |
+| \$base/\$module/@latest           | 返回有关模块最新已知版本的 JSON 格式元数据，格式与 \$base/\$module/@v/\$version.info 相同。如果 \$base/\$module/@v/list 为空或没有列出合适的版本，则最新版本应该是 go 命令应使用的模块版本。该端点是可选的，并且不需要模块代理来实现它。                                                                            |
+
+当解析模块的最新版本时，go命令将请求\$base/\$module/@v/list，如果没有找到合适的版本，则请求\$base/\$module/@latest。 go 命令按顺序优先选择：语义上最高的发布版本、语义上最高的预发布版本和按时间顺序排列的最新伪版本。在 Go 1.12 及更早版本中，go 命令将 \$base/\$module/@v/list 中的伪版本视为预发布版本，但自 Go 1.13 以来，情况不再如此。
+
+模块代理必须始终为 \$base/\$module/\$version.mod 和 \$base/\$module/\$version.zip 查询提供成功响应的相同内容。此内容使用 go.sum 文件以及默认情况下的校验和数据库进行加密验证。
+
+go 命令将从模块代理下载的大部分内容缓存在\$GOPATH/pkg/mod/cache/download 的模块缓存中。即使直接从版本控制系统下载，go 命令也会合成显式信息、mod 和 zip 文件并将它们存储在该目录中，就像直接从代理下载它们一样。缓存布局与代理 URL 空间相同，因此在（或将其复制到）https://example.com/proxy 提供 \$GOPATH/pkg/mod/cache/download 将允许用户通过设置 GOPROXY 访问缓存的模块版本到 https://example.com/proxy。
+
+### Communicating with proxies 与proxy交互
+
+go命令可以从模块代理下载模块源代码和元数据。 GOPROXY 环境变量可用于配置 go 命令可以连接到哪些代理以及是否可以直接与版本控制系统([version control systems](https://go.dev/ref/mod#vcs))通信。下载的模块数据保存在模块缓存中。 go 命令仅在需要缓存中尚未存在的信息时才会联系代理。
+
+GOPROXY 协议部分描述了可以发送到 GOPROXY 服务器的请求。然而，了解 go 命令何时发出这些请求也很有帮助。例如，go build 遵循以下过程：
+
+- 通过读取 go.mod 文件并执行最小版本选择 (MVS) 来计算构建列表。
+
+- 读取命令行上指定的包以及它们导入的包。
+
+- 如果构建列表中的任何模块都没有提供某个包，请查找提供该包的模块。在 go.mod 的最新版本中添加模块要求，然后重新开始。
+
+- 在加载所有内容后构建包。
+
+当 go 命令计算构建列表时，它会加载模块图中每个模块的 go.mod 文件。如果 go.mod 文件不在缓存中，go 命令将使用 \$module/@v/\$version.mod 请求从代理下载它（其中 \$module 是模块路径，\$version 是版本）。这些请求可以使用像curl这样的工具进行测试。例如，以下命令下载 golang.org/x/mod v0.2.0 版本的 go.mod 文件：
+
+```shell
+$ curl https://proxy.golang.org/golang.org/x/mod/@v/v0.2.0.mod
+module golang.org/x/mod
+
+go 1.12
+
+require (
+    golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
+    golang.org/x/tools v0.0.0-20191119224855-298f0cb1881e
+    golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898
+)
+```
+
+为了加载包，go 命令需要提供它的模块的源代码。模块源代码分布在 .zip 文件中，这些文件被提取到模块缓存中。如果模块 .zip 不在缓存中，go 命令将使用 \$module/@v/\$version.zip 请求下载它。
+
+```shell
+$ curl -O https://proxy.golang.org/golang.org/x/mod/@v/v0.2.0.zip
+$ unzip -l v0.2.0.zip | head
+Archive:  v0.2.0.zip
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+     1479  00-00-1980 00:00   golang.org/x/mod@v0.2.0/LICENSE
+     1303  00-00-1980 00:00   golang.org/x/mod@v0.2.0/PATENTS
+      559  00-00-1980 00:00   golang.org/x/mod@v0.2.0/README
+       21  00-00-1980 00:00   golang.org/x/mod@v0.2.0/codereview.cfg
+      214  00-00-1980 00:00   golang.org/x/mod@v0.2.0/go.mod
+     1476  00-00-1980 00:00   golang.org/x/mod@v0.2.0/go.sum
+     5224  00-00-1980 00:00   golang.org/x/mod@v0.2.0/gosumcheck/main.go
+```
+
+请注意，.mod 和 .zip 请求是分开的，尽管 go.mod 文件通常包含在 .zip 文件中。 go命令可能需要下载许多不同模块的go.mod文件，而.mod文件比.zip文件小得多。此外，如果 Go 项目没有 go.mod 文件，代理将提供一个仅包含模块指令的合成 go.mod 文件。从版本控制系统下载时，go 命令会生成合成的 go.mod 文件。
+
+如果 go 命令需要加载构建列表中任何模块都没有提供的包，它将尝试查找提供它的新模块。将包解析为模块部分描述了此过程。总之，go 命令请求有关可能包含该包的每个模块路径的最新版本的信息。例如，对于包 golang.org/x/net/html，go 命令将尝试查找模块 golang.org/x/net/html、golang.org/x/net、golang.org 的最新版本/x/ 和 golang.org。只有 golang.org/x/net 实际上存在并提供该包，因此 go 命令使用该模块的最新版本。如果多个模块提供该包，go 命令将使用路径最长的模块。
+
+当 go 命令请求模块的最新版本时，它首先发送对 \$module/@v/list 的请求。如果列表为空或者返回的版本均不可使用，则会发送 \$module/@latest 请求。选择版本后，go 命令会发送 \$module/@v/\$version.info 元数据请求。然后，它可能会发送 \$module/@v/\$version.mod 和 \$module/@v/\$version.zip 请求来加载 go.mod 文件和源代码。
+
+```shell
+$ curl https://proxy.golang.org/golang.org/x/mod/@v/list
+v0.1.0
+v0.2.0
+
+$ curl https://proxy.golang.org/golang.org/x/mod/@v/v0.2.0.info
+{"Version":"v0.2.0","Time":"2020-01-02T17:33:45Z"}
+```
+
+下载 .mod 或 .zip 文件后，go 命令计算加密哈希并检查它是否与主模块的 go.sum 文件中的哈希匹配。如果 go.sum 中不存在哈希值，则默认情况下，go 命令会从校验和数据库中检索它。如果计算出的哈希值不匹配，go 命令会报告安全错误，并且不会在模块缓存中安装该文件。 GOPRIVATE 和 GONOSUMDB 环境变量可用于禁用对特定模块的校验和数据库的请求。 GOSUMDB 环境变量也可以设置为 off 以完全禁用对校验和数据库的请求。有关详细信息，请参阅验证模块。请注意，为 .info 请求返回的版本列表和版本元数据未经身份验证，并且可能会随着时间的推移而发生变化。
+
+### Serving modules directly from a proxy 直接从代理提供模块服务
+
+大多数模块都是从版本控制存储库开发和提供的。在直接模式下，go 命令使用版本控制工具下载此类模块（请参阅版本控制系统）。也可以直接从模块代理提供模块。这对于希望在不公开其版本控制服务器的情况下提供模块服务的组织以及使用 go 命令不支持的版本控制工具的组织非常有用。
+
+当 go 命令以直接模式下载模块时，它首先根据模块路径使用 HTTP GET 请求查找模块服务器的 URL。它在 HTML 响应中查找名为 go-import 的 <meta> 标记。标签的内容必须包含存储库根路径、版本控制系统和 URL，并以空格分隔。有关详细信息，请参阅查找模块路径的存储库。
+
+如果版本控制系统是 mod，go 命令会使用 GOPROXY 协议从给定的 URL 下载模块。
+
+例如，假设 go 命令正在尝试下载版本 v1.0.0 的模块 example.com/gopher。它向 https://example.com/gopher?go-get=1 发送请求。服务器响应一个包含标签的 HTML 文档：
+
+```
+<meta name="go-import" content="example.com/gopher mod https://modproxy.example.com">
+```
+
+根据此响应，go 命令通过发送 https://modproxy.example.com/example.com/gopher/@v/v1.0.0.info、v1.0.0.mod 和 v1.0.0 的请求来下载模块。压缩。
+
+请注意，直接从代理提供的模块无法在 GOPATH 模式下使用 go get 下载。
