@@ -357,7 +357,33 @@ ToolchainName = string | ident .  /* valid toolchain name; see “Go toolchains�
 toolchain go1.21.0
 ```
 
-### require directive
+### exclude directive
+
+排除指令可防止 go 命令加载模块版本。
+
+从 Go 1.16 开始，如果任何 go.mod 文件中的 require 指令引用的版本被主模块的 go.mod 文件中的 except 指令排除，则该要求将被忽略。这可能会导致像 go get 和 go mod tidy 这样的命令向 go.mod 添加对更高版本的新要求，并在适当的情况下使用 // 间接注释。
+
+在 Go 1.16 之前，如果 require 指令引用了排除版本，则 go 命令会列出该模块的可用版本（如 go list -m -versions 所示）并加载下一个更高的非排除版本。这可能会导致不确定的版本选择，因为下一个更高版本可能会随着时间而改变。发布版本和预发布版本都被考虑用于此目的，但伪版本则不然。如果没有更高的版本，go命令会报错。
+
+except 指令仅适用于主模块的 go.mod 文件，并在其他模块中被忽略。有关详细信息，请参阅最小版本选择。
+
+```ebnf
+ExcludeDirective = "exclude" ( ExcludeSpec | "(" newline { ExcludeSpec } ")" newline ) .
+ExcludeSpec = ModulePath Version newline .
+```
+
+例如：
+
+```go-mod
+exclude golang.org/x/net v1.2.3
+
+exclude (
+    golang.org/x/crypto v1.4.5
+    golang.org/x/text v1.6.7
+)
+```
+
+## require directive
 
 require 指令声明给定模块依赖项的最低所需版本。对于每个所需的模块版本，go 命令会加载该版本的 go.mod 文件并合并该文件中的要求。加载所有需求后，go 命令会使用最小版本选择 (MVS [minimal version selection (MVS)](https://go.dev/ref/mod#minimal-version-selection)) 来解决它们以生成构建列表。
 
@@ -375,5 +401,365 @@ RequireSpec = ModulePath Version newline .
 例如：
 
 ```go-mod
+require golang.org/x/net v1.2.3
 
+require (
+    golang.org/x/crypto v1.4.5 // indirect
+    golang.org/x/text v1.6.7
+)
 ```
+
+### replace directive
+
+replace指令用其他地方找到的内容替换模块的特定版本或模块的所有版本的内容。可以使用另一个模块路径和版本或特定于平台的文件路径来指定替换。
+
+如果箭头左侧 (=>) 存在版本，则仅替换该模块的特定版本；其他版本都可以正常访问。如果省略左侧版本，则替换该模块的所有版本。
+
+如果箭头右侧的路径是绝对或相对路径（以./或../开头），则将其解释为替换模块根目录的本地文件路径，其中必须包含go.mod文件。在这种情况下，必须省略替换版本。
+
+如果右侧的路径不是本地路径，则它必须是有效的模块路径。在这种情况下，需要一个版本。相同的模块版本不得同时出现在构建列表中。
+
+无论替换是使用本地路径还是模块路径指定，如果替换模块具有 go.mod 文件，则其模块指令必须与其替换的模块路径匹配。
+
+替换指令仅适用于主模块的 go.mod 文件，并在其他模块中被忽略。有关详细信息，请参阅 [Minimal version selection](https://go.dev/ref/mod#minimal-version-selection)。
+
+如果有多个主模块，则所有主模块的 go.mod 文件都适用。不允许主模块之间存在冲突的替换指令，并且必须在 go.work 文件的替换中删除或覆盖。
+
+请注意，单独的替换指令不会将模块添加到模块图中。还需要在主模块的 go.mod 文件或依赖项的 go.mod 文件中引用替换模块版本的 require 指令。如果不需要左侧的模块版本，则替换指令无效。
+
+```ebnf
+ReplaceDirective = "replace" ( ReplaceSpec | "(" newline { ReplaceSpec } ")" newline ) .
+ReplaceSpec = ModulePath [ Version ] "=>" FilePath newline
+            | ModulePath [ Version ] "=>" ModulePath Version newline .
+FilePath = /* platform-specific relative or absolute file path */
+```
+
+例如：
+
+```go-mod
+replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
+
+replace (
+    golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
+    golang.org/x/net => example.com/fork/net v1.4.5
+    golang.org/x/net v1.2.3 => ./fork/net
+    golang.org/x/net => ./fork/net
+)
+```
+
+### retract directive 撤回指令
+
+撤回指令指示不应依赖 go.mod 定义的模块的版本或版本范围。当版本过早发布或版本发布后发现严重问题时，撤回指令非常有用。撤回的版本应在版本控制存储库和模块代理中保持可用，以确保依赖于它们的构建不会被破坏。 “撤回”这个词借用自学术文献：撤回的研究论文仍然可用，但它有问题，不应该成为未来工作的基础。
+
+当模块版本被收回时，用户将不会使用 go get、go mod tidy 或其他命令自动升级到该模块版本。依赖于撤回版本的构建应该继续工作，但是当用户使用 go list -m -u 检查更新或使用 go get 更新相关模块时，用户将收到撤回通知。
+
+要收回版本，模块作者应向 go.mod 添加收回指令，然后发布包含该指令的新版本。新版本必须高于其他发布或预发布版本；也就是说，@latest [version query](https://go.dev/ref/mod#version-queries)应在考虑撤回之前解析为新版本。 go 命令加载并应用 go list -m -retracted $modpath@latest 显示的版本的撤回（其中 $modpath 是模块路径）。
+
+除非使用 -retracted 标志，否则收回的版本将从 go list -m -versions 打印的版本列表中隐藏。解析 @>=v1.2.3 或 @latest 等版本查询时，将排除已收回的版本。
+
+包含撤回的版本可能会自行撤回。如果模块的最高版本或预发布版本自行收回，则在排除收回的版本后，@latest 查询将解析为较低版本。
+
+例如，考虑模块 example.com/m 的作者意外发布版本 v1.0.0 的情况。为了防止用户升级到 v1.0.0，作者可以在 go.mod 中添加两个撤回指令，然后用撤回标记 v1.0.1。
+
+```go-mod
+retract (
+    v1.0.0 // Published accidentally.
+    v1.0.1 // Contains retractions only.
+)
+```
+
+当用户运行 go get example.com/m@latest 时，go 命令会读取 v1.0.1（现在是最高版本）的撤回内容。 v1.0.0 和 v1.0.1 都已撤销，因此 go 命令将升级（或降级！）到下一个最高版本，可能是 v0.9.5。
+
+撤消指令可以使用单个版本（如 v1.0.0）或具有上限和下限的封闭版本间隔编写，由 [ 和 ] 分隔（如 [v1.1.0, v1.2.0]）。单一版本相当于上限和下限相同的区间。与其他指令一样，多个撤回指令可以组合在一个块中，该块由 ( 在行尾和 ) 分隔在其自己的行上。
+
+每个撤回指令都应有一条注释，解释撤回的理由，但这不是强制性的。 go 命令可能会在有关撤回版本的警告和 go 列表输出中显示基本原理注释。基本原理注释可以直接写在撤消指令上方（中间没有空行），也可以写在同一行之后。如果注释出现在块上方，则它适用于该块内没有自己注释的所有撤回指令。理由注释可以跨越多行。
+
+```ebnf
+RetractDirective = "retract" ( RetractSpec | "(" newline { RetractSpec } ")" newline ) .
+RetractSpec = ( Version | "[" Version "," Version "]" ) newline .
+```
+
+例如：
+
+- 收回 v1.0.0 和 v1.9.9 之间的所有版本：
+
+```go-mod
+retract v1.0.0
+retract [v1.0.0, v1.9.9]
+retract (
+    v1.0.0
+    [v1.0.0, v1.9.9]
+)
+```
+
+- 在过早发布版本 v1.0.0 后返回到无版本控制：
+
+```go-mod
+retract [v0.0.0, v1.0.1] // assuming v1.0.1 contains this retraction.
+```
+
+- 清除包含所有伪版本和标记版本的模块：
+
+```go-mod
+retract [v0.0.0-0, v0.15.2]  // assuming v0.15.2 contains this retraction.
+```
+
+撤销指令是在<mark> Go 1.16 中添加</mark>的。 Go 1.15及更低版本如果在主模块的go.mod文件中写入retract指令会报告错误，并且会忽略依赖项的go.mod文件中的retract指令。
+
+### Automatic updates
+
+如果 go.mod 缺少信息或没有准确反映现实，大多数命令都会报告错误。 go get 和 go mod tidy 命令可用于解决大多数此类问题。此外，**-mod=mod 标志可以与大多数模块感知命​​令（go build、go test 等）一起使用**，以指示 go 命令自动修复 go.mod 和 go.sum 中的问题。
+
+例如，考虑这个 go.mod 文件：
+
+```go-mod
+module example.com/M
+
+go 1.16
+
+require (
+    example.com/A v1
+    example.com/B v1.0.0
+    example.com/C v1.0.0
+    example.com/D v1.2.3
+    example.com/E dev
+)
+
+exclude example.com/D v1.2.3
+```
+
+使用 -mod=mod 触发的更新将非规范版本标识符重写为规范 semver 形式，因此 example.com/A 的 v1 变为 v1.0.0，example.com/E 的 dev 变为 dev 上最新提交的伪版本分支，可能是 v0.0.0-20180523231146-b3f5c0f6e5f1。
+
+此更新修改了要求以尊重排除，因此对排除的 example.com/D v1.2.3 的要求更新为使用 example.com/D 的下一个可用版本，可能是 v1.2.4 或 v1.3.0。
+
+该更新删除了多余或误导性的要求。例如，如果 example.com/A v1.0.0 本身需要 example.com/B v1.2.0 和 example.com/C v1.0.0，那么 go.mod 对 example.com/B v1.0.0 的要求会产生误导（已被取代） example.com/A 需要 v1.2.0），而 example.com/C v1.0.0 的要求是多余的（暗示 example.com/A 需要相同版本），因此两者都将被删除。如果主模块包含直接从 example.com/B 或 example.com/C 导入包的包，则需求将保留，但更新为实际使用的版本。
+
+最后，更新以规范格式重新格式化 go.mod，以便未来的机械更改将导致最小的差异。如果只需要更改格式，go 命令不会更新 go.mod。
+
+因为模块图定义了 import 语句的含义，所以任何加载包的命令也使用 go.mod，因此可以更新它，包括 go build、go get、go install、go list、go test、go mod tidy。
+
+在 Go 1.15 及更低版本中，默认启用 -mod=mod 标志，因此会自动执行更新。从 Go 1.16 开始，go 命令的行为就像设置了 -mod=readonly 一样：如果需要对 go.mod 进行任何更改，go 命令会报告错误并建议修复。
+
+## Minimal version selection (MVS) 最小版本选择
+
+Go 使用一种称为最小版本选择 (MVS) 的算法来选择构建包时要使用的一组模块版本。 MVS 在 Russ Cox 的《[Minimal Version Selection](https://research.swtch.com/vgo-mvs)》中进行了详细描述。
+
+从概念上讲，MVS 在由 go.mod 文件指定的模块有向图上运行。图中的每个顶点代表一个模块版本。每条边代表依赖项的最低所需版本，使用 require 指令指定。该图可以通过主模块的 go.mod 文件中的排除和替换指令以及 go.work 文件中的替换指令进行修改。
+
+MVS 生成构建列表([build list](https://go.dev/ref/mod#glos-build-list))作为输出，即用于构建的模块版本列表。
+
+MVS 从主模块（图中没有版本的特殊顶点）开始并遍历图，跟踪每个模块所需的最高版本。在遍历结束时，最高要求的版本构成构建列表：它们是满足所有要求的最低版本。
+
+可以使用命令 go list -m all 检查构建列表。与其他依赖管理系统不同，构建列表不保存在“锁”文件中。 MVS 是确定性的，当新版本的依赖项发布时，构建列表不会改变，因此 MVS 用于在每个模块感知命​​令的开始处计算它。
+
+考虑下图中的示例。主模块需要1.2或更高版本的模块A和1.2或更高版本的模块B。 A 1.2 和 B 1.2 分别需要 C 1.3 和 C 1.4。 C 1.3 和 C 1.4 都需要 D 1.2。
+![](images/buildlist.svg)
+
+MVS 访问并加载每个以蓝色突出显示的模块版本的 go.mod 文件。在图遍历结束时，MVS 返回包含粗体版本的构建列表：A 1.2、B 1.2、C 1.4 和 D 1.2。请注意，可以使用更高版本的 B 和 D，但 MVS 不会选择它们，因为没有什么需要它们。
+
+### Replacement 替换
+
+模块的内容（包括其 go.mod 文件）可以使用主模块的 go.mod 文件或工作区的 go.work 文件中的替换指令进行替换。替换指令可以应用于模块的特定版本或模块的所有版本。
+
+替换会更改模块图，因为替换模块可能具有与替换版本不同的依赖项。
+
+考虑下面的示例，其中 C 1.4 已替换为 R。R 依赖于 D 1.3 而不是 D 1.2，因此 MVS 返回包含 A 1.2、B 1.2、C 1.4（替换为 R）和 D 1.3 的构建列表。
+
+![](images/replace.svg)
+
+### Exclusion 排除
+
+还可以使用主模块的 go.mod 文件中的排除指令在特定版本中排除模块。
+
+排除也会改变模块图。当某个版本被排除时，它将从模块图中删除，并且对其的要求将被重定向到下一个更高的版本。
+
+考虑下面的例子。 C 1.3 已被排除。 MVS 将表现为 A 1.2 需要 C 1.4（下一个更高版本）而不是 C 1.3。
+
+![](images/exclude.svg)
+
+### Upgrades 升级版本
+
+go get 命令可用于升级一组模块。要执行升级，go 命令会在运行 MVS 之前通过将已访问版本的边添加到升级版本来更改模块图。
+
+考虑下面的例子。模块B可以从1.2升级到1.3，C可以从1.3升级到1.4，模块D可以从1.2升级到1.3。
+
+![](images/upgrade.svg)
+
+升级（和降级）可能会添加或删除间接依赖项。在这种情况下，升级后，E 1.1 和 F 1.1 会出现在构建列表中，因为 B 1.3 需要 E 1.1。
+
+为了保留升级，go 命令更新了 go.mod 中的要求。它将把 B 的要求更改为 1.3 版本。它还将通过 // 间接注释添加对 C 1.4 和 D 1.3 的要求，因为否则不会选择这些版本。
+
+### Downgrade 降级版本
+
+go get 命令也可用于降级一组模块。要执行降级，go 命令通过删除降级版本之上的版本来更改模块图。它还删除依赖于已删除版本的其他模块的版本，因为它们可能与其依赖项的降级版本不兼容。如果主模块需要通过降级删除的模块版本，则要求更改为尚未删除的先前版本。如果没有可用的先前版本，则删除该要求。
+
+考虑下面的例子。假设发现 C 1.4 存在问题，因此我们降级到 C 1.3。 C 1.4 已从模块图中删除。 B 1.2 也被删除，因为它需要 C 1.4 或更高版本。主模块对B的要求改为1.1。
+
+![](images/downgrade.svg)
+
+go get 还可以完全删除依赖项，在参数后使用 @none 后缀。这与降级类似。指定模块的所有版本都将从模块图中删除。
+
+## Module graph pruning 模块图修剪
+
+如果主模块为 go 1.17 或更高版本，则用于最小版本选择的模块图仅包含在其自己的 go.mod 文件中指定 go 1.17 或更高版本的每个模块依赖项的直接要求，除非该版本的模块也是（传递地）go 1.16 或更低版本的某些其他依赖项需要。 （go 1.17 依赖项的传递依赖项已从模块图中删除。）
+
+由于 go 1.17 go.mod 文件包含在该模块中构建任何包或测试所需的每个依赖项的 require 指令，因此修剪后的模块图包含 go build 或 go test 明确要求的任何依赖项中的包所需的所有依赖项主模块。在给定模块中构建任何包或测试不需要的模块不会影响其包的运行时行为，因此从模块图中删除的依赖项只会导致其他不相关的模块之间的干扰。
+
+其需求已被删除的模块仍然出现在模块图中，并且仍然由 go list -m all 报告：它们选择的版本是已知的并且定义良好，并且可以从这些模块加载包（例如，作为传递依赖项从其他模块加载的测试）。然而，由于 go 命令无法轻松识别满足这些模块的哪些依赖关系，因此 go build 和 go test 的参数不能包含来自其需求已被删除的模块的包。 go get 将包含每个命名包的模块提升为显式依赖项，允许在该包上调用 go build 或 go test。
+
+由于 Go 1.16 及更早版本不支持模块图修剪，因此指定 go 1.16 或更低版本的每个模块仍包含依赖关系的完整传递闭包（包括传递 go 1.17 依赖关系）。 （在 go 1.16 及更低版本中，go.mod 文件仅包含直接依赖项，因此必须加载更大的图以确保包含所有间接依赖项。）
+
+默认情况下，go mod tidy 为模块记录的 go.sum 文件包含低于其 go 指令中指定版本的 Go 版本所需的校验和。因此，go 1.17 模块包含 Go 1.16 加载的完整模块图所需的校验和，但 go 1.18 模块将仅包含 Go 1.17 加载的修剪模块图所需的校验和。 -compat 标志可用于覆盖默认版本（例如，在 go 1.17 模块中更积极地修剪 go.sum 文件）。
+
+更多细节请参见设计文档( [the design document](https://go.googlesource.com/proposal/+/master/design/36460-lazy-module-loading.md))。
+
+### Lazy module loading
+
+为模块图修剪添加的更全面的要求还可以在模块内工作时实现另一种优化。如果主模块是 go 1.17 或更高版本，则 go 命令会避免加载完整的模块图，直到（除非）需要它。相反，它仅加载主模块的 go.mod 文件，然后尝试加载仅使用这些要求构建的包。如果在这些需求中没有找到要导入的包（例如，对主模块外部的包的测试的依赖项），则根据需要加载模块图的其余部分。
+
+如果可以在不加载模块图的情况下找到所有导入的包，则 go 命令将仅加载包含这些包的模块的 go.mod 文件，并根据主模块的要求检查它们的要求，以确保它们在本地一致。 （由于版本控制合并、手动编辑以及使用本地文件系统路径替换的模块的更改，可能会出现不一致。）
+
+## Workspaces 工作空间
+
+工作区是磁盘上的模块集合，在运行最小版本选择 (MVS) 时用作主模块。
+
+可以在 go.work 文件中声明工作空间，该文件指定工作空间中每个模块的模块目录的相对路径。当不存在 go.work 文件时，工作区由包含当前目录的单个模块组成。
+
+大多数与模块一起使用的 go 子命令都对当前工作区确定的模块集进行操作。 go mod init、go modwhy、gomodedit、gomodtidy、gomodvendor 和 goget 始终在单个主模块上运行。
+
+命令通过首先检查 GOWORK 环境变量来确定它是否位于工作区上下文中。如果 **GOWORK** 设置为关闭，该命令将位于单模块上下文中。如果为空或未提供，该命令将搜索当前工作目录，然后是连续的父目录，以查找文件 go.work。如果找到文件，该命令将在它定义的工作空间中运行；否则，工作区将仅包含包含工作目录的模块。如果 GOWORK 命名以 .work 结尾的现有文件的路径，则将启用工作空间模式。任何其他值都是错误的。您可以使用 go env GOWORK 命令来确定 go 命令正在使用哪个 go.work 文件。如果 go 命令不是工作空间模式，则 go env GOWORK 将为空。
+
+### go.work files
+
+工作空间由名为 go.work 的 UTF-8 编码文本文件定义。 go.work 文件是面向行的。每行包含一个指令，由关键字和参数组成。例如：
+
+```go-module
+go 1.18
+
+use ./my/first/thing
+use ./my/second/thing
+
+replace example.com/bad/thing v1.4.5 => example.com/good/thing v1.4.5
+```
+
+与 go.mod 文件中一样，可以从相邻行中分解出前导关键字来创建块。
+
+```go-module
+use (
+    ./my/first/thing
+    ./my/second/thing
+)
+```
+
+go 命令提供了几个用于操作 go.work 文件的子命令。 go work init 创建新的 go.work 文件。 go work use 将模块目录添加到 go.work 文件中。 go work edit 执行低级编辑。 Go 程序可以使用 golang.org/x/mod/modfile 包以编程方式进行相同的更改。
+
+### Lexical elements 词法元素
+
+go.work 文件中的词汇元素的定义方式与 go.mod 文件中的定义方式完全相同。
+
+### Grammar 语法
+
+go.work 语法在下面使用扩展巴科斯-诺尔范式 (EBNF) 指定。有关 EBNF 语法的详细信息，请参阅 Go 语言规范中的符号部分。
+
+```ebnf
+GoWork = { Directive } .
+Directive = GoDirective |
+            ToolchainDirective |
+            UseDirective |
+            ReplaceDirective .
+```
+
+换行符、标识符和字符串分别用 newline、ident 和 string 表示。
+
+模块路径和版本用 ModulePath 和 Version 表示。模块路径和版本的指定方式与 go.mod 文件完全相同。
+
+```ebnf
+ModulePath = ident | string . /* see restrictions above */
+Version = ident | string .    /* see restrictions above */
+```
+
+### go directive
+
+有效的 go.work 文件中需要有 go 指令。版本必须是有效的 Go 发行版本：正整数后跟一个点和一个非负整数（例如 1.18、1.19）。
+
+go 指令指示 go.work 文件要使用的 go 工具链版本。如果对 go.work 文件格式进行更改，工具链的未来版本将根据其指示的版本解释该文件。
+
+一个 go.work 文件最多可以包含一个 go 指令。
+
+```ebnf
+GoDirective = "go" GoVersion newline .
+GoVersion = string | ident .  /* valid release version; see above */
+```
+
+例如：
+
+```go-module
+go 1.18
+```
+
+### toolchain directive
+
+工具链指令声明要在工作区中使用的建议 Go 工具链。仅当默认工具链早于建议的工具链时，它才有效。
+有关详细信息，请参阅“Go 工具链”。
+
+```go-module
+ToolchainDirective = "toolchain" ToolchainName newline .
+ToolchainName = string | ident .  /* valid toolchain name; see “Go toolchains” */
+```
+
+例如：
+
+```go-module
+toolchain go1.21.0
+```
+
+### use directive
+
+用户将磁盘上的模块添加到工作区中的主模块集中。它的参数是包含模块的 go.mod 文件的目录的相对路径。 use 指令不会添加包含在其参数目录的子目录中的模块。这些模块可以通过包含其 go.mod 文件的目录添加到单独的 use 指令中。
+
+```go-module
+UseDirective = "use" ( UseSpec | "(" newline { UseSpec } ")" newline ) .
+UseSpec = FilePath newline .
+FilePath = /* platform-specific relative or absolute file path */
+```
+
+例如：
+
+```go-module
+use ./mymod  // example.com/mymod
+
+use (
+    ../othermod
+    ./subdir/thirdmod
+)
+```
+
+### replace directive
+
+与 go.mod 文件中的替换指令类似，go.work 文件中的替换指令将模块的特定版本或模块的所有版本的内容替换为在其他地方找到的内容。 go.work 中的通配符替换会覆盖 go.mod 文件中特定于版本的替换。
+
+go.work 文件中的替换指令会覆盖工作区模块中相同模块或模块版本的任何替换。
+
+```go
+ReplaceDirective = "replace" ( ReplaceSpec | "(" newline { ReplaceSpec } ")" newline ) .
+ReplaceSpec = ModulePath [ Version ] "=>" FilePath newline
+            | ModulePath [ Version ] "=>" ModulePath Version newline .
+FilePath = /* platform-specific relative or absolute file path */
+```
+
+例如：
+
+```go-module
+replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
+
+replace (
+    golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
+    golang.org/x/net => example.com/fork/net v1.4.5
+    golang.org/x/net v1.2.3 => ./fork/net
+    golang.org/x/net => ./fork/net
+)
+```
+
+## Compatibility with non-module repositories 与非模块存储库的兼容性
+
+
