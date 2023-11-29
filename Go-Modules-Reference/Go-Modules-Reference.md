@@ -1682,3 +1682,150 @@ $ curl https://proxy.golang.org/golang.org/x/mod/@v/v0.2.0.info
 根据此响应，go 命令通过发送 https://modproxy.example.com/example.com/gopher/@v/v1.0.0.info、v1.0.0.mod 和 v1.0.0 的请求来下载模块。压缩。
 
 请注意，直接从代理提供的模块无法在 GOPATH 模式下使用 go get 下载。
+
+## Version control systems 版本控制系统
+
+go命令可以直接从版本控制存储库下载模块源代码和元数据。从代理下载模块通常更快，但如果代理不可用或代理无法访问模块的存储库（对于私有存储库通常是这样），则需要直接连接到存储库。支持 Git、Subversion、Mercurial、Bazaar 和 Fossil。版本控制工具必须安装在 PATH 中的目录中才能让 go 命令使用它。
+
+要从源存储库而不是代理下载特定模块，请设置 GOPRIVATE 或 GONOPROXY 环境变量。要将 go 命令配置为直接从源存储库下载所有模块，请将 GOPROXY 设置为 direct。有关详细信息，请参阅环境变量[Environment variables](https://go.dev/ref/mod#environment-variables)。
+
+### Finding a repository for a module path 查找模块路径的存储库
+
+当 go 命令以直接模式下载模块时，它首先查找包含该模块的存储库。
+
+如果模块路径的路径组件末尾有 VCS 限定符（.bzr、.fossil、.git、.hg、.svn 之一），则 go 命令将使用该路径限定符之前的所有内容作为存储库 URL。例如，对于模块 example.com/foo.git/bar，go 命令使用 git 下载位于 example.com/foo.git 的存储库，期望在 bar 子目录中找到该模块。 go命令会根据版本控制工具支持的协议猜测要使用的协议。
+
+如果模块路径没有限定符，go 命令将使用 ?go-get=1 查询字符串向从模块路径派生的 URL 发送 HTTP GET 请求。例如，对于模块 golang.org/x/mod，go 命令可能会发送以下请求：
+
+```shell
+https://golang.org/x/mod?go-get=1 (preferred)
+http://golang.org/x/mod?go-get=1  (fallback, only with GOINSECURE)
+```
+
+go 命令遵循重定向，但会忽略响应状态代码，因此服务器可能会响应 404 或任何其他错误状态。 GOINSECURE 环境变量可以设置为允许回退并重定向到特定模块的未加密 HTTP。
+
+服务器必须响应 HTML 文档，该文档的 <head> 中包含 <meta> 标记。 <meta> 标签应该出现在文档的早期，以避免混淆 go 命令的受限解析器。特别是，它应该出现在任何原始 JavaScript 或 CSS 之前。 <meta> 标记必须采用以下形式：
+
+```html
+<meta name="go-import" content="root-path vcs repo-url">
+```
+
+root-path 是存储库根路径，即与存储库根目录对应的模块路径部分。它必须是请求的模块路径的前缀或完全匹配。如果不完全匹配，则会对前缀发出另一个请求以验证 <meta> 标记是否匹配。
+
+vcs是版本控制系统。它必须是下表列出的工具之一或关键字 mod，它指示 go 命令使用 GOPROXY 协议从给定 URL 下载模块。有关详细信息，请参阅直接从代理提供服务模块。
+
+repo-url 是存储库的 URL。如果 URL 不包含方案（因为模块路径具有 VCS 限定符或因为 <meta> 标记缺少方案），则 go 命令将尝试版本控制系统支持的每个协议。例如，对于 Git，go 命令将尝试 https://，然后尝试 git+ssh://。仅当模块路径与 GOINSECURE 环境变量匹配时，才可以使用不安全协议（例如 http:// 和 git://）。
+
+| Name       | Command | GoVCS default      | Secure schemes      |
+| ---------- | ------- | ------------------ | ------------------- |
+| Bazaar     | bzr     | Private only       | https, bzr+ssh      |
+| Fossil     | fossil  | Private only       | https               |
+| Git        | git     | Public and private | https, git+ssh, ssh |
+| Mercurial  | hg      | Public and private | https, ssh          |
+| Subversion | svn     | Private onl        | https, svn+ssh      |
+
+作为一个例子，再次考虑 golang.org/x/mod。 go 命令向 https://golang.org/x/mod?go-get=1 发送请求。服务器响应一个包含标签的 HTML 文档：
+
+```html
+<meta name="go-import" content="golang.org/x/mod git https://go.googlesource.com/mod">
+```
+
+根据此响应，go 命令将使用远程 URL https://go.googlesource.com/mod 处的 Git 存储库。
+
+GitHub 和其他流行的托管服务响应所有存储库的 ?go-get=1 查询，因此通常不需要为这些站点托管的模块进行服务器配置。
+
+找到存储库 URL 后，go 命令会将存储库克隆到模块缓存中。一般来说，go 命令会尝试避免从存储库中获取不需要的数据。但是，实际使用的命令因版本控制系统而异，并且可能随时间而变化。对于 Git，go 命令可以列出大多数可用版本，而无需下载提交。它通常会获取提交而不下载祖先提交，但有时这样做是必要的。
+
+### Mapping versions to commits 将版本映射到commit
+
+go 命令可以检查存储库中特定规范版本（例如 v1.2.3、v2.4.0-beta 或 v3.0.0+不兼容）的模块。每个模块版本在存储库中都应该有一个语义版本标签，指示应该为给定版本签出哪个修订版本。
+
+如果模块定义在存储库根目录或根目录的主版本子目录中，则每个版本标记名称等于相应的版本。例如，模块 golang.org/x/text 定义在其存储库的根目录中，因此版本 v0.3.2 在该存储库中具有标签 v0.3.2。对于大多数模块来说都是如此。
+
+如果模块定义在存储库内的子目录中，即模块路径的模块子目录部分不为空，则每个标记名称必须以模块子目录为前缀，后跟斜杠。例如，模块 golang.org/x/tools/gopls 定义在存储库的 gopls 子目录中，根路径为 golang.org/x/tools。该模块的 v0.4.0 版本必须在该存储库中具有名为 gopls/v0.4.0 的标签。
+
+语义版本标签的主版本号必须与模块路径的主版本后缀（如果有）一致。例如，标签 v1.0.0 可能属于模块 example.com/mod，但不属于 example.com/mod/v2，后者将具有类似 v2.0.0 的标签。
+
+如果不存在 go.mod 文件，并且该模块位于存储库根目录中，则主版本 v2 或更高版本的标签可能属于没有主版本后缀的模块。这种版本用后缀+不兼容表示。版本标签本身不能有后缀。请参阅与非模块存储库的兼容性。 [Compatibility with non-module repositories](https://go.dev/ref/mod#non-module-compat).
+
+一旦创建标签，就不应将其删除或更改为其他版本。版本经过验证以确保安全、可重复的构建。如果标签被修改，客户端在下载时可能会看到安全错误。即使删除标签后，其内容也可能在模块代理上仍然可用。
+
+### Mapping pseudo-versions to commits
+
+go 命令可以检查存储库中特定修订版的模块，编码为伪版本，如 v1.3.2-0.20191109021931-daa7c04131f5。
+
+伪版本的最后 12 个字符（上例中的 daa7c04131f5）表示存储库中要签出的修订版本。这的含义取决于版本控制系统。对于 Git 和 Mercurial，这是提交哈希的前缀。对于 Subversion，这是一个用零填充的修订号。
+
+在签出提交之前，go 命令会验证时间戳（上面的 20191109021931）是否与提交日期匹配。它还验证基本版本（v1.3.1，上例中 v1.3.2 之前的版本）是否对应于作为提交祖先的语义版本标记。这些检查确保模块作者可以完全控制伪版本与其他发布版本的比较。
+
+有关更多信息，请参阅伪版本。 [Pseudo-versions](https://go.dev/ref/mod#pseudo-versions)
+
+### Mapping branches and commits to versions
+
+可以使用版本查询在特定分支、标签或修订版本处签出模块。
+
+```shell
+go get example.com/mod@master
+```
+
+go 命令将这些名称转换为可以通过最小版本选择（MVS）使用的规范版本。 MVS 取决于明确订购版本的能力。随着时间的推移，分支名称和修订版本无法可靠地进行比较，因为它们依赖于可能会发生变化的存储库结构。
+
+如果修订版标有一个或多个语义版本标签（例如 v1.2.3），则将使用最高有效版本的标签。 go命令只考虑可能属于目标模块的语义版本标签；例如，example.com/mod/v2 不会考虑标签 v1.5.2，因为主要版本与模块路径的后缀不匹配。
+
+如果修订版本未标记有效的语义版本标签，则 go 命令将生成伪版本。如果修订版具有带有有效语义版本标签的祖先，则最高祖先版本将用作伪版本基础。请参阅伪版本。
+
+### Module directories within a repository
+
+一旦在特定版本中签出了模块的存储库，go 命令必须找到包含模块的 go.mod 文件的目录（模块的根目录）。
+回想一下，模块路径由三部分组成：存储库根路径（对应于存储库根目录）、模块子目录和主版本后缀（仅适用于 v2 或更高版本发布的模块）。
+对于大多数模块，模块路径等于存储库根路径，因此模块的根目录就是存储库的根目录。
+模块有时在存储库子目录中定义。这通常是针对具有多个需要独立发布和版本控制的组件的大型存储库。这样的模块应该在与存储库根路径之后的模块路径部分匹配的子目录中找到。例如，假设模块 example.com/monorepo/foo/bar 位于根路径为 example.com/monorepo 的存储库中。它的 go.mod 文件必须位于 foo/bar 子目录中。
+如果模块以主版本 v2 或更高版本发布，则其路径必须具有主版本后缀。带有主版本后缀的模块可以在两个子目录之一中定义：一个带有后缀，一个不带有后缀。例如，假设上述模块的新版本已发布，路径为 example.com/monorepo/foo/bar/v2。它的 go.mod 文件可能位于 foo/bar 或 foo/bar/v2 中。
+带有主版本后缀的子目录是主版本子目录。它们可用于在单个分支上开发模块的多个主要版本。当多个主要版本的开发在不同的分支上进行时，这可能是不必要的。然而，大版本子目录有一个重要的属性：在GOPATH模式下，包导入路径与GOPATH/src下的目录完全匹配。 go 命令在 GOPATH 模式下提供最小的模块兼容性（请参阅与非模块存储库的兼容性），因此主要版本子目录对于与 GOPATH 模式下构建的项目的兼容性并不总是必需的。不过，不支持最低模块兼容性的旧工具可能会存在问题。
+一旦 go 命令找到模块根目录，它就会创建该目录内容的 .zip 文件，然后将该 .zip 文件提取到模块缓存中。有关 .zip 文件中可能包含哪些文件的详细信息，请参阅文件路径和大小限制。 .zip 文件的内容在提取到模块缓存之前会进行身份验证，就像从代理下载 .zip 文件一样。
+模块 zip 文件不包含供应商目录或任何嵌套模块（包含 go.mod 文件的子目录）的内容。这意味着模块必须注意不要引用其目录之外或其他模块中的文件。例如， //go:embed 模式不得与嵌套模块中的文件匹配。在文件不应包含在模块中的情况下，此行为可能是一种有用的解决方法。例如，如果存储库将大文件签入 testdata 目录，模块作者可以在 testdata 中添加一个空的 go.mod 文件，这样他们的用户就不需要下载这些文件。当然，这可能会减少用户测试其依赖项的覆盖范围。
+
+### Special case for LICENSE files
+
+当 go 命令为不在存储库根目录中的模块创建 .zip 文件时，如果该模块的根目录中没有名为 LICENSE 的文件（与 go.mod 一起），则 go 命令将复制名为 LICENSE 的文件如果同一版本中存在许可证，则来自存储库根目录的许可证。
+这种特殊情况允许相同的许可证文件应用于存储库中的所有模块。这仅适用于专门名为 LICENSE 的文件，不带 .txt 等扩展名。不幸的是，如果不破坏现有模块的加密总和，就无法扩展它；请参阅验证模块。其他工具和网站（例如 pkg.go.dev）可能会识别具有其他名称的文件。
+另请注意，go 命令在创建模块 .zip 文件时不包含符号链接；请参阅文件路径和大小限制。因此，如果存储库的根目录中没有 LICENSE 文件，作者可以在子目录中定义的模块中创建其许可证文件的副本，以确保这些文件包含在模块 .zip 文件中。
+
+### Controlling version control tools with GOVCS 使用 GOVCS 控制版本控制工具
+
+go 命令能够使用 git 等版本控制命令下载模块，这对于去中心化的包生态系统至关重要，在该生态系统中可以从任何服务器导入代码。如果恶意服务器找到一种方法导致调用的版本控制命令运行非预期代码，这也是一个潜在的安全问题。
+
+为了平衡功能和安全问题，go命令默认只使用git和hg从公共服务器下载代码。它将使用任何已知的版本控制系统从私有服务器下载代码，私有服务器定义为与 GOPRIVATE 环境变量匹配的托管包。仅允许 Git 和 Mercurial 的理由是，这两个系统最关注作为不受信任服务器的客户端运行的问题。相比之下，Bazaar、Fossil 和 Subversion 主要用于受信任、经过身份验证的环境，并且没有像攻击面那样受到严格审查。
+
+版本控制命令限制仅在使用直接版本控制访问下载代码时适用。从代理下载模块时，go 命令使用 GOPROXY 协议，该协议始终是允许的。默认情况下，go 命令对公共模块使用 Go 模块镜像 (proxy.golang.org)，并且仅在私有模块或镜像拒绝提供公共包（通常出于法律原因）时才回退到版本控制。因此，默认情况下，客户端仍然可以访问 Bazaar、Fossil 或 Subversion 存储库提供的公共代码，因为这些下载使用 Go 模块镜像，这会带来使用自定义沙箱运行版本控制命令的安全风险。
+
+版本控制命令限制仅在使用直接版本控制访问下载代码时适用。从代理下载模块时，go 命令使用 GOPROXY 协议，该协议始终是允许的。默认情况下，go 命令对公共模块使用 Go 模块镜像 (proxy.golang.org)，并且仅在私有模块或镜像拒绝提供公共包（通常出于法律原因）时才回退到版本控制。因此，默认情况下，客户端仍然可以访问 Bazaar、Fossil 或 Subversion 存储库提供的公共代码，因为这些下载使用 Go 模块镜像，这会带来使用自定义沙箱运行版本控制命令的安全风险。
+
+例如，考虑：
+
+```shell
+GOVCS=github.com:git,evil.com:off,*:git|hg
+```
+
+通过此设置，模块或导入路径以 github.com/ 开头的代码只能使用 git； evil.com 上的路径不能使用任何版本控制命令，所有其他路径（* 匹配所有内容）只能使用 git 或 hg。
+
+特殊模式 public 和 private 与公共和私有模块或导入路径相匹配。如果路径与 GOPRIVATE 变量匹配，则该路径是私有的；否则它是公开的。
+
+如果 GOVCS 变量中没有规则与特定模块或导入路径匹配，则 go 命令将应用其默认规则，该规则现在可以用 GOVCS 表示法概括为 public:git|hg,private:all。
+
+要允许对任何包不受限制地使用任何版本控制系统，请使用：
+
+```shell
+GOVCS=*:all
+```
+
+要禁用版本控制的所有使用，请使用：
+
+```shell
+GOVCS=*:off
+```
+
+go env -w 命令可用于设置 GOVCS 变量以供将来的 go 命令调用。
+GOVCS 在 Go 1.16 中引入。 Go 的早期版本可以对任何模块使用任何已知的版本控制工具。
+
+## Module zip files
