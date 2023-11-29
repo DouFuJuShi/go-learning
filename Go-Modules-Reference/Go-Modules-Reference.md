@@ -1218,3 +1218,85 @@ type Retract struct {
 例如，工具可以通过解析 go mod edit -json 的输出来获取 go.mod 文件作为数据结构，然后可以通过使用 -require、-exclude 等调用 go mod edit 来进行更改。
 
 工具还可以使用包 golang.org/x/mod/modfile 来解析、编辑和格式化 go.mod 文件。
+
+### go mod graph
+
+```shell
+go mod graph [-go=version]
+```
+
+go mod graph 命令以文本形式打印模块需求图（已应用替换）。例如：
+
+```shell
+example.com/main example.com/a@v1.1.0
+example.com/main example.com/b@v1.2.0
+example.com/a@v1.1.0 example.com/b@v1.1.1
+example.com/a@v1.1.0 example.com/c@v1.3.0
+example.com/b@v1.1.0 example.com/c@v1.1.0
+example.com/b@v1.2.0 example.com/c@v1.2.0
+```
+
+模块图中的每个顶点代表模块的特定版本。图中的每条边代表对依赖项的最低版本的要求。
+
+go mod graph 打印图表的边缘，每行一个。每行都有两个以空格分隔的字段：模块版本及其依赖项之一。每个模块版本都被标识为路径@版本形式的字符串。主模块没有 @version 后缀，因为它没有版本。
+
+-go 标志使 go mod graph 报告给定 Go 版本加载的模块图，而不是 go.mod 文件中 go 指令指示的版本。
+
+有关如何选择版本的更多信息，请参阅最小版本选择 (MVS)。另请参阅 go list -m 来打印选定的版本，并参阅 go mod Why 来了解为什么需要模块。
+
+### go mod init
+
+```shell
+go mod init [module-path]
+```
+
+```shell
+go mod init
+go mod init example.com/m
+```
+
+go mod init 命令初始化并在当前目录中写入一个新的 go.mod 文件，实际上创建了一个以当前目录为根的新模块。 go.mod 文件不得已存在。
+
+init 接受一个可选参数，即新模块的模块路径。有关选择模块路径的说明，请参阅模块路径。如果省略模块路径参数，init 将尝试使用 .go 文件中的导入注释、供应商工具配置文件和当前目录（如果在 GOPATH 中）来推断模块路径。
+
+如果存在vendor工具的配置文件，init 将尝试从中导入模块需求。 init 支持以下配置文件。
+
+- `GLOCKFILE` (Glock)
+- `Godeps/Godeps.json` (Godeps)
+- `Gopkg.lock` (dep)
+- `dependencies.tsv` (godeps)
+- `glide.lock` (glide)
+- `vendor.conf` (trash)
+- `vendor.yml` (govend)
+- `vendor/manifest` (gvt)
+- `vendor/vendor.json` (govendor)
+
+Vendoring 工具配置文件并不总是能够以完美的保真度进行翻译。例如，如果在同一存储库中导入多个不同版本的包，并且该存储库仅包含一个模块，则导入的 go.mod 只能需要一个版本的模块。您可能希望运行 go list -m all 来检查构建列表中的所有版本，并运行 go mod tidy 来添加缺少的需求并删除未使用的需求。
+
+### go mod tidy
+
+```shell
+go mod tidy [-e] [-v] [-go=version] [-compat=version]
+```
+
+go mod tidy 确保 go.mod 文件与模块中的源代码匹配。它添加了构建当前模块的包和依赖项所需的任何缺失的模块要求，并删除了对不提供任何相关包的模块的要求。它还将所有缺失的条目添加到 go.sum 并删除不必要的条目。
+
+-e 标志（在 Go 1.16 中添加）会导致 go mod tidy 尝试继续，尽管在加载包时遇到错误。
+
+-v 标志使 go mod tidy 将有关已删除模块的信息打印到标准错误。
+
+go mod tidy 的工作原理是递归地加载主模块中的所有包以及它们导入的所有包。这包括测试导入的包（包括其他模块中的测试）。 go mod tidy 的作用就好像所有构建标签都已启用，因此它会考虑特定于平台的源文件和需要自定义构建标签的文件，即使这些源文件通常不会构建。有一个例外：忽略构建标记未启用，因此具有构建约束 // +buildignore 的文件将不会被考虑。请注意，go mod tidy 不会考虑主模块中名为 testdata 的目录或名称以 .或 _ 除非这些包是由其他包显式导入的。
+
+一旦 go mod tidy 加载了这组包，它就会确保提供一个或多个包的每个模块在主模块的 go.mod 文件中都有一个 require 指令，或者（如果主模块是 go 1.16 或更低版本）需要另一个必需的模块。 go mod tidy 将添加对每个缺失模块的最新版本的要求（有关最新版本的定义，请参阅版本查询）。 go mod tidy 将删除不提供上述集合中任何包的模块的 require 指令。
+
+go mod tidy 还可以添加或删除require 指令上 // indirect 的注释。 // indirect 注释表示模块不提供由主模块中的包导入的包。 （有关何时添加// indirect 依赖项和注释的更多详细信息，请参阅 require 指令。）
+
+如果设置了 -go 标志，go mod tidy 会将 go 指令更新为指定版本，根据该版本启用或禁用模块图修剪和延迟模块加载（并根据需要添加或删除间接需求）。
+
+默认情况下，当 go 指令中指示的版本之前的 Go 版本加载模块图时，go mod tidy 将检查所选模块版本是否不会更改。还可以通过 -compat 标志显式指定检查兼容性的版本。
+
+### go mod vendor
+
+```shel
+go mod vendor [-e] [-v] [-o]
+```
