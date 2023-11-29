@@ -14,17 +14,17 @@ module 模块是一起发布、版本控制和分发的包的集合。模块可�
 
 模块中的每个包都是同一目录中编译在一起的源文件的集合。包路径是与包含包的子目录连接的模块路径（相对于模块根）。例如，模块“golang.org/x/net”包含目录“html”中的包。该包的路径是“golang.org/x/net/html”。
 
-### Module paths 某块路径
+### Module paths 模块路径
 
-模块路径module path是模块的规范名称，在模块的 go.mod 文件中使用 module 指令声明。模块的路径是模块内包路径的前缀。
+模块路径module path是模块的规范名称，在模块的 go.mod 文件中使用 module 指令声明。<mark>模块的路径是模块内包路径的前缀</mark>。
 
-模块路径应该描述模块的功能以及在哪里可以找到它。通常，模块路径由存储库根路径、存储库中的目录（通常为空）和主要版本后缀（仅适用于主要版本 2 或更高版本）组成。
+模块路径应该描述<mark>模块的功能</mark>以及在<mark>哪里可以找到它</mark>。通常，模块路径由存储库根路径、存储库中的目录（通常为空）和主版本后缀（仅适用于主要版本 2 或更高版本）组成。
 
 - *存储库根路径*是模块路径的一部分，对应于开发模块的版本控制存储库的根目录。大多数模块都是在其存储库的根目录中定义的，因此这通常是整个路径。例如，golang.org/x/net 是同名模块的存储库根路径。有关 go 命令如何使用从模块路径派生的 HTTP 请求来查找存储库的信息，请参阅查找模块路径的存储库[Finding a repository for a module path](https://go.dev/ref/mod#vcs-find)。
 
-- 如果模块未在存储库的根目录中定义，则*模块子目录*是命名该目录的模块路径的一部分，不包括主版本后缀。这也用作语义版本标签的前缀。例如，模块 golang.org/x/tools/gopls 位于根路径为 golang.org/x/tools 的存储库的 gopls 子目录中，因此它具有模块子目录 gopls。请参阅将版本映射到存储库中的提交和模块目录。
+- 如果模块未在存储库的根目录中定义，则*模块子目录*是命名该目录的模块路径的一部分，不包括主版本后缀。这也用作语义版本标签的前缀。例如，模块 golang.org/x/tools/gopls 位于根路径为 golang.org/x/tools 的存储库的 gopls 子目录中，因此它具有模块子目录 gopls。请参阅将版本映射到存储库中的提交([Mapping versions to commits](https://go.dev/ref/mod#vcs-version))和模块目录([Module directories within a repository](https://go.dev/ref/mod#vcs-dir))。
 
-- 如果模块以主版本 2 或更高版本发布，则模块路径必须以主版本后缀（如 /v2）结尾。这可能是也可能不是子目录名称的一部分。例如，路径为 golang.org/x/repo/sub/v2 的模块可能位于存储库 golang.org/x/repo 的 /sub 或 /sub/v2 子目录中。
+- 如果模块以主版本 2 或更高版本发布，则模块路径必须以<mark>主版本后缀（如 /v2）</mark>结尾。这可能是也可能不是子目录名称的一部分。例如，路径为 golang.org/x/repo/sub/v2 的模块可能位于存储库 golang.org/x/repo 的 /sub 或 /sub/v2 子目录中。
 
 如果某个模块可能被其他模块依赖，则必须遵循这些规则，以便 go 命令可以找到并下载该模块。模块路径中允许的字符也有一些词法限制[lexical restrictions](https://go.dev/ref/mod#go-mod-file-ident)。
 
@@ -383,7 +383,7 @@ exclude (
 )
 ```
 
-## require directive
+### require directive
 
 require 指令声明给定模块依赖项的最低所需版本。对于每个所需的模块版本，go 命令会加载该版本的 go.mod 文件并合并该文件中的要求。加载所有需求后，go 命令会使用最小版本选择 (MVS [minimal version selection (MVS)](https://go.dev/ref/mod#minimal-version-selection)) 来解决它们以生成构建列表。
 
@@ -762,17 +762,17 @@ replace (
 
 ## Compatibility with non-module repositories 与非模块存储库的兼容性
 
-为了确保从 GOPATH 到模块的顺利过渡，go 命令可以通过添加 [go.mod 文件](https://go.dev/ref/mod#glos-go-mod-file)，从尚未迁移到模块的存储库以模块感知模式下载并构建包。
+为了<mark>确保从 GOPATH 到模块的顺利过渡</mark>，go 命令可以通过添加 go.mod 文件，以模块感知模式(module-aware mode)从尚未迁移到模块的仓库中下载和编译软件包。
 
-当 go 命令直接从存储库下载给定版本的模块时，它会查找模块路径的存储库 URL，将版本映射到存储库中的修订版，然后提取该修订版存储库的存档。如果模块的路径等于存储库根路径，并且存储库根目录不包含 go.mod 文件，则 go 命令会在模块缓存中合成一个 go.mod 文件，其中包含模块指令而不包含其他内容。由于合成 go.mod 文件不包含其依赖项的 require 指令，因此依赖于它们的其他模块可能需要额外的 require 指令（带有 // 间接注释），以确保在每个构建上以相同版本获取每个依赖项。
+当 go 命令直接从存储库下载给定版本的模块时，它会查找模块路径的存储库 URL，将版本映射到存储库中的修订版，然后提取该修订版存储库的存档。<mark>如果模块的路径等于存储库根路径，并且存储库根目录不包含 go.mod 文件，则 go 命令会在模块缓存(module cache)中合成一个 go.mod 文件，其中包含模块指令而不包含其他内容。</mark>由于合成 go.mod 文件不包含其依赖项的 require 指令，因此依赖于它们的其他模块可能需要额外的 require 指令（带有 // indirect 注释），以确保在每个构建上以相同版本获取每个依赖项。
 
 当 go 命令从代理下载模块时，它会与模块内容的其余部分分开下载 go.mod 文件。如果原始模块没有合成的 go.mod 文件，代理预计会提供合成的 go.mod 文件。
 
 ### +incompatible versions +incompatible版本
 
-以主要版本 2 或更高版本发布的模块必须在其模块路径上具有匹配的主要版本后缀。例如，如果模块在 v2.0.0 版本发布，则其路径必须具有 /v2 后缀。这允许 go 命令将项目的多个主要版本视为不同的模块，即使它们是在同一存储库中开发的。
+主版本以 2 或更高版本发布的模块必须在其模块路径上具有匹配的<mark>主版本后缀</mark>。例如，如果模块在 `v2.0.0` 版本发布，则其路径必须具有 /v2 后缀。这允许 go 命令将项目的多个主要版本视为不同的模块，即使它们是在同一存储库中开发的。
 
-当模块支持添加到 go 命令时，引入了主版本后缀要求，并且许多存储库在此之前已经标记了主版本 2 或更高版本的版本。为了保持与这些存储库的兼容性，go 命令会在没有 go.mod 文件的情况下向主版本 2 或更高版本的版本添加 +incompatible 的后缀。 +incompatible表示该版本与主版本号较低的版本属于同一模块；因此，go 命令可能会自动升级到更高的不兼容版本，即使它可能会破坏构建。
+当 go 命令增加模块支持时，引入了主版本后缀要求，并且**许多存储库在此之前已经标记了主版本 2 或更高版本的版本**。**为了保持与这些存储库的兼容性**，**go 命令会在<mark>没有 go.mod 文件</mark>的情况下向<mark>主版本 2 或着更高</mark>的版本<mark>添加 +incompatible</mark> 的后缀**。 +incompatible表示该版本与主版本号较低的版本属于同一模块；因此，go 命令可能会自动升级到更高的不兼容版本，即使它可能会破坏构建。
 
 考虑下面的示例要求：
 
@@ -780,11 +780,11 @@ replace (
 require example.com/m v4.1.2+incompatible
 ```
 
-版本v4.1.2+incompatible指的是提供模块example.com/m的存储库中的语义版本标签v4.1.2。该模块必须位于存储库根目录中（即存储库根路径也必须是 example.com/m），**并且不得存在 go.mod 文件**。该模块可能具有较低主版本号的版本，例如 v1.5.2，并且 go 命令可能会自动从这些版本升级到v4.1.2+incompatible（有关升级如何工作的信息，请参阅最小版本选择 (MVS)）。
+版本v4.1.2+incompatible指的是提供模块example.com/m的存储库中的语义版本标签([semantic version tag](https://go.dev/ref/mod#glos-semantic-version-tag))v4.1.2。该模块必须位于存储库根目录中（即存储库根路径也必须是 example.com/m），**并且不得存在 go.mod 文件**。该模块可能具有较低主版本号的版本，例如 v1.5.2，并且 go 命令可能会自动从这些版本升级到v4.1.2+incompatible（有关升级如何工作的信息，请参阅最小版本选择 (MVS)）。
 
-在版本 v2.0.0 被标记后迁移到模块的存储库通常应该发布新的主要版本。在上面的示例中，作者应创建一个路径为 example.com/m/v5 的模块，并应发布版本 v5.0.0。作者还应该更新模块中包的导入，以使用前缀 example.com/m/v5 而不是 example.com/m。有关更详细的示例，请参阅 Go 模块：v2 及更高版本。
+在版本 v2.0.0 被标记后迁移到模块的存储库通常应该发布新的主要版本。在上面的示例中，作者应创建一个路径为 example.com/m/v5 的模块，并应发布版本 v5.0.0。作者还应该更新模块中包的导入，以使用前缀 example.com/m/v5 而不是 example.com/m。有关更详细的示例，请参阅 Go 模块：v2 及更高版本([Go Modules: v2 and Beyond](https://blog.golang.org/v2-go-modules))。
 
-请注意，+incompatible 后缀不应出现在版本库的标签上；类似 v4.1.2+incompatible 这样的标签将被忽略。后缀只会出现在 go 命令使用的版本中。有关版本和标签之间区别的详情，请参阅将版本映射到提交。
+请注意，+incompatible 后缀不应出现在版本库的标签上；类似 v4.1.2+incompatible 这样的标签将被忽略。后缀只会出现在 go 命令使用的版本中。有关版本和标签之间区别的详情，请参阅将版本映射到提交( [Mapping versions to commits](https://go.dev/ref/mod#vcs-version))。
 
 另请注意，+incompatible 后缀可能会出现在伪版本中。例如，v2.0.1-20200722182040-012345abcdef+incompatible 可能是一个有效的伪版本。
 
@@ -825,3 +825,396 @@ require example.com/m v4.1.2+incompatible
 此规则允许已迁移到模块的包导入在 GOPATH 模式下构建时已迁移到模块的其他包，即使未使用主版本子目录也是如此。
 
 ## Module-aware commands 模块命令
+
+大多数 go 命令可以在模块感知模式或 GOPATH 模式下运行。在模块感知模式下，go 命令使用 go.mod 文件来查找版本化依赖项，它通常从模块缓存中加载包，如果模块丢失则下载模块。在GOPATH模式下，go命令会忽略模块；它会在供应商目录和 GOPATH 中查找依赖项。
+
+从 Go 1.16 开始，默认启用模块感知模式，无论 go.mod 文件是否存在。在较低版本中，当当前目录或任何父目录中存在 go.mod 文件时，会启用模块感知模式。
+
+模块感知模式可以使用 GO111MODULE 环境变量进行控制，该变量可以设置为on、off 或auto。
+
+- 如果 GO111MODULE=off，go 命令会忽略 go.mod 文件并在 GOPATH 模式下运行。
+
+- 如果 GO111MODULE=on 或未设置，则即使不存在 go.mod 文件，go 命令也会以模块感知模式运行。并非所有命令都可以在没有 go.mod 文件的情况下工作：请参阅模块外部的模块命令( [Module commands outside a module](https://go.dev/ref/mod#commands-outside))。
+
+- 如果 GO111MODULE=auto，则当当前目录或任何父目录中存在 go.mod 文件时，go 命令将以模块感知模式运行。在 Go 1.15 及更低版本中，这是默认行为。即使不存在 go.mod 文件，go mod 子命令和 go install 也会在模块感知模式下运行版本查询。
+
+在模块感知模式下，GOPATH 不再定义构建期间导入的含义，但它仍然存储下载的依赖项（在 GOPATH/pkg/mod 中；请参阅模块缓存[Module cache](https://go.dev/ref/mod#module-cache)）和安装的命令（在 GOPATH/bin 中，除非设置了 GOBIN） 。
+
+### Build commands Build命令
+
+所有加载有关包的信息的命令都是模块感知的。这包括：
+
+- `go build`
+- `go fix`
+- `go generate`
+- `go install`
+- `go list`
+- `go run`
+- `go test`
+- `go vet`
+
+当在模块感知模式下运行时，这些命令使用 go.mod 文件来解释命令行上列出的或 Go 源文件中写入的导入路径。这些命令接受所有模块命令通用的以下标志。
+
+- -mod 标志控制 go.mod 是否可以自动更新以及是否使用vendor目录。
+  
+  - -mod=mod 告诉 go 命令忽略vendor目录并自动更新 go.mod，例如，当任何已知模块未提供导入的包时。[automatically update](https://go.dev/ref/mod#go-mod-file-updates)
+  
+  - -mod=readonly 告诉 go 命令忽略vendor目录，并在需要更新 go.mod 时报告错误。
+  
+  - -mod=vendor 告诉 go 命令使用vendor目录。在这种模式下，go命令不会使用网络或模块缓存。
+  
+  - <mark>默认情况下</mark>，如果 go.mod 中的 go 版本为 1.14 或更高版本并且存在vendor目录，则 go 命令的行为就像使用了 -mod=vendor 一样。否则，go 命令的行为就像使用了 -mod=readonly 一样。
+  
+  - go get 拒绝接受这个标志，因为命令的目的是修改依赖关系，只有 -mod=mod 才允许修改依赖关系。
+
+- -modcacherw 标志指示 go 命令在模块缓存中创建具有读写权限的新目录，而不是将其设置为只读。当一致使用此标志时（通常通过在环境中设置 GOFLAGS=-modcacherw 或运行 go env -w GOFLAGS=-modcacherw），可以使用 rm -r 等命令删除模块缓存，而无需先更改权限。 go clean -modcache 命令可用于删除模块缓存，无论是否使用 -modcacherw。
+
+- -modfile=file.mod 标志指示 go 命令读取（也可能写入）模块根目录中的备用文件而不是 go.mod。文件名必须以 .mod 结尾。名为 go.mod 的文件必须仍然存在才能确定模块根目录，但无法访问该文件。当指定 -modfile 时，还会使用备用 go.sum 文件：其路径是通过修剪 .mod 扩展名并附加 .sum 从 -modfile 标志派生的。
+
+### Vendoring
+
+使用模块时，go 命令通常通过将模块从源下载到模块缓存中来满足依赖关系，然后从这些下载的副本中加载包。 Vendoring 可用于允许与旧版本的 Go 进行互操作，或确保用于构建的所有文件都存储在单个文件树中。
+
+go mod vendor 命令会在主模块根目录下创建一个名为 vendor 的目录，其中包含构建和测试主模块软件包所需的所有软件包副本。仅在主模块之外的软件包测试中导入的软件包不包括在内。与 go mod tidy 和其他模块命令一样，在构建 vendor 目录时，除了忽略（ignore）之外，不考虑其他构建约束。
+
+go mod vendor还创建文件vendor/modules.txt，其中包含vendored包的列表以及从中复制它们的模块版本。启用vendoring后，此清单将用作模块版本信息的来源，如 go list -m 和 go version -m 所报告的那样。当go命令读取vendor/modules.txt时，它会检查模块版本是否与go.mod一致。如果自生成vendor/modules.txt以来go.mod发生了变化，go命令将报告错误。应再次运行 go modvendor 以更新vendor目录。
+
+如果vendor目录存在于主模块的根目录中，并且主模块的 go.mod 文件中的 go 版本为 1.14 或更高版本，则会自动使用该目录。要显式启用vendor，请使用标志 -mod=vendor 调用 go 命令。要禁用供应商，请使用标志 -mod=readonly 或 -mod=mod。
+
+启用vendoring后，go build 和 go test 等构建命令会从vendor目录加载包，而不是访问网络或本地模块缓存。 go list -m 命令仅打印有关 go.mod 中列出的模块的信息。当启用vendor时，go mod 命令（例如 go mod download 和 go mod tidy）的工作方式没有什么不同，并且仍然会下载模块并访问模块缓存。当启用vendor时，go get 的工作方式也没有什么不同。
+
+与 GOPATH 模式下的vendor不同，go 命令忽略主模块根目录以外位置的vendor目录。此外，由于未使用其他模块中的vendor目录，因此 go 命令在构建模块 zip 文件时不包含vendor目录（但请参阅已知错误 [#31562](https://go.dev/issue/31562) 和[#37397](https://go.dev/issue/37397)）。
+
+### go get
+
+```shell
+go get [-d] [-t] [-u] [build flags] [packages]
+```
+
+例子：
+
+```shell
+# Upgrade a specific module.
+$ go get golang.org/x/net
+
+# Upgrade modules that provide packages imported by packages in the main module.
+$ go get -u ./...
+
+# Upgrade or downgrade to a specific version of a module.
+$ go get golang.org/x/text@v0.3.2
+
+# Update to the commit on the module's master branch.
+$ go get golang.org/x/text@master
+
+# Remove a dependency on a module and downgrade modules that require it
+# to versions that don't require it.
+$ go get golang.org/x/text@none
+
+# Upgrade the minimum required Go version for the main module.
+$ go get go
+
+# Upgrade the suggested Go toolchain, leaving the minimum Go version alone.
+$ go get toolchain
+
+# Upgrade to the latest patch release of the suggested Go toolchain.
+$ go get toolchain@patch
+```
+
+go get 命令更新主模块的 go.mod 文件中的模块依赖项，然后构建并安装命令行上列出的包。
+
+第一步是确定要更新哪些模块。 go get 接受包列表、包模式和模块路径作为参数。如果指定了包参数，则 go get 更新提供该包的模块。如果指定了包模式（例如，全部或带有 ... 通配符的路径），go get 会将模式扩展为一组包，然后更新提供包的模块。如果参数命名的是模块而不是包（例如，模块 golang.org/x/net 的根目录中没有包），则 go get 将更新模块但不会构建包。如果没有指定参数， go get 的行为就像 if 。被指定（当前目录中的包）；这可以与 -u 标志一起使用来更新提供导入包的模块。
+
+每个参数可能包含一个版本查询后缀，指示所需的版本，如 go get golang.org/x/text@v0.3.0 中。版本查询后缀由 @ 符号后跟版本查询组成，它可能表示特定版本 (v0.3.0)、版本前缀 (v0.3)、分支或标记名称 (master)、修订版本 (1234abcd) ，或最新、升级、补丁或无特殊查询之一。如果没有给出版本，go get 使用@upgrade 查询。
+
+一旦 go get 将其参数解析为特定模块和版本，go get 将在主模块的 go.mod 文件中添加、更改或删除 require 指令，以确保模块将来保持所需的版本。请注意，go.mod 文件中所需的版本是最低版本，并且可能会随着新依赖项的添加而自动增加。有关如何选择版本以及如何通过模块感知命​​令解决冲突的详细信息，请参阅最小版本选择 (MVS)。
+
+当添加、升级或降级命令行上指定的模块时，如果指定模块的新版本需要更高版本的其他模块，则可能会升级其他模块。例如，假设模块 example.com/a 升级到版本 v1.5.0，并且该版本需要版本 v1.2.0 的模块 example.com/b。如果当前版本 v1.1.0 需要模块 example.com/b，则 go get example.com/a@v1.5.0 也会将 example.com/b 升级到 v1.2.0。
+
+![](images/get-upgrade.svg)
+
+当命令行上指定的模块被降级或删除时，其他模块可能会被降级。为了继续上面的示例，假设模块 example.com/b 降级到 v1.1.0。模块 example.com/a 也将降级到需要 v1.1.0 或更低版本的 example.com/b 的版本。
+
+![](images/get-downgrade.svg)
+
+可以使用版本后缀@none 删除模块要求。这是一种特殊的降级。依赖于已删除模块的模块将根据需要降级或删除。即使主模块中的包导入了一个或多个模块需求，也可以删除该模块需求。在这种情况下，下一个构建命令可能会添加新的模块要求。
+
+如果一个模块需要两个不同版本（在命令行参数中明确指定或满足升级和降级），go get 将报告错误。
+
+go get 选择一组新版本后，它会检查任何新选择的模块版本或任何提供在命令行上命名的包的模块是否被撤回或弃用。 go get 为它找到的每个撤回版本或已弃用的模块打印一条警告。 go list -m -u all 可用于检查所有依赖项中的撤回和弃用。
+
+go get 更新 go.mod 文件后，它会构建在命令行上命名的包。可执行文件将安装在 GOBIN 环境变量指定的目录中，如果未设置 GOPATH 环境变量，则默认为 `$GOPATH/bin` 或 `$HOME/go/bin`。
+
+go get 支持以下标志：
+
+- <mark>-d 标志</mark>告诉 go get 不要构建或安装包。当使用 -d 时，go get 只会管理 go.mod 中的依赖项。不推荐使用不带 -d 的 go get 来构建和安装软件包（从 Go 1.17 开始）。在 Go 1.18 中，-d 将始终启用。
+
+- -u 标志告诉 go get 升级提供由命令行上命名的包直接或间接导入的包的模块。 -u 选择的每个模块都将升级到其最新版本，除非更高版本（预发行版）已需要该模块。
+
+- -u=patch 标志（不是 -u patch）还告诉 go get 升级依赖项，但 go get 会将每个依赖项升级到最新的补丁版本（类似于 @patch 版本查询）。
+
+- -t 标志告诉 go get 考虑构建命令行上命名的包的测试所需的模块。当 -t 和 -u 一起使用时，go get 也会更新测试依赖项。
+
+- 不应再使用 -insecure 标志。它允许 go get 解析自定义导入路径并使用不安全的方案（例如 HTTP）从存储库和模块代理中获取。 GOINSECURE 环境变量提供了更细粒度的控制，应该改为使用。
+
+从 Go 1.16 开始，推荐使用 go install 命令来构建和安装程序。当与版本后缀（如 @latest 或 @v1.4.6）一起使用时， go install 以模块感知模式构建包，忽略当前目录或任何父目录（如果有）中的 go.mod 文件。
+
+go get 更专注于管理 go.mod 中的需求。 -d 标志已被弃用，在 Go 1.18 中，它将始终启用。
+
+### go install
+
+```go
+go install [build flags] [packages]
+```
+
+例子：
+
+```shell
+# Install the latest version of a program,
+# ignoring go.mod in the current directory (if any).
+$ go install golang.org/x/tools/gopls@latest
+
+# Install a specific version of a program.
+$ go install golang.org/x/tools/gopls@v0.6.4
+
+# Install a program at the version selected by the module in the current directory.
+$ go install golang.org/x/tools/gopls
+
+# Install all programs in a directory.
+$ go install ./cmd/...
+```
+
+go install 命令构建并安装由命令行上的路径命名的包。可执行文件（主包）安装到 GOBIN 环境变量指定的目录中，如果未设置 GOPATH 环境变量，则默认为 \$GOPATH/bin 或 \$HOME/go/bin。 $GOROOT 中的可执行文件安装在 \$GOROOT/bin 或 \$GOTOOLDIR 而不是 \$GOBIN 中。不可执行的包已构建并缓存，但未安装。
+
+从 Go 1.16 开始，如果参数具有版本后缀（如 @latest 或 @v1.0.0）， go install 将在模块感知模式下构建包，<mark>忽略当前目录或任何父目录（如果有）中的 go.mod 文件。这对于安装可执行文件而不影响主模块的依赖关系很有用。</mark>
+
+为了消除构建过程中使用的模块版本的歧义，参数必须满足以下限制条件：
+
+- 参数必须是包路径或包模式（带有“...”通配符）。它们不能是标准包（如 fmt）、元模式（std、cmd、all）或相对或绝对文件路径。
+
+- 所有参数必须具有相同的版本后缀。不允许不同的查询，即使它们引用相同的版本。
+
+- 所有参数必须引用同一版本的同一模块中的包。
+
+- 包路径参数必须引用主包。模式参数仅匹配主包。
+
+- 没有模块被视为主模块。
+  
+  - 如果包含在命令行上命名的包的模块有一个 go.mod 文件，则它不能包含指令（替换和排除），否则如果它是主模块，则会导致它被不同地解释。
+  
+  - 该模块不能要求其自身的更高版本。
+  
+  - 任何模块中都不使用vendor目录。 （vendor目录不包含在模块 zip 文件中，因此 go install 不会下载它们。）
+
+有关支持的版本查询语法，请参阅版本查询( [Version queries](https://go.dev/ref/mod#version-queries))。 Go 1.15 及更低版本不支持在 go install 中使用版本查询。
+
+如果参数没有版本后缀，go install 可能会在模块感知模式或 GOPATH 模式下运行，具体取决于 GO111MODULE 环境变量和 go.mod 文件是否存在。有关详细信息，请参阅模块感知命​​令。如果启用了模块感知模式，则 go install 在主模块的上下文中运行，该模块可能与包含正在安装的包的模块不同。
+
+### go list -m
+
+```shell
+go list -m [-u] [-retracted] [-versions] [list flags] [modules]
+```
+
+```shell
+$ go list -m all
+$ go list -m -versions example.com/m
+$ go list -m -json example.com/m@latest
+```
+
+-m 标志使 go list 列出模块而不是包。在这种模式下，go list 的参数可以是模块、模块模式（包含 ... 通配符）、版本查询或特殊模式 all，它匹配构建列表中的所有模块。如果未指定参数，则列出主模块。
+
+列出模块时， -f 标志仍然指定应用于 Go 结构的格式模板，但现在是 Module 结构：
+
+```go
+type Module struct {
+    Path       string        // module path
+    Version    string        // module version
+    Versions   []string      // available module versions
+    Replace    *Module       // replaced by this module
+    Time       *time.Time    // time version was created
+    Update     *Module       // available update (with -u)
+    Main       bool          // is this the main module?
+    Indirect   bool          // module is only indirectly needed by main module
+    Dir        string        // directory holding local copy of files, if any
+    GoMod      string        // path to go.mod file describing module, if any
+    GoVersion  string        // go version used in module
+    Retracted  []string      // retraction information, if any (with -retracted or -u)
+    Deprecated string        // deprecation message, if any (with -u)
+    Error      *ModuleError  // error loading module
+}
+
+type ModuleError struct {
+    Err string // the error itself
+}
+```
+
+默认输出是打印模块路径，然后打印有关版本和替换（如果有）的信息。例如， go list -m all 可能会打印：
+
+```shell
+example.com/main/module
+golang.org/x/net v0.1.0
+golang.org/x/text v0.3.0 => /tmp/text
+rsc.io/pdf v0.1.1
+```
+
+Module 结构有一个 String 方法，用于格式化此行输出，因此默认格式相当于 -f '{{.String}}'。
+
+请注意，当模块被替换时，其 Replace 字段描述替换模块，并且其 Dir 字段设置为替换模块的源代码（如果存在）。 （也就是说，如果 Replace 为非零，则 Dir 设置为 Replace.Dir，无法访问替换的源代码。）
+
+-u 标志添加有关可用升级的信息。当给定模块的最新版本比当前版本更新时，list -u 将模块的 Update 字段设置为有关较新模块的信息。 list -u 还打印当前选定的版本是否已撤回以及该模块是否已弃用。该模块的 String 方法通过在当前版本后面的括号中格式化新版本来指示可用的升级。例如， go list -m -u all 可能会打印：
+
+```shell
+example.com/main/module
+golang.org/x/old v1.9.9 (deprecated)
+golang.org/x/net v0.1.0 (retracted) [v0.2.0]
+golang.org/x/text v0.3.0 [v0.4.0] => /tmp/text
+rsc.io/pdf v0.1.1 [v0.1.2]
+```
+
+（对于工具， go list -m -u -json all 可能更方便解析。）
+
+**-versions 标志**使 list 将模块的 Versions 字段设置为该模块的所有已知版本的列表，根据语义版本控制从最低到最高排序。该标志还更改默认输出格式以显示模块路径，后跟空格分隔的版本列表。除非还指定了 -retracted 标志，否则此列表中将省略已收回的版本。
+
+-retracted 标志指示 list 在使用 -versions 标志打印的列表中显示收回的版本，并在解析版本查询时考虑收回的版本。例如， go list -m -retracted example.com/m@latest 显示模块 example.com/m 的最高版本或预发布版本，即使该版本已撤回。在此版本中，retract 指令和弃用是从 go.mod 文件加载的。 -retracted 标志是在 Go 1.16 中添加的。
+
+模板函数 module 接受一个字符串参数，该参数必须是模块路径或查询，并以 Module 结构体的形式返回指定的模块。如果发生错误，结果将是一个带有非零错误字段的模块结构。
+
+### go mod download
+
+```shell
+go mod download [-x] [-json] [-reuse=old.json] [modules]
+```
+
+```shell
+$ go mod download
+$ go mod download golang.org/x/mod@v0.2.0
+```
+
+go mod download 命令将指定模块下载到模块缓存中。参数可以是模块路径或模块模式，选择主模块的依赖项或path@version形式的版本查询。如果没有参数，下载适用于主模块的所有依赖项。
+
+go命令在普通执行过程中会根据需要自动下载模块。 go mod download 命令主要用于预填充模块缓存或加载由模块代理提供的数据。
+
+默认情况下，下载不会向标准输出写入任何内容。它将进度消息和错误打印到标准错误。
+
+-json 标志使 download 将一系列 JSON 对象打印到标准输出，描述每个下载的模块（或失败），对应于以下 Go 结构：
+
+```go
+type Module struct {
+    Path     string // module path
+    Query    string // version query corresponding to this version
+    Version  string // module version
+    Error    string // error loading module
+    Info     string // absolute path to cached .info file
+    GoMod    string // absolute path to cached .mod file
+    Zip      string // absolute path to cached .zip file
+    Dir      string // absolute path to cached source root directory
+    Sum      string // checksum for path, version (as in go.sum)
+    GoModSum string // checksum for go.mod (as in go.sum)
+    Origin   any    // provenance of module
+    Reuse    bool   // reuse of old module info is safe
+}
+
+```
+
+-<mark>x 标志</mark>导致 download 将 download 执行的命令打印到标准错误。
+
+-reuse 标志接受包含先前“go mod download -json”调用的 JSON 输出的文件名。 go 命令可以使用此文件来确定模块自上次调用以来未发生更改，并避免重新下载它。通过将 Reuse 字段设置为 true，将在新输出中标记未重新下载的模块。通常模块缓存会自动提供这种重用； -reuse 标志对于不保留模块缓存的系统很有用。
+
+### go mod edit
+
+```shell
+go mod edit [editing flags] [-fmt|-print|-json] [go.mod]
+```
+
+```shell
+# Add a replace directive.
+$ go mod edit -replace example.com/a@v1.0.0=./a
+
+# Remove a replace directive.
+$ go mod edit -dropreplace example.com/a@v1.0.0
+
+# Set the go version, add a requirement, and print the file
+# instead of writing it to disk.
+$ go mod edit -go=1.14 -require=example.com/m@v1.0.0 -print
+
+# Format the go.mod file.
+$ go mod edit -fmt
+
+# Format and print a different .mod file.
+$ go mod edit -print tools.mod
+
+# Print a JSON representation of the go.mod file.
+$ go mod edit -json
+```
+
+go mod edit 命令提供了一个用于编辑和格式化 go.mod 文件的命令行界面，主要供工具和脚本使用。 go mod edit 只读取一个 go.mod 文件；它不会查找有关其他模块的信息。默认情况下，go mod edit 读取和写入主模块的 go.mod 文件，但可以在编辑标志后指定不同的目标文件。
+
+编辑标志指定了编辑操作的顺序。
+
+- -module 标志更改模块的路径（go.mod 文件的模块行）。
+
+- -go=version 标志设置预期的 Go 语言版本。
+
+- -require=path@version 和 -droprequire=path 标志添加和删除对给定模块路径和版本的要求。请注意，-require 会覆盖路径上的任何现有要求。这些标志主要用于理解模块图的工具。用户应该更喜欢 go get path@version 或 go get path@none，它们根据需要进行其他 go.mod 调整以满足其他模块施加的约束。查看[`go get`](https://go.dev/ref/mod#go-get)。
+
+- -exclude=path@version 和 -dropexclude=path@version 标志添加和删除给定模块路径和版本的排除项。请注意，如果该排除已存在，则 -exclude=path@version 是无操作。
+
+- -replace=old[@v]=new[@v] 标志添加给定模块路径和版本对的替换。如果old@v中的@v被省略，则会添加左侧没有版本的替换，适用于旧模块路径的所有版本。如果new@v中的@v被省略，则新路径应该是本地模块根目录，而不是模块路径。请注意，-replace 会覆盖旧[@v] 的任何冗余替换，因此省略 @v 将删除特定版本的替换。
+
+- -dropreplace=old[@v] 标志删除给定模块路径和版本对的替换。如果提供了@v，则删除给定版本的替换。左侧没有版本的现有替换件仍可以替换该模块。如果省略@v，则删除没有版本的替换。
+
+- -retract=version 和 -dropretract=version 标志添加和删除给定版本的撤回，该版本可以是单个版本（如 v1.2.3）或一个间隔（如 [v1.1.0,v1.2.0]）。请注意，-retract 标志无法为撤回指令添加基本原理注释。建议提供基本原理注释，并且可以通过 go list -m -u 和其他命令显示。
+
+编辑标志可以重复。更改将按给定的顺序应用。
+
+go mod edit 有额外的标志来控制其输出。
+
+- <mark>-fmt 标志</mark>重新格式化 go.mod 文件而不进行其他更改。使用或重写 go.mod 文件的任何其他修改也暗示了这种重新格式化。唯一需要此标志的情况是没有指定其他标志，如 go mod edit -fmt 中。
+
+- -print 标志以文本格式打印最终的 go.mod，而不是将其写回磁盘。
+
+- -json 标志以 JSON 格式打印最终的 go.mod，而不是以文本格式将其写回到磁盘。 JSON 输出对应于以下 Go 类型：
+
+```go
+type Module struct {
+    Path    string
+    Version string
+}
+
+type GoMod struct {
+    Module  ModPath
+    Go      string
+    Require []Require
+    Exclude []Module
+    Replace []Replace
+    Retract []Retract
+}
+
+type ModPath struct {
+    Path       string
+    Deprecated string
+}
+
+type Require struct {
+    Path     string
+    Version  string
+    Indirect bool
+}
+
+type Replace struct {
+    Old Module
+    New Module
+}
+
+type Retract struct {
+    Low       string
+    High      string
+    Rationale string
+}
+```
+
+请注意，这仅描述了 go.mod 文件本身，而不是间接引用的其他模块。对于可用于构建的完整模块集，请使用 go list -m -json all。请参阅 go list -m。
+
+例如，工具可以通过解析 go mod edit -json 的输出来获取 go.mod 文件作为数据结构，然后可以通过使用 -require、-exclude 等调用 go mod edit 来进行更改。
+
+工具还可以使用包 golang.org/x/mod/modfile 来解析、编辑和格式化 go.mod 文件。
