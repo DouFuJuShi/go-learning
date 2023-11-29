@@ -1829,3 +1829,362 @@ go env -w 命令可用于设置 GOVCS 变量以供将来的 go 命令调用。
 GOVCS 在 Go 1.16 中引入。 Go 的早期版本可以对任何模块使用任何已知的版本控制工具。
 
 ## Module zip files
+
+模块版本以 .zip 文件形式分发。很少需要直接与这些文件交互，因为 go 命令会自动从模块代理和版本控制存储库中创建、下载和提取它们。但是，了解这些文件对于了解跨平台兼容性约束或实现模块代理仍然很有用。
+
+go mod download 命令下载一个或多个模块的 zip 文件，然后将这些文件提取到模块缓存中。根据 GOPROXY 和其他环境变量，go 命令可以从代理下载 zip 文件，也可以克隆源代码控制存储库并从中创建 zip 文件。 -json 标志可用于查找下载 zip 文件的位置及其在模块缓存中提取的内容。
+
+golang.org/x/mod/zip 包可用于以编程方式创建、提取或检查 zip 文件的内容。
+
+### File path and size constraints
+
+模块 zip 文件的内容有许多限制。这些限制确保可以在各种平台上安全、一致地提取 zip 文件。
+
+- 模块 zip 文件的大小最多为 500 MiB。其文件的未压缩总大小也限制为 500 MiB。 go.mod 文件限制为 16 MiB。许可证文件也限制为 16 MiB。这些限制的存在是为了减轻对用户、代理和模块生态系统其他部分的拒绝服务攻击。模块目录树中包含超过 500 MiB 文件的存储库应在提交时标记模块版本，仅包含构建模块包所需的文件；构建通常不需要视频、模型和其他大型资源。
+
+- 模块 zip 文件中的每个文件都必须以前缀 \$module@\$version/ 开头，其中 $module 是模块路径，$version 是版本，例如 golang.org/x/mod@v0.3.0/。模块路径必须有效，版本必须有效且规范，并且版本必须与模块路径的主版本后缀匹配。有关特定定义和限制，请参阅模块路径和版本。
+
+- 文件模式、时间戳和其他元数据将被忽略。
+
+- 空目录（路径以斜线结尾的条目）可能包含在模块 zip 文件中，但不会被提取。 go 命令在它创建的 zip 文件中不包含空目录。
+
+- 创建 zip 文件时，符号链接和其他不规则文件将被忽略，因为它们不可跨操作系统和文件系统移植，并且没有可移植的方式以 zip 文件格式表示它们。
+
+- 创建 zip 文件时，名为供应商的目录中的文件将被忽略，因为从不使用主模块之外的供应商目录。
+
+- 创建 zip 文件时，包含 go.mod 文件的目录（模块根目录除外）中的文件将被忽略，因为它们不是模块的一部分。 go 命令在提取 zip 文件时会忽略包含 go.mod 文件的子目录。
+
+- 在 Unicode 大小写折叠下，zip 文件中的两个文件不能具有相同的路径（请参阅 strings.EqualFold）。这确保了可以在不区分大小写的文件系统上提取 zip 文件而不会发生冲突。
+
+- go.mod 文件可能会也可能不会出现在顶级目录 (\$module@\$version/go.mod) 中。如果存在，它必须具有名称 go.mod （全部小写）。任何其他目录中都不允许名为 go.mod 的文件。
+
+- 模块内的文件和目录名称可以由 Unicode 字母、ASCII 数字、ASCII 空格字符 (U+0020) 和 ASCII 标点字符 !#$%&()+,-.=@[]^_{} 组成～。请注意，包路径可能不包含所有这些字符。请参阅 module.CheckFilePath 和 module.CheckImportPath 了解差异。
+
+- 第一个点之前的文件或目录名不得是 Windows 上的保留文件名，无论大小写（CON、com1、NuL 等）。
+
+## Private modules 私有模块
+
+Go 模块经常在版本控制服务器和模块代理上开发和分发，而这些服务器和模块代理在公共互联网上不可用。 go 命令可以从私有源下载和构建模块，尽管它通常需要一些配置。
+
+下面的环境变量可用于配置对私有模块的访问。有关详细信息，请参阅环境变量。另请参阅隐私以了解有关控制发送到公共服务器的信息的信息。
+
+- GOPROXY - 模块代理 URL 列表。 go 命令将尝试按顺序从每个服务器下载模块。关键字 direct 指示 go 命令从开发模块的版本控制存储库下载模块，而不是使用代理。
+
+- GOPRIVATE - 应被视为私有的模块路径前缀的全局模式列表。充当 GONOPROXY 和 GONOSUMDB 的默认值。
+
+- GONOPROXY - 不应从代理下载的模块路径前缀的全局模式列表。 go 命令将从开发模块的版本控制存储库下载匹配的模块，无论 GOPROXY 是什么。
+
+- GONOSUMDB - 不应使用公共校验和数据库 sum.golang.org 检查的模块路径前缀的全局模式列表。
+
+- GOINSECURE - 可以通过 HTTP 和其他不安全协议检索的模块路径前缀的全局模式列表。
+
+这些变量可以在开发环境中设置（例如，在 .profile 文件中），也可以使用 go env -w 永久设置。
+
+本节的其余部分描述了提供对私有模块代理和版本控制存储库的访问的常见模式。
+
+### Private proxy serving all modules
+
+为所有模块（公共和私有）提供服务的中央私有代理服务器为管理员提供了最大的控制权，并且对单个开发人员来说需要最少的配置。
+
+要将 go 命令配置为使用此类服务​​器，请设置以下环境变量，将 https://proxy.corp.example.com 替换为您的代理 URL，将 corp.example.com 替换为您的模块前缀：
+
+```shell
+GOPROXY=https://proxy.corp.example.com
+GONOSUMDB=corp.example.com
+```
+
+GOPROXY 设置指示 go 命令仅从 https://proxy.corp.example.com 下载模块； go 命令不会连接到其他代理或版本控制存储库。
+
+GONOSUMDB 设置指示 go 命令不要使用公共校验和数据库来验证路径以 corp.example.com 开头的模块。
+
+在此配置中运行的代理可能需要对私有版本控制服务器的读取访问权限。它还需要访问公共互联网来下载公共模块的新版本。
+
+有几种现有的 GOPROXY 服务器实现可以通过这种方式使用。最小的实现将从模块缓存目录中提供文件，并使用 go mod download （具有适当的配置）来检索丢失的模块。
+
+### Direct access to private modules
+
+go 命令可以配置为绕过公共代理并直接从版本控制服务器下载私有模块。当运行私人代理服务器不可行时，这非常有用。
+
+要将 go 命令配置为以这种方式工作，请设置 GOPRIVATE，替换 corp.example.com 私有模块前缀：
+
+```shell
+GOPRIVATE=corp.example.com
+```
+
+在这种情况下不需要更改 GOPROXY 变​​量。它默认为 https://proxy.golang.org,direct，它指示 go 命令首先尝试从 https://proxy.golang.org 下载模块，然后如果该代理响应 404，则回退到直接连接（未找到）或 410（已消失）。
+
+GOPRIVATE 设置指示 go 命令不要连接到以 corp.example.com 开头的模块的代理或校验和数据库。
+
+可能仍然需要内部 HTTP 服务器来解析存储库 URL 的模块路径。例如，当 go 命令下载模块 corp.example.com/mod 时，它将向 https://corp.example.com/mod?go-get=1 发送 GET 请求，并查找存储库响应中的 URL。为了避免这种要求，请确保每个私有模块路径都有一个 VCS 后缀（如 .git），标记存储库根前缀。例如，当 go 命令下载模块 corp.example.com/repo.git/mod 时，它将克隆 Git 存储库 https://corp.example.com/repo.git 或 ssh://corp.example .com/repo.git，无需提出额外请求。
+
+开发人员需要对包含私有模块的存储库进行读取访问。这可以在全局 VCS 配置文件（如 .gitconfig）中进行配置。最好将 VCS 工具配置为不需要交互式身份验证提示。默认情况下，调用 Git 时，go 命令通过设置 GIT_TERMINAL_PROMPT=0 来禁用交互式提示，但它遵循显式设置。
+
+### Passing credentials to private proxies
+
+go 命令在与代理服务器通信时支持 HTTP 基本身份验证。
+
+凭证可以在 .netrc 文件中指定。例如，包含以下行的 .netrc 文件将配置 go 命令以使用给定的用户名和密码连接到计算机 proxy.corp.example.com。
+
+```shell
+machine proxy.corp.example.com
+login jrgopher
+password hunter2
+```
+
+文件的位置可以使用 NETRC 环境变量设置。如果未设置 NETRC，go 命令将在类 UNIX 平台上读取 $HOME/.netrc 或在 Windows 上读取 %USERPROFILE%\_netrc。
+
+.netrc 中的字段用空格、制表符和换行符分隔。不幸的是，这些字符不能在用户名或密码中使用。另请注意，计算机名称不能是完整的 URL，因此不可能为同一计算机上的不同路径指定不同的用户名和密码。
+
+或者，可以直接在 GOPROXY URL 中指定凭证。例如：
+
+```shell
+GOPROXY=https://jrgopher:hunter2@proxy.corp.example.com
+```
+
+采用此方法时请务必小心：环境变量可能会出现在 shell 历史记录和日志中。
+
+### Passing credentials to private repositories
+
+go 命令可以直接从版本控制存储库下载模块。如果不使用私有代理，这对于私有模块是必需的。请参阅直接访问私有模块进行配置。
+
+go 命令在直接下载模块时运行 git 等版本控制工具。这些工具执行自己的身份验证，因此您可能需要在特定于工具的配置文件（如 .gitconfig）中配置凭据。
+
+为了确保此操作顺利进行，请确保 go 命令使用正确的存储库 URL，并且版本控制工具不需要交互式输入密码。 go 命令更喜欢 https:// URL 而不是其他方案（如 ssh://），除非在查找存储库 URL 时指定了该方案。特别是对于 GitHub 存储库，go 命令假定为 https://。
+
+对于大多数服务器，您可以将客户端配置为通过 HTTP 进行身份验证。例如，GitHub 支持使用 OAuth 个人访问令牌作为 HTTP 密码。您可以将 HTTP 密码存储在 .netrc 文件中，就像将凭据传递给私有代理时一样。
+
+或者，您可以将 https:// URL 重写为另一个方案。例如，在 .gitconfig 中：
+
+```shell
+[url "git@github.com:"]
+    insteadOf = https://github.com/
+```
+
+### Privacy   隐私
+
+go 命令可以从模块代理服务器和版本控制系统下载模块和元数据。环境变量 GOPROXY 控制使用哪些服务器。环境变量 GOPRIVATE 和 GONOPROXY 控制从代理获取哪些模块。
+
+GOPROXY 的默认值为：
+
+```shell
+https://proxy.golang.org,direct
+```
+
+通过此设置，当 go 命令下载模块或模块元数据时，它会首先向 proxy.golang.org 发送请求，这是 Google 运营的公共模块代理（隐私政策）。有关每个请求中发送哪些信息的详细信息，请参阅 GOPROXY 协议。 go 命令不传输个人身份信息，但它确实传输所请求的完整模块路径。如果代理响应 404（未找到）或 410（已消失）状态，则 go 命令将尝试直接连接到提供该模块的版本控制系统。有关详细信息，请参阅版本控制系统。
+
+GOPRIVATE 或 GONOPROXY 环境变量可以设置为与私有模块前缀匹配的 glob 模式列表，不应从任何代理请求。例如：
+
+```shell
+GOPRIVATE=*.corp.example.com,*.research.example.com
+```
+
+GOPRIVATE 只是充当 GONOPROXY 和 GONOSUMDB 的默认值，因此无需设置 GONOPROXY，除非 GONOSUMDB 应具有不同的值。当模块路径与 GONOPROXY 匹配时，go 命令会忽略该模块的 GOPROXY 并直接从其版本控制存储库中获取它。当没有代理服务私有模块时，这非常有用。请参阅直接访问私有模块。
+
+如果有一个可信代理为所有模块提供服务，则不应设置 GONOPROXY。例如，如果 GOPROXY 设置为一个源，则 go 命令将不会从其他源下载模块。在这种情况下仍应设置 GONOSUMDB。
+
+```shell
+GOPROXY=https://proxy.corp.example.com
+GONOSUMDB=*.corp.example.com,*.research.example.com
+```
+
+如果存在仅服务私有模块的受信任代理，则不应设置 GONOPROXY，但必须注意确保代理以正确的状态代码进行响应。例如，考虑以下配置：
+
+```shell
+GOPROXY=https://proxy.corp.example.com,https://proxy.golang.org
+GONOSUMDB=*.corp.example.com,*.research.example.com
+```
+
+假设由于拼写错误，开发人员尝试下载不存在的模块。
+
+```shell
+go mod download corp.example.com/secret-product/typo@latest
+```
+
+go 命令首先从 proxy.corp.example.com 请求此模块。如果该代理响应 404（未找到）或 410（已消失），go 命令将回退到 proxy.golang.org，在请求 URL 中传输秘密产品路径。如果私有代理以任何其他错误代码响应，go 命令将打印错误并且不会回退到其他源。
+
+除了代理之外，go 命令还可以连接到校验和数据库以验证 go.sum 中未列出的模块的加密哈希值。 GOSUMDB 环境变量设置校验和数据库的名称、URL 和公钥。 GOSUMDB 的默认值是 sum.golang.org，由 Google 运营的公共校验和数据库（隐私政策）。有关每个请求传输内容的详细信息，请参阅校验和数据库。与代理一样，go 命令不会传输个人身份信息，但它会传输所请求的完整模块路径，并且校验和数据库无法计算非公共模块的校验和。
+
+GONOSUMDB 环境变量可以设置为指示哪些模块是私有的并且不应从校验和数据库请求的模式。 GOPRIVATE 作为 GONOSUMDB 和 GONOPROXY 的默认值，因此没有必要设置 GONOSUMDB，除非 GONOPROXY 应具有不同的值。
+
+代理可以镜像校验和数据库。如果 GOPROXY 中的代理执行此操作，则 go 命令将不会直接连接到校验和数据库。
+
+GOSUMDB 可以设置为 off 以完全禁用校验和数据库。通过此设置，go 命令将不会验证下载的模块，除非它们已经在 go.sum 中。请参阅验证模块。
+
+## Module cache
+
+模块缓存是 go 命令存储下载的模块文件的目录。模块缓存与构建缓存不同，构建缓存包含已编译的包和其他构建工件。
+
+模块缓存的默认位置是 \$GOPATH/pkg/mod。要使用不同的位置，请设置 GOMODCACHE 环境变量。
+
+模块缓存没有最大大小，并且 go 命令不会自动删除其内容。
+
+缓存可能被同一台机器上开发的多个Go项目共享。无论主模块的位置如何，go 命令都将使用相同的缓存。 go 命令的多个实例可以同时安全地访问同一模块缓存。
+
+go 命令在缓存中创建具有只读权限的模块源文件和目录，以防止下载模块后对其进行意外更改。这有一个不幸的副作用，即使缓存难以使用 rm -rf 等命令删除。可以使用 go clean -modcache 删除缓存。或者，当使用 -modcacherw 标志时，go 命令将创建具有读写权限的新目录。这增加了编辑器、测试和其他程序修改模块缓存中的文件的风险。 go mod verify 命令可用于检测对主模块的依赖项的修改。它扫描每个模块依赖项的提取内容并确认它们与 go.sum 中的预期哈希匹配。
+
+下表解释了模块缓存中大多数文件的用途。一些临时文件（锁定文件、临时目录）被省略。对于每个路径，$module 是模块路径，$version 是版本。以斜杠 (/) 结尾的路径是目录。模块路径和版本中的大写字母使用感叹号进行转义（Azure 转义为 !azure），以避免在不区分大小写的文件系统上发生冲突。
+
+| Path                                         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `$module@$version/`                          | Directory containing extracted contents of a module `.zip` file. This serves as a module root directory for a downloaded module. It won't contain a `go.mod` file if the original module didn't have one.                                                                                                                                                                                                                                                                               |
+| `cache/download/`                            | Directory containing files downloaded from module proxies and files derived from [version control systems](https://go.dev/ref/mod#vcs). The layout of this directory follows the [`GOPROXY` protocol](https://go.dev/ref/mod#goproxy-protocol), so this directory may be used as a proxy when served by an HTTP file server or when referenced with a `file://` URL.                                                                                                                    |
+| `cache/download/$module/@v/list`             | List of known versions (see [`GOPROXY` protocol](https://go.dev/ref/mod#goproxy-protocol)). This may change over time, so the `go` command usually fetches a new copy instead of re-using this file.                                                                                                                                                                                                                                                                                    |
+| `cache/download/$module/@v/$version.info`    | JSON metadata about the version. (see [`GOPROXY` protocol](https://go.dev/ref/mod#goproxy-protocol)). This may change over time, so the `go` command usually fetches a new copy instead of re-using this file.                                                                                                                                                                                                                                                                          |
+| `cache/download/$module/@v/$version.mod`     | The `go.mod` file for this version (see [`GOPROXY` protocol](https://go.dev/ref/mod#goproxy-protocol)). If the original module did not have a `go.mod` file, this is a synthesized file with no requirements.                                                                                                                                                                                                                                                                           |
+| `cache/download/$module/@v/$version.zip`     | The zipped contents of the module (see [`GOPROXY` protocol](https://go.dev/ref/mod#goproxy-protocol) and [Module zip files](https://go.dev/ref/mod#zip-files)).                                                                                                                                                                                                                                                                                                                         |
+| `cache/download/$module/@v/$version.ziphash` | A cryptographic hash of the files in the `.zip` file. Note that the `.zip` file itself is not hashed, so file order, compression, alignment, and metadata don't affect the hash. When using a module, the `go` command verifies this hash matches the corresponding line in [`go.sum`](https://go.dev/ref/go-sum-files). The [`go mod verify`](https://go.dev/ref/mod#go-mod-verify) command checks that the hashes of module `.zip` files and extracted directories match these files. |
+| `cache/download/sumdb/`                      | Directory containing files downloaded from a [checksum database](https://go.dev/ref/mod#checksum-database) (typically `sum.golang.org`).                                                                                                                                                                                                                                                                                                                                                |
+| `cache/vcs/`                                 | Contains cloned version control repositories for modules fetched directly from their sources. Directory names are hex-encoded hashes derived from the repository type and URL. Repositories are optimized for size on disk. For example, cloned Git repositories are bare and shallow when possible.                                                                                                                                                                                    |
+
+## Authenticating modules
+
+当 go 命令将模块 zip 文件或 go.mod 文件下载到模块缓存中时，它会计算加密哈希并将其与已知值进行比较，以验证文件自首次下载以来没有更改。如果下载的文件没有正确的哈希值，go 命令会报告安全错误。
+对于 go.mod 文件，go 命令根据文件内容计算哈希值。对于模块 zip 文件，go 命令按确定的顺序根据存档中文件的名称和内容计算哈希值。哈希不受文件顺序、压缩、对齐和其他元数据的影响。有关哈希实现的详细信息，请参阅 golang.org/x/mod/sumdb/dirhash。
+go 命令将每个哈希与主模块的 go.sum 文件中的相应行进行比较。如果该哈希值与 go.sum 中的哈希值不同，则 go 命令会报告安全错误并删除下载的文件，而不将其添加到模块缓存中。
+如果 go.sum 文件不存在，或者它不包含下载文件的哈希值，则 go 命令可以使用校验和数据库（公共可用模块的哈希值的全局源）来验证哈希值。一旦验证了哈希值，go 命令会将其添加到 go.sum 并将下载的文件添加到模块缓存中。如果模块是私有的（由 GOPRIVATE 或 GONOSUMDB 环境变量匹配），或者如果禁用校验和数据库（通过设置 GOSUMDB=off），则 go 命令接受哈希并将文件添加到模块缓存而不验证它。
+模块缓存通常由系统上的所有 Go 项目共享，每个模块可能有自己的 go.sum 文件，其哈希值可能不同。为了避免信任其他模块，go 命令每当访问模块缓存中的文件时都会使用主模块的 go.sum 来验证哈希值。 Zip 文件哈希值的计算成本很高，因此 go 命令会检查与 zip 文件一起存储的预先计算的哈希值，而不是重新哈希文件。 go mod verify 命令可用于检查 zip 文件和提取的目录自添加到模块缓存以来是否未被修改。
+
+### go.sum files
+
+模块的根目录中可能有一个名为 go.sum 的文本文件，以及它的 go.mod 文件。 go.sum 文件包含模块的直接和间接依赖项的加密哈希值。当 go 命令将模块 .mod 或 .zip 文件下载到模块缓存中时，它会计算哈希并检查该哈希是否与主模块的 go.sum 文件中的相应哈希匹配。如果模块没有依赖项或者使用替换指令将所有依赖项替换为本地目录，则 go.sum 可能为空或不存在。
+
+go.sum 中的每一行都有三个由空格分隔的字段：模块路径、版本（可能以 /go.mod 结尾）和哈希值。
+
+- 模块路径是哈希所属模块的名称。
+
+- 版本是哈希所属模块的版本。如果版本以 /go.mod 结尾，则哈希值仅适用于模块的 go.mod 文件；否则，哈希值适用于模块的 .zip 文件中的文件。
+
+- 哈希列由算法名称（如 h1）和 Base64 编码的加密哈希组成，并用冒号 (:) 分隔。目前，SHA-256 (h1) 是唯一支持的哈希算法。如果将来发现 SHA-256 中的漏洞，将添加对另一种算法（名为 h2 等）的支持。
+
+go.sum 文件可能包含模块的多个版本的哈希值。 go 命令可能需要从依赖项的多个版本加载 go.mod 文件，以便执行最小版本选择。 go.sum 还可能包含不再需要的模块版本的哈希值（例如，升级后）。 go mod tidy 将添加缺失的哈希值，并从 go.sum 中删除不必要的哈希值。
+
+### Checksum database
+
+校验和数据库是 go.sum 行的全局源。 go 命令可以在许多情况下使用它来检测代理或源服务器的不当行为。
+校验和数据库允许所有公开可用的模块版本的全局一致性和可靠性。它使得不受信任的代理成为可能，因为它们无法在不被注意到的情况下提供错误的代码。它还确保与特定版本相关的位不会日复一日地发生变化，即使模块的作者随后更改了其存储库中的标签。
+校验和数据库由 Google 运营的 sum.golang.org 提供服务。它是 go.sum 行哈希的透明日志（或“默克尔树”），由 Trillian 支持。 Merkle 树的主要优点是独立审计员可以验证它没有被篡改，因此它比简单的数据库更值得信赖。
+go 命令使用最初在提案：保护公共 Go 模块生态系统中概述的协议与校验和数据库进行交互。
+下表指定了校验和数据库必须响应的查询。对于每个路径，$base 是校验和数据库 URL 的路径部分，$module 是模块路径，\$version 是版本。例如，如果校验和数据库 URL 是 https://sum.golang.org，并且客户端正在请求版本 v0.3.2 的模块 golang.org/x/text 的记录，则客户端将发送 GET 请求https://sum.golang.org/lookup/golang.org/x/text@v0.3.2。
+为了避免在不区分大小写的文件系统中提供服务时出现歧义，通过将每个大写字母替换为感叹号，后跟相应的小写字母，对 $module 和 $version 元素进行大小写编码。这允许模块 example.com/M 和 example.com/m 都存储在磁盘上，因为前者被编码为 example.com/!m。
+路径中用方括号括起来的部分（例如 [.p/\$W]）表示可选值。
+
+| Path                            | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `$base/latest`                  | Returns a signed, encoded tree description for the latest log. This signed description is in the form of a [note](https://pkg.go.dev/golang.org/x/mod/sumdb/note), which is text that has been signed by one or more server keys and can be verified using the server's public key. The tree description provides the size of the tree and the hash of the tree head at that size. This encoding is described in `[golang.org/x/mod/sumdb/tlog#FormatTree](https://pkg.go.dev/golang.org/x/mod/sumdb/tlog#FormatTree)`. |
+| `$base/lookup/$module@$version` | Returns the log record number for the entry about `$module` at `$version`, followed by the data for the record (that is, the `go.sum` lines for `$module` at `$version`) and a signed, encoded tree description that contains the record.                                                                                                                                                                                                                                                                               |
+| `$base/tile/$H/$L/$K[.p/$W]`    | Returns a [log tile](https://research.swtch.com/tlog#serving_tiles), which is a set of hashes that make up a section of the log. Each tile is defined in a two-dimensional coordinate at tile level `$L`, `$K`th from the left, with a tile height of `$H`. The optional `.p/$W` suffix indicates a partial log tile with only `$W` hashes. Clients must fall back to fetching the full tile if a partial tile is not found.                                                                                            |
+| `$base/tile/$H/data/$K[.p/$W]`  | Returns the record data for the leaf hashes in `/tile/$H/0/$K[.p/$W]` (with a literal `data` path element).                                                                                                                                                                                                                                                                                                                                                                                                             |
+
+如果 go 命令查询校验和数据库，那么第一步是通过 /lookup 端点检索记录数据。如果日志中尚未记录模块版本，则校验和数据库将在回复之前尝试从源服务器获取它。此 /lookup 数据提供了此模块版本的总和及其在日志中的位置，这通知客户端应获取哪些图块来执行证明。 go 命令在向主模块的 go.sum 文件添加新的 go.sum 行之前执行“包含”证明（日志中存在特定记录）和“一致性”证明（树未被篡改）。重要的是，如果没有首先根据签名树哈希对其进行身份验证，并根据客户端的签名树哈希时间线对签名树哈希进行身份验证，则永远不要使用来自 /lookup 的数据。
+签名的树哈希和校验和数据库提供的新切片存储在模块缓存中，因此 go 命令只需要获取丢失的切片。
+go命令不需要直接连接到校验和数据库。它可以通过镜像校验和数据库并支持上述协议的模块代理请求模块和。这对于阻止组织外部请求的私人企业代理特别有帮助。
+GOSUMDB 环境变量标识要使用的校验和数据库的名称以及可选的公钥和 URL，如下所示：
+
+```shell
+GOSUMDB="sum.golang.org"
+GOSUMDB="sum.golang.org+<publickey>"
+GOSUMDB="sum.golang.org+<publickey> https://sum.golang.org"
+```
+
+go 命令知道 sum.golang.org 的公钥，并且知道名称 sum.golang.google.cn （在中国大陆可用）连接到 sum.golang.org 校验和数据库；使用任何其他数据库都需要明确提供公钥。 URL 默认为 https:// 后跟数据库名称。
+GOSUMDB 默认为 sum.golang.org，由 Google 运行的 Go 校验和数据库。请参阅 https://sum.golang.org/privacy 了解该服务的隐私政策。
+如果 GOSUMDB 设置为 off，或者使用 -insecure 标志调用 go get，则不会查阅校验和数据库，并且接受所有无法识别的模块，但代价是放弃所有模块经过验证的可重复下载的安全保证。绕过特定模块的校验和数据库的更好方法是使用 GOPRIVATE 或 GONOSUMDB 环境变量。有关详细信息，请参阅私有模块。
+go env -w 命令可用于设置这些变量以供将来的 go 命令调用。
+
+## Environment variables
+
+go 命令中的模块行为可以使用下面列出的环境变量进行配置。该列表仅包含与模块相关的环境变量。请参阅 go help 环境以获取 go 命令识别的所有环境变量的列表。
+
+| Variable      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GO111MODULE` | Controls whether the `go` command runs in module-aware mode or `GOPATH` mode. Three values are recognized:<br><br>- `off`: the `go` command ignores `go.mod` files and runs in `GOPATH` mode.<br>- `on` (or unset): the `go` command runs in module-aware mode, even when no `go.mod` file is present.<br>- `auto`: the `go` command runs in module-aware mode if a `go.mod` file is present in the current directory or any parent directory. In Go 1.15 and lower, this was the default.<br><br>See [Module-aware commands](https://go.dev/ref/mod#mod-commands) for more information.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `GOMODCACHE`  | The directory where the `go` command will store downloaded modules and related files. See [Module cache](https://go.dev/ref/mod#module-cache) for details on the structure of this directory.If `GOMODCACHE` is not set, it defaults to `$GOPATH/pkg/mod`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `GOINSECURE`  | Comma-separated list of glob patterns (in the syntax of Go's [`path.Match`](https://go.dev/pkg/path/#Match)) of module path prefixes that may always be fetched in an insecure manner. Only applies to dependencies that are being fetched directly.Unlike the `-insecure` flag on `go get`, `GOINSECURE` does not disable module checksum database validation. `GOPRIVATE` or `GONOSUMDB` may be used to achieve that.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `GONOPROXY`   | Comma-separated list of glob patterns (in the syntax of Go's [`path.Match`](https://go.dev/pkg/path/#Match)) of module path prefixes that should always be fetched directly from version control repositories, not from module proxies.If `GONOPROXY` is not set, it defaults to `GOPRIVATE`. See [Privacy](https://go.dev/ref/mod#private-module-privacy).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `GONOSUMDB`   | Comma-separated list of glob patterns (in the syntax of Go's [`path.Match`](https://go.dev/pkg/path/#Match)) of module path prefixes for which the `go` should not verify checksums using the checksum database.If `GONOSUMDB` is not set, it defaults to `GOPRIVATE`. See [Privacy](https://go.dev/ref/mod#private-module-privacy).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `GOPATH`      | In `GOPATH` mode, the `GOPATH` variable is a list of directories that may contain Go code.In module-aware mode, the [module cache](https://go.dev/ref/mod#glos-module-cache) is stored in the `pkg/mod` subdirectory of the first `GOPATH` directory. Module source code outside the cache may be stored in any directory.If `GOPATH` is not set, it defaults to the `go` subdirectory of the user's home directory.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `GOPRIVATE`   | Comma-separated list of glob patterns (in the syntax of Go's [`path.Match`](https://go.dev/pkg/path/#Match)) of module path prefixes that should be considered private. `GOPRIVATE` is a default value for `GONOPROXY` and `GONOSUMDB`. See [Privacy](https://go.dev/ref/mod#private-module-privacy). `GOPRIVATE` also determines whether a module is considered private for `GOVCS`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `GOPROXY`     | List of module proxy URLs, separated by commas (`,`) or pipes (`\|`). When the `go` command looks up information about a module, it contacts each proxy in the list in sequence until it receives a successful response or a terminal error. A proxy may respond with a 404 (Not Found) or 410 (Gone) status to indicate the module is not available on that server.The `go` command's error fallback behavior is determined by the separator characters between URLs. If a proxy URL is followed by a comma, the `go` command falls back to the next URL after a 404 or 410 error; all other errors are considered terminal. If the proxy URL is followed by a pipe, the `go` command falls back to the next source after any error, including non-HTTP errors like timeouts.`GOPROXY` URLs may have the schemes `https`, `http`, or `file`. If a URL has no scheme, `https` is assumed. A module cache may be used directly as a file proxy:<br><br>GOPROXY=file://$(go env GOMODCACHE)/cache/download<br><br>Two keywords may be used in place of proxy URLs:<br><br>- `off`: disallows downloading modules from any source.<br>- `direct`: download directly from version control repositories instead of using a module proxy.<br><br>`GOPROXY` defaults to `https://proxy.golang.org,direct`. Under that configuration, the `go` command first contacts the Go module mirror run by Google, then falls back to a direct connection if the mirror does not have the module. See https://proxy.golang.org/privacy for the mirror's privacy policy. The `GOPRIVATE` and `GONOPROXY` environment variables may be set to prevent specific modules from being downloaded using proxies. See [Privacy](https://go.dev/ref/mod#private-module-privacy) for information on private proxy configuration.See [Module proxies](https://go.dev/ref/mod#module-proxy) and [Resolving a package to a module](https://go.dev/ref/mod#resolve-pkg-mod) for more information on how proxies are used. |
+| `GOSUMDB`     | Identifies the name of the checksum database to use and optionally its public key and URL. For example:<br><br>GOSUMDB="sum.golang.org"<br>GOSUMDB="sum.golang.org+<publickey>"<br>GOSUMDB="sum.golang.org+<publickey> https://sum.golang.org"<br><br>The `go` command knows the public key of `sum.golang.org` and also that the name `sum.golang.google.cn` (available inside mainland China) connects to the `sum.golang.org` database; use of any other database requires giving the public key explicitly. The URL defaults to `https://` followed by the database name.`GOSUMDB` defaults to `sum.golang.org`, the Go checksum database run by Google. See [Privacy: Go modules services](https://sum.golang.org/privacy) for the service's privacy policy.If `GOSUMDB` is set to `off` or if `go get` is invoked with the `-insecure` flag, the checksum database is not consulted, and all unrecognized modules are accepted, at the cost of giving up the security guarantee of verified repeatable downloads for all modules. A better way to bypass the checksum database for specific modules is to use the `GOPRIVATE` or `GONOSUMDB` environment variables.See [Authenticating modules](https://go.dev/ref/mod#authenticating) and [Privacy](https://go.dev/ref/mod#private-module-privacy) for more information.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `GOVCS`       | Controls the set of version control tools the `go` command may use to download public and private modules (defined by whether their paths match a pattern in `GOPRIVATE`) or other modules matching a glob pattern.If `GOVCS` is not set, or if a module does not match any pattern in `GOVCS`, the `go` command may use `git` and `hg` for a public module, or any known version control tool for a private module. Concretely, the `go` command acts as if `GOVCS` were set to:<br><br>public:git\|hg,private:all<br><br>See [Controlling version control tools with `GOVCS`](https://go.dev/ref/mod#vcs-govcs) for a complete explanation.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `GOWORK`      | The `GOWORK` environment variable instructs the `go` command to enter workspace mode using the provided [`go.work` file](#go-work-file) to define the workspace. If `GOWORK` is set to `off` workspace mode is disabled. This can be used to run the `go` command in single module mode: for example, `GOWORK=off go build .` builds the `.` package in single-module mode.`If `GOWORK` is empty, the `go` command will search for a `go.work` file as described in the [Workspaces](#workspaces) section.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+
+## Glossary
+
+**build constraint:** 编译包时判断是否使用Go源文件的条件。构建约束可以用文件名后缀（例如，foo_linux_amd64.go）或构建约束注释（例如，//+build linux,amd64）来表示。请参阅[Build Constraints](https://go.dev/pkg/go/build/#hdr-Build_Constraints)。
+
+**build list:** 将用于构建命令（例如 go build、go list 或 go test）的模块版本列表。构建列表是使用最小版本选择从主模块的 go.mod 文件和传递所需模块中的 go.mod 文件确定的。构建列表包含模块图中所有模块的版本，而不仅仅是与特定命令相关的版本。
+
+**canonical version:** 格式正确的版本，除了+不兼容之外，没有构建元数据后缀。例如，v1.2.3 是规范版本，但 v1.2.3+meta 则不是。
+
+**current module:** 主模块的同义词。
+
+**deprecated module:** 其作者不再支持的模块（尽管主要版本为此目的被视为不同的模块）。已弃用的模块在最新版本的 go.mod 文件中标有弃用注释。
+
+**direct dependency:** 其路径出现在主模块中的包或测试的 .go 源文件的导入声明中或包含此类包的模块中的包。 （比较间接依赖。）
+
+**direct mode:** 环境变量的设置，使 go 命令直接从版本控制系统（而不是模块代理）下载模块。 GOPROXY=direct 对所有模块执行此操作。 GOPRIVATE 和 GONOPROXY 对匹配模式列表的模块执行此操作。
+
+**`go.mod` file:** 定义模块的路径、要求和其他元数据的文件。出现在模块的根目录中。请参阅有关 go.mod 文件的部分。
+
+**`go.work` file** 定义要在工作区中使用的模块集的文件。请参阅有关 go.work 文件的部分
+
+**import path:** 用于导入 Go 源文件中的包的字符串。与包路径同义。
+
+**indirect dependency:** 由主模块中的包或测试传递导入的包，但其路径未出现在主模块中的任何导入声明中；或者出现在模块图中但不提供任何由主模块直接导入的包的模块。 （比较直接依赖。）
+
+**lazy module loading:** Go 1.17 中的一项更改是，避免在指定 go 1.17 或更高版本的模块中加载不需要模块图的命令。请参阅延迟模块加载。
+
+**main module:** 调用 go 命令的模块。主模块由当前目录或父目录中的 go.mod 文件定义。请参阅模块、包和版本。
+
+**major version:** 语义版本中的第一个数字（v1.2.3 中为 1）。在具有不兼容更改的版本中，主版本必须递增，并且次要版本和补丁版本必须设置为 0。主版本为 0 的语义版本被认为是不稳定的。
+
+**major version subdirectory:** 版本控制存储库中与模块的主要版本后缀匹配的子目录，可以在其中定义模块。例如，根路径为 example.com/mod 的存储库中的模块 example.com/mod/v2 可以定义在存储库根目录或主版本子目录 v2 中。请参阅存储库中的模块目录。
+
+**major version suffix:** 与主版本号匹配的模块路径后缀。例如，example.com/mod/v2 中的 /v2 v2.0.0 及更高版本需要主版本后缀，而早期版本不允许使用主版本后缀。请参阅有关主要版本后缀的部分。
+
+**minimal version selection (MVS):** 用于确定将在构建中使用的所有模块的版本的算法。有关详细信息，请参阅最小版本选择部分。
+
+**minor version:** 语义版本中的第二个数字（v1.2.3 中为 2）。在具有新的向后兼容功能的版本中，次要版本必须增加，并且补丁版本必须设置为 0。
+
+**module:** 一起发布、版本化和分发的软件包的集合。
+
+**module cache:** 存储下载模块的本地目录，位于 GOPATH/pkg/mod 中。请参阅模块缓存。
+
+**module graph:** 模块需求的有向图，植根于主模块。图中的每个顶点都是一个模块；每个边缘都是 go.mod 文件中 require 语句的一个版本（受主模块的 go.mod 文件中的替换和排除语句的影响）。
+
+**module graph pruning:** Go 1.17 中的一项更改是通过省略指定 go 1.17 或更高版本的模块的传递依赖关系来减小模块图的大小。请参阅模块图修剪。
+
+**module path:** 标识模块并充当模块内包导入路径的前缀的路径。例如，“golang.org/x/net”。
+
+**module proxy:** 实现 GOPROXY 协议的 Web 服务器。 go 命令从模块代理下载版本信息、go.mod 文件和模块 zip 文件。
+
+**module root directory:** 包含定义模块的 go.mod 文件的目录。
+
+**module subdirectory:** 存储库根路径之后的模块路径部分，指示定义模块的子目录。当非空时，模块子目录也是语义版本标签的前缀。模块子目录不包含主版本后缀（如果有），即使该模块位于主版本子目录中。请参阅模块路径。
+
+**package:** 同一目录中编译在一起的源文件的集合。请参阅 Go 语言规范中的包部分。
+
+**package path:** 唯一标识包的路径。包路径是与模块内的子目录连接的模块路径。例如“golang.org/x/net/html”是“html”子目录中模块“golang.org/x/net”中包的包路径。导入路径的同义词。
+
+**patch version:** 语义版本中的第三个数字（v1.2.3 中的 3）。在模块公共接口没有变化的版本中，补丁版本必须增加。
+
+**pre-release version:** 带有破折号的版本，后跟一系列点分隔的标识符，紧跟在补丁版本之后，例如 v1.2.3-beta4。预发布版本被认为不稳定，并且不假定与其他版本兼容。预发布版本排序在相应的发布版本之前：v1.2.3-pre 位于 v1.2.3 之前。另请参阅发布版本。
+
+**pseudo-version:** 对修订标识符（例如 Git 提交哈希）和来自版本控制系统的时间戳进行编码的版本。例如，v0.0.0-20191109021931-daa7c04131f5。用于与非模块存储库兼容以及标记版本不可用的其他情况。
+
+**release version:** 没有预发布后缀的版本。例如，v1.2.3，而不是 v1.2.3-pre。另请参阅预发行版本。
+
+**repository root path:** 模块路径中与版本控制存储库的根目录相对应的部分。请参阅模块路径。
+
+**retracted version:** 一个不应该依赖的版本，要么因为它发布过早，要么因为它发布后发现了严重的问题。请参阅撤消指令。
+
+**semantic version tag:** 版本控制存储库中将版本映射到特定修订版的标记。请参阅将版本映射到提交。
+
+**selected version:** 通过最小版本选择选择的给定模块的版本。所选版本是在模块图中找到的模块路径的最高版本。
+
+**vendor directory:** 名为vendor的目录，包含在主模块中构建包所需的其他模块的包。由 go mod 供应商维护。请参阅“[Vendoring](https://go.dev/ref/mod#vendoring)”。
+
+**version:** 模块的不可变快照的标识符，写为字母 v 后跟语义版本。请参阅版本部分。
+
+**workspace:** 磁盘上的模块集合，在运行最小版本选择 (MVS) 时用作主模块。请参阅有关工作区的部分
