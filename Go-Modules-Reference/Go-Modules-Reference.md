@@ -762,4 +762,66 @@ replace (
 
 ## Compatibility with non-module repositories 与非模块存储库的兼容性
 
+为了确保从 GOPATH 到模块的顺利过渡，go 命令可以通过添加 [go.mod 文件](https://go.dev/ref/mod#glos-go-mod-file)，从尚未迁移到模块的存储库以模块感知模式下载并构建包。
 
+当 go 命令直接从存储库下载给定版本的模块时，它会查找模块路径的存储库 URL，将版本映射到存储库中的修订版，然后提取该修订版存储库的存档。如果模块的路径等于存储库根路径，并且存储库根目录不包含 go.mod 文件，则 go 命令会在模块缓存中合成一个 go.mod 文件，其中包含模块指令而不包含其他内容。由于合成 go.mod 文件不包含其依赖项的 require 指令，因此依赖于它们的其他模块可能需要额外的 require 指令（带有 // 间接注释），以确保在每个构建上以相同版本获取每个依赖项。
+
+当 go 命令从代理下载模块时，它会与模块内容的其余部分分开下载 go.mod 文件。如果原始模块没有合成的 go.mod 文件，代理预计会提供合成的 go.mod 文件。
+
+### +incompatible versions +incompatible版本
+
+以主要版本 2 或更高版本发布的模块必须在其模块路径上具有匹配的主要版本后缀。例如，如果模块在 v2.0.0 版本发布，则其路径必须具有 /v2 后缀。这允许 go 命令将项目的多个主要版本视为不同的模块，即使它们是在同一存储库中开发的。
+
+当模块支持添加到 go 命令时，引入了主版本后缀要求，并且许多存储库在此之前已经标记了主版本 2 或更高版本的版本。为了保持与这些存储库的兼容性，go 命令会在没有 go.mod 文件的情况下向主版本 2 或更高版本的版本添加 +incompatible 的后缀。 +incompatible表示该版本与主版本号较低的版本属于同一模块；因此，go 命令可能会自动升级到更高的不兼容版本，即使它可能会破坏构建。
+
+考虑下面的示例要求：
+
+```go-module
+require example.com/m v4.1.2+incompatible
+```
+
+版本v4.1.2+incompatible指的是提供模块example.com/m的存储库中的语义版本标签v4.1.2。该模块必须位于存储库根目录中（即存储库根路径也必须是 example.com/m），**并且不得存在 go.mod 文件**。该模块可能具有较低主版本号的版本，例如 v1.5.2，并且 go 命令可能会自动从这些版本升级到v4.1.2+incompatible（有关升级如何工作的信息，请参阅最小版本选择 (MVS)）。
+
+在版本 v2.0.0 被标记后迁移到模块的存储库通常应该发布新的主要版本。在上面的示例中，作者应创建一个路径为 example.com/m/v5 的模块，并应发布版本 v5.0.0。作者还应该更新模块中包的导入，以使用前缀 example.com/m/v5 而不是 example.com/m。有关更详细的示例，请参阅 Go 模块：v2 及更高版本。
+
+请注意，+incompatible 后缀不应出现在版本库的标签上；类似 v4.1.2+incompatible 这样的标签将被忽略。后缀只会出现在 go 命令使用的版本中。有关版本和标签之间区别的详情，请参阅将版本映射到提交。
+
+另请注意，+incompatible 后缀可能会出现在伪版本中。例如，v2.0.1-20200722182040-012345abcdef+incompatible 可能是一个有效的伪版本。
+
+### Minimal module compatibility
+
+以主要版本 2 或更高版本发布的模块需要在其模块路径上具有主要版本后缀。该模块可能会也可能不会在其存储库内的主要版本子目录中开发。这对于构建 GOPATH 模式时在模块内导入包的包有影响。
+
+通常在 GOPATH 模式下，包存储在与其存储库根路径匹配的目录中，并与其在存储库中的目录相连接。例如，存储库中子目录 sub 中根路径为 example.com/repo 的包将存储在 $GOPATH/src/example.com/repo/sub 中，并将作为 example.com/repo/sub 导入。
+
+对于带有主版本后缀的模块，人们可能期望在目录 $GOPATH/src/example.com/repo/v2/sub 中找到包 example.com/repo/v2/sub。这需要在其存储库的 v2 子目录中开发该模块。 go 命令支持这一点，但不要求它（请参阅将版本映射到提交）。
+
+如果模块不是在主版本子目录中开发的，那么它在 GOPATH 中的目录将不包含主版本后缀，并且其包可能会在没有主版本后缀的情况下导入。在上面的示例中，该包将在目录 $GOPATH/src/example.com/repo/sub 中找到，并将作为 example.com/repo/sub 导入。
+
+这给打算在模块模式和 GOPATH 模式下构建的包带来了一个问题：模块模式需要后缀，而 GOPATH 模式则不需要。
+
+为了解决这个问题，Go 1.11 中添加了最小模块兼容性，并向后移植到 Go 1.9.7 和 1.10.3。当导入路径解析为 GOPATH 模式下的目录时：
+
+- 解析 `$modpath/$vn/$dir` 形式的导入时，其中：
+  
+  - $modpath 是有效的module path,
+  
+  - $vn 是主版本后缀,
+  
+  - $dir 可能是一个空子目录，
+
+- 如果以下所有条件均为真：
+  
+  - 包` $modpath/$vn/$dir` 不存在于任何相关的vendor目录中。
+  
+  - go.mod 文件与导入文件位于同一目录中，或者位于 $GOPATH/src 根目录之前的任何父目录中，
+  
+  - 不存在 `$GOPATH[i]/src/$modpath/$vn/$suffix` 目录（对于任何根 $GOPATH[i]），
+  
+  - 文件 `$GOPATH[d]/src/$modpath/go.mod` 存在（对于某些根 `$GOPATH[d]`）并将模块路径声明为 `$modpath/$vn`，
+
+- 然后`$modpath/$vn/$dir`的导入被解析到目录`$GOPATH[d]/src/$modpath/$dir`。
+
+此规则允许已迁移到模块的包导入在 GOPATH 模式下构建时已迁移到模块的其他包，即使未使用主版本子目录也是如此。
+
+## Module-aware commands 模块命令
