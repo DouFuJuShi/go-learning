@@ -8,6 +8,8 @@ Go101 https://gfw.go101.org/article/packages-and-imports.html
 
 Uber Style Guide https://github.com/uber-go/guide    
 
+Google Style Guide https://google.github.io/styleguide/go/index
+
 Standard Go Project Layout https://github.com/golang-standards/project-layout/blob/master/README_zh.md
 
 ## Design Pattern
