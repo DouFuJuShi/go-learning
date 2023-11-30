@@ -1,7 +1,9 @@
 # protoc 插件实现说明
 
 ## 预备知识
+
 ### 1. [Extensions](https://protobuf.dev/programming-guides/proto2/#extensions)
+
 ```protobuff
 // example
 // file kittens/video_ext.proto
@@ -28,9 +30,11 @@ message UserContent {
 ```
 
 ### 2. [Custom Options](https://protobuf.dev/programming-guides/proto2/#customoptions)
+
 Protocol Buffers允许定义和使用自己的选项。但是这是大多数人不需要的高级功能。
 由于选项是由 google/protobuf/descriptor.proto 中定义的Message（如 FileOptions 或 FieldOptions），    
 定义自己的选项都只是扩展这些Message。例如：
+
 ```protobuf
 import "google/protobuf/descriptor.proto";
 
@@ -118,10 +122,20 @@ message OtherMessage {
 }
 ```
 
-### 3. protoc 插件名字命名
-plugin必须命名为"protoc-gen-$NAME"，然后在标志"--${NAME}_out"被传递给protoc命令。
+### 3. protoc 插件名命名规范
+
+plugin必须命名为"protoc-gen-\$NAME"，然后在标志"--\${NAME}_out"被传递给protoc命令。
+
+https://protobuf.dev/reference/cpp/api-docs/google.protobuf.compiler.plugin/
+
+### 4. Go编写插件引用的库
+
+```shell
+go get google.golang.org/protobuf/compiler/protogen
+```
 
 ## reference
-[protobuf](https://github.com/protocolbuffers/protobuf)
-[document](https://protobuf.dev)
-[protobuf-go](https://github.com/protocolbuffers/protobuf-go)
+
+[protobuf](https://github.com/protocolbuffers/protobuf)  protoc 命令行工具
+[proto buffers document](https://protobuf.dev) 
+[protobuf-go](https://github.com/protocolbuffers/protobuf-go)  go代码生成 (protoc 插件)
