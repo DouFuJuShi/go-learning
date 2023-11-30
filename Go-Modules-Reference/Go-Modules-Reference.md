@@ -1,4 +1,4 @@
-# Go Modules Reference<sub>[https://go.dev/ref/mod]([Go Modules Reference - The Go Programming Language](https://go.dev/ref/mod))</sub>
+# Go Modules Reference Go模块手册
 
 ## 介绍
 
@@ -1113,7 +1113,6 @@ type Module struct {
     Origin   any    // provenance of module
     Reuse    bool   // reuse of old module info is safe
 }
-
 ```
 
 -<mark>x 标志</mark>导致 download 将 download 执行的命令打印到标准错误。
@@ -1355,8 +1354,6 @@ golang.org/x/text/language
 -m 标志导致 go mod 为什么将其参数视为模块列表。 go mod Why 将打印每个模块中任何包的路径。请注意，即使使用 -m，go mod Why 也会查询包图，而不是 go mod graph 打印的模块图。
 
 -vendor 标志导致 go mod 为什么忽略主模块之外的包测试中的导入（就像 go mod供应商所做的那样）。默认情况下，go mod Why 会考虑与 all 模式匹配的包图。在声明 go 1.16 或更高版本的模块中（使用 go.mod 中的 go 指令），此标志在 Go 1.16 之后无效，因为 all 的含义已更改以匹配 go mod 供应商匹配的包集。
-
-
 
 ### go version -m
 
@@ -2188,3 +2185,11 @@ go 命令中的模块行为可以使用下面列出的环境变量进行配置�
 **version:** 模块的不可变快照的标识符，写为字母 v 后跟语义版本。请参阅版本部分。
 
 **workspace:** 磁盘上的模块集合，在运行最小版本选择 (MVS) 时用作主模块。请参阅有关工作区的部分
+
+
+
+## 其他
+
+[Go module机制下升级major版本号的实践](https://tonybai.com/2019/06/03/the-practice-of-upgrading-major-version-under-go-module/)
+
+[Go Modules Reference - The Go Programming Language](https://go.dev/ref/mod)
