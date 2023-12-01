@@ -137,3 +137,5 @@ go get google.golang.org/protobuf/compiler/protogen
 [protobuf](https://github.com/protocolbuffers/protobuf)  protoc 命令行工具
 [proto buffers document](https://protobuf.dev) 
 [protobuf-go](https://github.com/protocolbuffers/protobuf-go)  go代码生成 (protoc 插件)
+
+https://rotemtam.com/2021/03/22/creating-a-protoc-plugin-to-gen-go-code/
