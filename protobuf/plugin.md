@@ -126,8 +126,6 @@ message OtherMessage {
 
 plugin必须命名为"protoc-gen-\$NAME"，然后在标志"--\${NAME}_out"被传递给protoc命令。
 
-https://protobuf.dev/reference/cpp/api-docs/google.protobuf.compiler.plugin/
-
 ### 4. Go编写插件引用的库
 
 ```shell

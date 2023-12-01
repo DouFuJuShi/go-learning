@@ -2186,10 +2186,10 @@ go 命令中的模块行为可以使用下面列出的环境变量进行配置�
 
 **workspace:** 磁盘上的模块集合，在运行最小版本选择 (MVS) 时用作主模块。请参阅有关工作区的部分
 
-
-
 ## 其他
 
 [Go module机制下升级major版本号的实践](https://tonybai.com/2019/06/03/the-practice-of-upgrading-major-version-under-go-module/)
 
 [Go Modules Reference - The Go Programming Language](https://go.dev/ref/mod)
+
+[通过一个例子让你彻底掌握 Go 工作区模式](https://polarisxu.studygolang.com/posts/go/workspace/)
