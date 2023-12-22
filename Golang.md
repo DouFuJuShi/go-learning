@@ -102,7 +102,9 @@ confluent-kafka-go https://github.com/confluentinc/confluent-kafka-go
 
 fasthttp https://github.com/valyala/fasthttp
 
-go-resty/resty https://github.com/go-resty/resty
+go-resty/resty https://github.com/go-resty/resty   
+
+req https://github.com/imroc/req
 
 ## Linter
 
