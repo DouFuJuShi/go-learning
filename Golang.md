@@ -211,3 +211,6 @@ gocache [GitHub - eko/gocache: ☔️ A complete Go cache library that brings yo
 go-cache [GitHub - patrickmn/go-cache: An in-memory key:value store/cache (similar to Memcached) library for Go, suitable for single-machine applications.](https://github.com/patrickmn/go-cache)
 
 ristretto [GitHub - dgraph-io/ristretto: A high performance memory-bound Go cache](https://github.com/dgraph-io/ristretto)
+
+### util function library
+lancet https://github.com/duke-git/lancet   
