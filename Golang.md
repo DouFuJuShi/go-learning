@@ -2,7 +2,9 @@
 
 ## Doc
 
-Go101 https://gfw.go101.org/article/packages-and-imports.html
+Go101 https://gfw.go101.org/article/packages-and-imports.html   
+
+golang-open-source-projects https://github.com/hackstoic/golang-open-source-projects
 
 ## Go Style Guide
 
