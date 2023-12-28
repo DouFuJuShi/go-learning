@@ -218,3 +218,6 @@ ristretto [GitHub - dgraph-io/ristretto: A high performance memory-bound Go cach
 
 ### util function library
 lancet https://github.com/duke-git/lancet   
+
+### vitess
+vitess https://github.com/vitessio/vitess   
