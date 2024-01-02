@@ -6,6 +6,8 @@ Go101 https://gfw.go101.org/article/packages-and-imports.html
 
 golang-open-source-projects https://github.com/hackstoic/golang-open-source-projects
 
+coder-kung-fu https://github.com/yanfeizhang/coder-kung-fu   
+
 ## Go Style Guide
 
 Uber Style Guide https://github.com/uber-go/guide    
