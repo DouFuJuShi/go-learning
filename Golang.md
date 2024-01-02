@@ -222,4 +222,4 @@ ristretto [GitHub - dgraph-io/ristretto: A high performance memory-bound Go cach
 lancet https://github.com/duke-git/lancet   
 
 ### vitess
-vitess [https://github.com/vitessio/vitess ](https://github.com/vitessio/vitess)https://github.com/vitessio/vitess  
+vitess [https://github.com/vitessio/vitess ](https://github.com/vitessio/vitess)
