@@ -16,4 +16,3 @@ https://herbertograca.com/
 
 [go2o](https://github.com/ixre/go2o)   
 
-[go-cleanarchitecture](https://github.com/manuelkiessling/go-cleanarchitecture)
