@@ -223,3 +223,9 @@ lancet https://github.com/duke-git/lancet
 
 ### vitess
 vitess [https://github.com/vitessio/vitess ](https://github.com/vitessio/vitess)
+
+### trace
+odigos https://github.com/keyval-dev/odigos   
+
+signoz https://github.com/SigNoz/signoz   
+
