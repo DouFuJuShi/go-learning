@@ -54,7 +54,9 @@ grpc-go https://github.com/grpc/grpc-go
 
 gRPCurl https://github.com/fullstorydev/grpcurl     
 
-evans https://github.com/ktr0731/evans
+evans https://github.com/ktr0731/evans   
+
+ghz https://github.com/bojand/ghz   
 
 go-grpc-middleware https://github.com/grpc-ecosystem/go-grpc-middleware
 
