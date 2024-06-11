@@ -1,6 +1,7 @@
 # RocketMQ
 
 ## Offical Site
+
 https://rocketmq.apache.org/    
 
 https://github.com/apache/rocketmq
@@ -11,117 +12,74 @@ RocketMQ 4.X https://github.com/apache/rocketmq-client-go
 
 RocketMQ 5.X https://github.com/apache/rocketmq-clients/golang
 
-
 ## Installtion
 
 ```shell
-# rocketmq-all-5.1.3-bin-release tree
+➜  rocketmq-all-5.2.0-bin-release tree -L 2
 .
 ├── LICENSE
 ├── NOTICE
 ├── README.md
 ├── benchmark
-│   ├── batchproducer.sh
-│   ├── consumer.sh
-│   ├── producer.sh
-│   ├── runclass.sh
-│   ├── shutdown.sh
-│   └── tproducer.sh
+│   ├── batchproducer.sh
+│   ├── consumer.sh
+│   ├── producer.sh
+│   ├── runclass.sh
+│   ├── shutdown.sh
+│   └── tproducer.sh
 ├── bin
-│   ├── README.md
-│   ├── cachedog.sh
-│   ├── cleancache.sh
-│   ├── cleancache.v1.sh
-│   ├── controller
-│   │   ├── fast-try-independent-deployment.cmd
-│   │   ├── fast-try-independent-deployment.sh
-│   │   ├── fast-try-namesrv-plugin.cmd
-│   │   ├── fast-try-namesrv-plugin.sh
-│   │   ├── fast-try.cmd
-│   │   └── fast-try.sh
-│   ├── dledger
-│   │   └── fast-try.sh
-│   ├── export.sh
-│   ├── mqadmin # admin tool
-│   ├── mqadmin.cmd
-│   ├── mqbroker # 部署Broker服务器
-│   ├── mqbroker.cmd
-│   ├── mqbroker.numanode0
-│   ├── mqbroker.numanode1
-│   ├── mqbroker.numanode2
-│   ├── mqbroker.numanode3
-│   ├── mqbrokercontainer
-│   ├── mqcontroller
-│   ├── mqcontroller.cmd
-│   ├── mqnamesrv # name server
-│   ├── mqnamesrv.cmd
-│   ├── mqproxy 
-│   ├── mqproxy.cmd
-│   ├── mqshutdown # 关闭运行中的 broker proxy namesrv controller
-│   ├── mqshutdown.cmd
-│   ├── os.sh # 在部署Broker服务器之前，强烈建议运行**os.sh**，这是为了优化您的操作系统以获得更好的性能。os.sh参数设置仅供参考。您可以根据目标主机配置调整它们。
-│   ├── play.cmd
-│   ├── play.sh
-│   ├── runbroker.cmd
-│   ├── runbroker.sh
-│   ├── runserver.cmd
-│   ├── runserver.sh
-│   ├── setcache.sh
-│   ├── startfsrv.sh
-│   ├── tools.cmd
-│   └── tools.sh
+│   ├── README.md
+│   ├── cachedog.sh
+│   ├── cleancache.sh
+│   ├── cleancache.v1.sh
+│   ├── controller
+│   ├── dledger
+│   ├── export.sh
+│   ├── mqadmin
+│   ├── mqadmin.cmd
+│   ├── mqbroker
+│   ├── mqbroker.cmd
+│   ├── mqbroker.numanode0
+│   ├── mqbroker.numanode1
+│   ├── mqbroker.numanode2
+│   ├── mqbroker.numanode3
+│   ├── mqbrokercontainer
+│   ├── mqcontroller
+│   ├── mqcontroller.cmd
+│   ├── mqnamesrv
+│   ├── mqnamesrv.cmd
+│   ├── mqproxy
+│   ├── mqproxy.cmd
+│   ├── mqshutdown
+│   ├── mqshutdown.cmd
+│   ├── os.sh
+│   ├── play.cmd
+│   ├── play.sh
+│   ├── runbroker.cmd
+│   ├── runbroker.sh
+│   ├── runserver.cmd
+│   ├── runserver.sh
+│   ├── setcache.sh
+│   ├── startfsrv.sh
+│   ├── tools.cmd
+│   └── tools.sh
 ├── conf
-│   ├── 2m-2s-async
-│   │   ├── broker-a-s.properties
-│   │   ├── broker-a.properties
-│   │   ├── broker-b-s.properties
-│   │   └── broker-b.properties
-│   ├── 2m-2s-sync
-│   │   ├── broker-a-s.properties
-│   │   ├── broker-a.properties
-│   │   ├── broker-b-s.properties
-│   │   └── broker-b.properties
-│   ├── 2m-noslave
-│   │   ├── broker-a.properties
-│   │   ├── broker-b.properties
-│   │   └── broker-trace.properties
-│   ├── broker.conf
-│   ├── container
-│   │   └── 2container-2m-2s
-│   │       ├── broker-a-in-container1.conf
-│   │       ├── broker-a-in-container2.conf
-│   │       ├── broker-b-in-container1.conf
-│   │       ├── broker-b-in-container2.conf
-│   │       ├── broker-container1.conf
-│   │       ├── broker-container2.conf
-│   │       └── nameserver.conf
-│   ├── controller
-│   │   ├── cluster-3n-independent
-│   │   │   ├── controller-n0.conf
-│   │   │   ├── controller-n1.conf
-│   │   │   └── controller-n2.conf
-│   │   ├── cluster-3n-namesrv-plugin
-│   │   │   ├── namesrv-n0.conf
-│   │   │   ├── namesrv-n1.conf
-│   │   │   └── namesrv-n2.conf
-│   │   ├── controller-standalone.conf
-│   │   └── quick-start
-│   │       ├── broker-n0.conf
-│   │       ├── broker-n1.conf
-│   │       └── namesrv.conf
-│   ├── dledger
-│   │   ├── broker-n0.conf
-│   │   ├── broker-n1.conf
-│   │   └── broker-n2.conf
-│   ├── plain_acl.yml
-│   ├── rmq-proxy.json # proxy的配置文件
-│   ├── rmq.broker.logback.xml
-│   ├── rmq.client.logback.xml
-│   ├── rmq.controller.logback.xml
-│   ├── rmq.namesrv.logback.xml
-│   ├── rmq.proxy.logback.xml
-│   ├── rmq.tools.logback.xml
-│   └── tools.yml
+│   ├── 2m-2s-async
+│   ├── 2m-2s-sync
+│   ├── 2m-noslave
+│   ├── broker.conf
+│   ├── container
+│   ├── controller
+│   ├── dledger
+│   ├── plain_acl.yml
+│   ├── rmq-proxy.json
+│   ├── rmq.broker.logback.xml
+│   ├── rmq.client.logback.xml
+│   ├── rmq.controller.logback.xml
+│   ├── rmq.namesrv.logback.xml
+│   ├── rmq.proxy.logback.xml
+│   ├── rmq.tools.logback.xml
+│   └── tools.yml
 └── lib
     ├── animal-sniffer-annotations-1.21.jar
     ├── annotations-13.0.jar
@@ -131,40 +89,47 @@ RocketMQ 5.X https://github.com/apache/rocketmq-clients/golang
     ├── bcpkix-jdk15on-1.69.jar
     ├── bcprov-jdk15on-1.69.jar
     ├── bcutil-jdk15on-1.69.jar
+    ├── bolt-1.6.4.jar
     ├── caffeine-2.9.3.jar
-    ├── checker-qual-3.12.0.jar
+    ├── checker-qual-3.33.0.jar
     ├── commons-beanutils-1.9.4.jar
     ├── commons-cli-1.5.0.jar
     ├── commons-codec-1.13.jar
     ├── commons-collections-3.2.2.jar
     ├── commons-digester-2.1.jar
     ├── commons-io-2.7.jar
+    ├── commons-lang-2.6.jar
     ├── commons-lang3-3.12.0.jar
     ├── commons-logging-1.2.jar
     ├── commons-validator-1.7.jar
     ├── concurrentlinkedhashmap-lru-1.4.2.jar
     ├── disruptor-1.2.10.jar
+    ├── disruptor-3.3.7.jar
     ├── dledger-0.3.1.2.jar
     ├── error_prone_annotations-2.14.0.jar
     ├── failureaccess-1.0.1.jar
     ├── fastjson-1.2.83.jar
-    ├── grpc-api-1.50.0.jar
-    ├── grpc-context-1.50.0.jar
-    ├── grpc-core-1.50.0.jar
-    ├── grpc-netty-shaded-1.50.0.jar
-    ├── grpc-protobuf-1.50.0.jar
-    ├── grpc-protobuf-lite-1.50.0.jar
-    ├── grpc-services-1.50.0.jar
-    ├── grpc-stub-1.50.0.jar
+    ├── grpc-api-1.53.0.jar
+    ├── grpc-context-1.53.0.jar
+    ├── grpc-core-1.53.0.jar
+    ├── grpc-netty-shaded-1.53.0.jar
+    ├── grpc-protobuf-1.53.0.jar
+    ├── grpc-protobuf-lite-1.53.0.jar
+    ├── grpc-services-1.53.0.jar
+    ├── grpc-stub-1.53.0.jar
     ├── gson-2.9.0.jar
-    ├── guava-31.1-jre.jar
+    ├── guava-32.0.1-jre.jar
     ├── hamcrest-2.1.jar
-    ├── j2objc-annotations-1.3.jar
+    ├── hessian-3.3.6.jar
+    ├── j2objc-annotations-2.8.jar
+    ├── jackson-core-2.15.2.jar
     ├── jaeger-thrift-1.6.0.jar
     ├── jaeger-tracerresolver-1.6.0.jar
     ├── javassist-3.20.0-GA.jar
     ├── javax.annotation-api-1.3.2.jar
+    ├── jctools-core-2.1.1.jar
     ├── jna-4.2.2.jar
+    ├── jraft-core-1.3.14.jar
     ├── jsr305-3.0.2.jar
     ├── jul-to-slf4j-2.0.6.jar
     ├── kotlin-stdlib-1.6.20.jar
@@ -174,6 +139,7 @@ RocketMQ 5.X https://github.com/apache/rocketmq-clients/golang
     ├── libthrift-0.14.1.jar
     ├── listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar
     ├── lz4-java-1.8.0.jar
+    ├── metrics-core-4.0.2.jar
     ├── netty-all-4.1.65.Final.jar
     ├── netty-tcnative-boringssl-static-2.0.53.Final-linux-aarch_64.jar
     ├── netty-tcnative-boringssl-static-2.0.53.Final-linux-x86_64.jar
@@ -184,25 +150,26 @@ RocketMQ 5.X https://github.com/apache/rocketmq-clients/golang
     ├── netty-tcnative-classes-2.0.53.Final.jar
     ├── okhttp-4.11.0.jar
     ├── okio-3.2.0.jar
-    ├── okio-jvm-3.0.0.jar
+    ├── okio-jvm-3.4.0.jar
     ├── openmessaging-api-0.3.1-alpha.jar
-    ├── opentelemetry-api-1.26.0.jar
-    ├── opentelemetry-api-events-1.26.0-alpha.jar
-    ├── opentelemetry-api-logs-1.26.0-alpha.jar
-    ├── opentelemetry-context-1.26.0.jar
-    ├── opentelemetry-exporter-common-1.26.0.jar
-    ├── opentelemetry-exporter-logging-1.26.0.jar
-    ├── opentelemetry-exporter-otlp-1.26.0.jar
-    ├── opentelemetry-exporter-otlp-common-1.26.0.jar
-    ├── opentelemetry-exporter-prometheus-1.26.0-alpha.jar
-    ├── opentelemetry-extension-incubator-1.26.0-alpha.jar
-    ├── opentelemetry-sdk-1.26.0.jar
-    ├── opentelemetry-sdk-common-1.26.0.jar
-    ├── opentelemetry-sdk-extension-autoconfigure-spi-1.26.0.jar
-    ├── opentelemetry-sdk-logs-1.26.0-alpha.jar
-    ├── opentelemetry-sdk-metrics-1.26.0.jar
-    ├── opentelemetry-sdk-trace-1.26.0.jar
-    ├── opentelemetry-semconv-1.26.0-alpha.jar
+    ├── opentelemetry-api-1.29.0.jar
+    ├── opentelemetry-api-events-1.29.0-alpha.jar
+    ├── opentelemetry-context-1.29.0.jar
+    ├── opentelemetry-exporter-common-1.29.0.jar
+    ├── opentelemetry-exporter-logging-1.29.0.jar
+    ├── opentelemetry-exporter-logging-otlp-1.29.0.jar
+    ├── opentelemetry-exporter-otlp-1.29.0.jar
+    ├── opentelemetry-exporter-otlp-common-1.29.0.jar
+    ├── opentelemetry-exporter-prometheus-1.29.0-alpha.jar
+    ├── opentelemetry-exporter-sender-okhttp-1.29.0.jar
+    ├── opentelemetry-extension-incubator-1.29.0-alpha.jar
+    ├── opentelemetry-sdk-1.29.0.jar
+    ├── opentelemetry-sdk-common-1.29.0.jar
+    ├── opentelemetry-sdk-extension-autoconfigure-spi-1.29.0.jar
+    ├── opentelemetry-sdk-logs-1.29.0.jar
+    ├── opentelemetry-sdk-metrics-1.29.0.jar
+    ├── opentelemetry-sdk-trace-1.29.0.jar
+    ├── opentelemetry-semconv-1.29.0-alpha.jar
     ├── opentracing-noop-0.33.0.jar
     ├── opentracing-tracerresolver-0.1.8.jar
     ├── opentracing-util-0.33.0.jar
@@ -210,35 +177,43 @@ RocketMQ 5.X https://github.com/apache/rocketmq-clients/golang
     ├── proto-google-common-protos-2.9.0.jar
     ├── protobuf-java-3.20.1.jar
     ├── protobuf-java-util-3.20.1.jar
-    ├── rocketmq-acl-5.1.3.jar
-    ├── rocketmq-broker-5.1.3.jar
-    ├── rocketmq-client-5.1.3.jar
-    ├── rocketmq-common-5.1.3.jar
-    ├── rocketmq-container-5.1.3.jar
-    ├── rocketmq-controller-5.1.3.jar
-    ├── rocketmq-example-5.1.3.jar
-    ├── rocketmq-filter-5.1.3.jar
+    ├── rocketmq-acl-5.2.0.jar
+    ├── rocketmq-broker-5.2.0.jar
+    ├── rocketmq-client-5.2.0.jar
+    ├── rocketmq-common-5.2.0.jar
+    ├── rocketmq-container-5.2.0.jar
+    ├── rocketmq-controller-5.2.0.jar
+    ├── rocketmq-example-5.2.0.jar
+    ├── rocketmq-filter-5.2.0.jar
+    ├── rocketmq-grpc-netty-codec-haproxy-1.0.0.jar
     ├── rocketmq-logback-classic-1.0.1.jar
-    ├── rocketmq-namesrv-5.1.3.jar
-    ├── rocketmq-openmessaging-5.1.3.jar
-    ├── rocketmq-proto-2.0.2.jar
-    ├── rocketmq-proxy-5.1.3.jar
-    ├── rocketmq-remoting-5.1.3.jar
+    ├── rocketmq-namesrv-5.2.0.jar
+    ├── rocketmq-openmessaging-5.2.0.jar
+    ├── rocketmq-proto-2.0.3.jar
+    ├── rocketmq-proxy-5.2.0.jar
+    ├── rocketmq-remoting-5.2.0.jar
+    ├── rocketmq-rocksdb-1.0.2.jar
     ├── rocketmq-shaded-slf4j-api-bridge-1.0.0.jar
     ├── rocketmq-slf4j-api-1.0.1.jar
-    ├── rocketmq-srvutil-5.1.3.jar
-    ├── rocketmq-store-5.1.3.jar
-    ├── rocketmq-tiered-store-5.1.3.jar
-    ├── rocketmq-tools-5.1.3.jar
+    ├── rocketmq-srvutil-5.2.0.jar
+    ├── rocketmq-store-5.2.0.jar
+    ├── rocketmq-tiered-store-5.2.0.jar
+    ├── rocketmq-tools-5.2.0.jar
     ├── slf4j-api-2.0.3.jar
-    ├── snakeyaml-1.32.jar
+    ├── snakeyaml-2.0.jar
+    ├── sofa-common-tools-1.0.12.jar
     ├── tomcat-annotations-api-8.5.46.jar
     ├── tomcat-embed-core-8.5.46.jar
     └── zstd-jni-1.5.2-2.jar
+
+12 directories, 176 files
 ```
+
 ### namesrv Setting
+
 ```properties
-rocketmqHome=/Users/aqi/Downloads/rocketmq-all-5.1.3-bin-release
+# mqnamesrv -p
+rocketmqHome=/Users/aqi/Downloads/rocketmq-all-5.2.0-bin-release
 kvConfigPath=/Users/aqi/namesrv/kvConfig.json
 configStorePath=/Users/aqi/namesrv/namesrv.properties
 productEnvName=center
@@ -258,6 +233,8 @@ notifyMinBrokerIdChanged=false
 enableControllerInNamesrv=false
 needWaitForService=false
 waitSecondsForService=45
+deleteTopicWithBrokerRegistration=false
+configBlackList=configBlackList;configStorePath;kvConfigPath
 bindAddress=0.0.0.0
 listenPort=9876
 serverWorkerThreads=8
@@ -272,6 +249,8 @@ writeBufferHighWaterMark=0
 writeBufferLowWaterMark=0
 serverSocketBacklog=1024
 serverPooledByteBufAllocatorEnable=true
+enableShutdownGracefully=false
+shutdownWaitTimeSeconds=30
 useEpollNativeSelector=false
 clientWorkerThreads=4
 clientCallbackExecutorThreads=8
@@ -290,12 +269,16 @@ writeBufferHighWaterMark=0
 writeBufferLowWaterMark=0
 disableCallbackExecutor=false
 disableNettyWorkerGroup=false
+maxReconnectIntervalTimeSeconds=60
+enableReconnectForGoAway=true
+enableTransparentRetry=true
 ```
 
 ### broker Setting
+
 ```properties
 brokerConfigPath=
-rocketmqHome=/Users/aqi/Downloads/rocketmq-all-5.1.3-bin-release
+rocketmqHome=/Users/aqi/Downloads/rocketmq-all-5.2.0-bin-release
 namesrvAddr=
 listenPort=6888
 brokerIP1=192.168.20.140
@@ -655,7 +638,6 @@ batchDispatchRequestThreadPoolNums=16
 
 Config Path: /path/to/rocketmq-all-5.1.3-bin-release/conf/rmq-proxy.json   
 
-
 ```json
 {
   "rocketMQClusterName": "orderCluster",
@@ -665,25 +647,27 @@ Config Path: /path/to/rocketmq-all-5.1.3-bin-release/conf/rmq-proxy.json
 }
 ```
 
-
 - rocketMQClusterName 设置集群名
 - namesrvAddr 设置namesrv地址
 - grpcServerPort 设置GRPC监听端口并开启GRPC协议
 - remotingListenPort 设置remoting监听端口并且开启remoting监听
 
-
 ### ACL 权限控制
+
 1. Broker 配置
+   
    ```properties
    aclEnable = true # 默认 false，开启 ACL 需要设置为 true
    ```
+
 2. plain_acl.yml 配置
-   默认 /path/to/rocketmq-all-5.1.3-bin-release/conf/plain_acl.yml，可以通过 -Drocketmq.acl.plain.file 指定 ACL 文件名称
-```yaml
+   默认 /path/to/rocketmq-all-5.2.0-bin-release/conf/plain_acl.yml，可以通过 -Drocketmq.acl.plain.file 指定 ACL 文件名称
+   
+   ```yaml
     globalWhiteRemoteAddresses:
       - 10.10.103.*
       - 192.168.0.*
-    
+   
     accounts:
       - accessKey: RocketMQ
         secretKey: 12345678
@@ -700,26 +684,23 @@ Config Path: /path/to/rocketmq-all-5.1.3-bin-release/conf/rmq-proxy.json
           - groupA=DENY
           - groupB=PUB|SUB
           - groupC=SUB
-    
+   
       - accessKey: rocketmq2
         secretKey: 12345678
         whiteRemoteAddress: 192.168.1.*
         # if it is admin, it could access all resources
         admin: true
-```
+   ```
 
-
-
-
-| 参数名 | 说明 |
-| :--- | :--- |
+| 参数名                        | 说明                                                                                                                                                                              |
+|:-------------------------- |:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | globalWhiteRemoteAddresses | 全局白名单配置，策略如下： 空：忽略白名单，继续执行下面校验 全匹配模式：全部放行不会执行后面校验 例如：* 或 ... 或 ::::::: 多 IP 模式：表示白名单 IP 在设置区间段的放行 例如：192.168.0.{1,2} 或 192.168.1.1,192.168.1.2 或 192.168.*. 或 192.168.1-10.5-50 |
-| accessKey | 用户唯一标识 |
-| secretKey | 访问密码 |
-| whiteRemoteAddress | 用户级白名单，格式同 globalWhiteRemoteAddresses |
-| admin | 是否为管理员，管理员拥有所有资源访问权限 true or false |
-| secretKey | 访问密码 |
-| defaultTopicPerm | 默认主题权限，默认值 DENY |
-| defaultGroupPerm | 默认消费组权限，默认值 DENY |
-| topicPerms | 详细的主题权限 |
-| groupPerms | 详细的消费组权限 |
+| accessKey                  | 用户唯一标识                                                                                                                                                                          |
+| secretKey                  | 访问密码                                                                                                                                                                            |
+| whiteRemoteAddress         | 用户级白名单，格式同 globalWhiteRemoteAddresses                                                                                                                                           |
+| admin                      | 是否为管理员，管理员拥有所有资源访问权限 true or false                                                                                                                                              |
+| secretKey                  | 访问密码                                                                                                                                                                            |
+| defaultTopicPerm           | 默认主题权限，默认值 DENY                                                                                                                                                                 |
+| defaultGroupPerm           | 默认消费组权限，默认值 DENY                                                                                                                                                                |
+| topicPerms                 | 详细的主题权限                                                                                                                                                                         |
+| groupPerms                 | 详细的消费组权限                                                                                                                                                                        |
