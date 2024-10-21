@@ -26,4 +26,7 @@ Install 编译并安装由导入路径命名的包。
 
 当禁用模块感知模式时，非主包将安装在目录 $GOPATH/pkg/$GOOS_$GOARCH 中。启用模块感知模式后，将构建并缓存非主包，但不会安装。
 
-在Go 1.20之前，标准库安装到$GOROOT/pkg/$GOOS_\$GOARCH。从 Go 1.20 开始，标准库已构建并缓存，但未安装。设置 GODEBUG=installgoroot=all 可恢复 $GOROOT/pkg/$GOOS_$GOARCH 的使用。
+在Go 1.20之前，标准库安装到$GOROOT/pkg/$GOOS_\$GOARCH。从 Go 1.20 开始，标准库已构建并缓存，但未安装。设置 GODEBUG=installgoroot=all 可恢复 $GOROOT/pkg/$GOOS_$GOARCH 的使用。   
+
+例子：   
+指定路径安装 GO111MODULE=on GOPATH=/Users/aqi/gopath/1.19/ GOBIN=/Users/aqi/gopath/1.19/bin go1.19.13 install golang.org/x/tools/gopls@v0.15.3
